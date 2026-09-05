@@ -39,6 +39,18 @@ set(PROJECT_VERSION_FULL
 
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
+# Clang does not support MSVC's dllimport annotation on member declarations.
+# Apply this at the root so it reaches every first- and third-party target.
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(
+    $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-ignored-attributes>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-volatile>
+    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:Clang>>:-Wno-ignored-attributes>
+    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:Clang>>:-Wno-unknown-cuda-version>
+  )
+  add_link_options("LINKER:/ignore:importeddllmain")
+endif()
+
 # CTest sets up dashboard/memcheck infrastructure (DartConfiguration.tcl, MemoryCheckCommand, etc.)
 # which is required for `ctest -T memcheck` (used by Scripts/valgrind_ctest.sh).
 #

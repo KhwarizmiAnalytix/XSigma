@@ -214,32 +214,43 @@ if(PROFILER_ENABLE_KINETO)
       if(TARGET CUDA::nvToolsExt)
         list(APPEND PROFILER_DEPENDENCY_LIBS CUDA::nvToolsExt)
         set(PROFILER_HAS_NVTX 1)
-      elseif(TARGET CUDA::nvtx3)
-        list(APPEND PROFILER_DEPENDENCY_LIBS CUDA::nvtx3)
-        list(APPEND PROFILER_DEPENDENCY_COMPILE_DEFINITIONS PROFILER_CUDA_USE_NVTX3=1)
-        set(PROFILER_HAS_NVTX 1)
       else()
-        find_library(
-          PROFILER_NVTOOLSEXT_LIBRARY
-          NAMES nvToolsExt nvToolsExt64_1
-          HINTS ${CUDAToolkit_LIBRARY_DIR} ${CUDAToolkit_LIBRARY_ROOT}
-          PATH_SUFFIXES lib lib64 lib/x64
-        )
-        if(PROFILER_NVTOOLSEXT_LIBRARY)
-          list(APPEND PROFILER_DEPENDENCY_LIBS ${PROFILER_NVTOOLSEXT_LIBRARY})
+        # CMake's FindCUDAToolkit creates CUDA::nvtx3 unconditionally whenever
+        # CUDA >= 10.0 is found -- it does not verify that nvtx3/nvtx3.hpp
+        # actually exists on disk (some Windows installs, e.g. the network
+        # installer's silent full install, can omit the NVTX headers). Check
+        # for the header ourselves before trusting the target.
+        set(_profiler_nvtx3_header_found 0)
+        foreach(_nvtx_inc IN LISTS CUDAToolkit_INCLUDE_DIRS)
+          if(EXISTS "${_nvtx_inc}/nvtx3/nvtx3.hpp")
+            set(_profiler_nvtx3_header_found 1)
+            break()
+          endif()
+        endforeach()
+        unset(_nvtx_inc)
+        if(TARGET CUDA::nvtx3 AND _profiler_nvtx3_header_found)
+          list(APPEND PROFILER_DEPENDENCY_LIBS CUDA::nvtx3)
+          list(APPEND PROFILER_DEPENDENCY_COMPILE_DEFINITIONS PROFILER_CUDA_USE_NVTX3=1)
           set(PROFILER_HAS_NVTX 1)
         else()
-          foreach(_nvtx_inc IN LISTS CUDAToolkit_INCLUDE_DIRS)
-            if(EXISTS "${_nvtx_inc}/nvtx3/nvtx3.hpp")
-              list(APPEND PROFILER_DEPENDENCY_COMPILE_DEFINITIONS PROFILER_CUDA_USE_NVTX3=1)
-              if(CMAKE_DL_LIBS)
-                list(APPEND PROFILER_DEPENDENCY_LIBS ${CMAKE_DL_LIBS})
-              endif()
-              set(PROFILER_HAS_NVTX 1)
-              break()
+          find_library(
+            PROFILER_NVTOOLSEXT_LIBRARY
+            NAMES nvToolsExt nvToolsExt64_1
+            HINTS ${CUDAToolkit_LIBRARY_DIR} ${CUDAToolkit_LIBRARY_ROOT}
+            PATH_SUFFIXES lib lib64 lib/x64
+          )
+          if(PROFILER_NVTOOLSEXT_LIBRARY)
+            list(APPEND PROFILER_DEPENDENCY_LIBS ${PROFILER_NVTOOLSEXT_LIBRARY})
+            set(PROFILER_HAS_NVTX 1)
+          elseif(_profiler_nvtx3_header_found)
+            list(APPEND PROFILER_DEPENDENCY_COMPILE_DEFINITIONS PROFILER_CUDA_USE_NVTX3=1)
+            if(CMAKE_DL_LIBS)
+              list(APPEND PROFILER_DEPENDENCY_LIBS ${CMAKE_DL_LIBS})
             endif()
-          endforeach()
+            set(PROFILER_HAS_NVTX 1)
+          endif()
         endif()
+        unset(_profiler_nvtx3_header_found)
       endif()
       list(APPEND PROFILER_DEPENDENCY_COMPILE_DEFINITIONS PROFILER_HAS_NVTX=${PROFILER_HAS_NVTX})
       message(STATUS "Profiler: CUDA Toolkit found -- enabling PROFILER_HAS_CUDA"

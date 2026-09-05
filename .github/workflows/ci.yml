@@ -2205,6 +2205,18 @@ jobs:
         if [ "${{ matrix.backend }}" = "hip" ]; then extra="--with-hip"; fi
         ./.github/workflows/install/install-deps-ubuntu.sh --with-tbb $extra
 
+    - name: Select GCC 13 headers for Clang CUDA
+      if: runner.os == 'Linux' && matrix.backend == 'cuda'
+      shell: bash
+      run: |
+        # Clang 18 selects the newest installed GCC by default. GCC 14's
+        # <limits> exposes __float128, which is unsupported on CUDA targets.
+        # Keep host C++ and CUDA compilation on the same compatible headers.
+        sudo apt-get install -y g++-13
+        gcc_install_dir="$(dirname "$(g++-13 -print-libgcc-file-name)")"
+        echo "CXXFLAGS=${CXXFLAGS:+$CXXFLAGS }--gcc-install-dir=$gcc_install_dir" >> "$GITHUB_ENV"
+        echo "CUDAFLAGS=${CUDAFLAGS:+$CUDAFLAGS }--gcc-install-dir=$gcc_install_dir" >> "$GITHUB_ENV"
+
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
