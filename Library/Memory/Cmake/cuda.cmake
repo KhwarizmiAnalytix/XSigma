@@ -61,6 +61,18 @@ endif()
 # Enable CUDA language support
 enable_language(CUDA)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CUDA_COMPILER_FORCED)
+  # The forced compiler skips CMake's CUDA ABI probe, including implicit
+  # include detection. Clang uses the same host headers for CXX and CUDA.
+  # Preserve their implicit status so dependencies cannot inject, for example,
+  # -isystem /usr/include ahead of libstdc++ and break cmath's include_next.
+  list(APPEND CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+  list(REMOVE_DUPLICATES CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES)
+  set(CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES "${CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES}"
+      CACHE INTERNAL "CUDA implicit host include directories" FORCE
+  )
+endif()
+
 # Persist CUDA language rules to the CMake cache so every directory scope can access them during
 # generation.
 #
