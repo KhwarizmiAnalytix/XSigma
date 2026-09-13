@@ -459,7 +459,7 @@ graph_execution_status graph_executor::execute(
                     // the reset.
                     if (state->consumers_left[dep]->fetch_sub(1, std::memory_order_acq_rel) == 1)
                     {
-                        state->results[dep].reset();
+                        state->results[dep] = nullptr;
                     }
                 }
             }
