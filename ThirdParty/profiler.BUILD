@@ -7,7 +7,7 @@ load("@xsigma//bazel:profiler.bzl", "profiler_copts", "profiler_defines", "profi
 
 package(default_visibility = ["//visibility:public"])
 
-# KINETO backend: bespoke/base, bespoke/kineto, bespoke/common (no unwind)
+# KINETO backend sources (Profiler's default). ITT is not selectable from XSigma.
 _KINETO_BACKEND_SRCS = glob(
     [
         "kineto_*.cpp",
@@ -23,32 +23,6 @@ _KINETO_BACKEND_SRCS = glob(
     allow_empty = True,
 )
 
-# ITT backend (when PROFILER_ENABLE_ITT and not KINETO): base + common + itt.
-# bespoke/kineto/kineto_shim.{h,cpp} is included even though this isn't the Kineto backend:
-# bespoke/common/collection.{h,cpp} #include "bespoke/kineto/kineto_shim.h" unconditionally
-# (matches CMakeLists.txt:337-349).
-# profiler_kineto.{h,cpp} is also included: it is the shared enableProfiler/
-# disableProfiler orchestration layer for every backend (Kineto, ITT, NVTX,
-# PRIVATEUSE1), not just Kineto -- its ITT dispatch branch is internally
-# guarded by #if PROFILER_HAS_ITT and does not touch libkineto.
-# kineto_client_interface.* is Kineto-ondemand-only (its body is wholly
-# `#if PROFILER_HAS_KINETO`) but is harmlessly inert without it.
-_ITT_BACKEND_SRCS = glob(
-    [
-        "bespoke/base/**/*.cpp",
-        "bespoke/common/**/*.cpp",
-        "bespoke/itt/**/*.cpp",
-        "bespoke/kineto/kineto_shim.cpp",
-        "bespoke/kineto/profiler_kineto.cpp",
-        "bespoke/kineto/kineto_client_interface.cpp",
-    ],
-    exclude = [
-        "bespoke/common/unwind/**/*.cpp",
-        "Testing/**",
-    ],
-    allow_empty = True,
-)
-
 _KINETO_BACKEND_HDRS = glob(
     [
         "kineto_*.h",
@@ -56,19 +30,6 @@ _KINETO_BACKEND_HDRS = glob(
         "bespoke/kineto/**/*.h",
         "bespoke/common/**/*.h",
         "bespoke/base/**/*.h",
-    ],
-    exclude = ["Testing/**"],
-    allow_empty = True,
-)
-
-_ITT_BACKEND_HDRS = glob(
-    [
-        "bespoke/base/**/*.h",
-        "bespoke/common/**/*.h",
-        "bespoke/itt/**/*.h",
-        "bespoke/kineto/kineto_shim.h",
-        "bespoke/kineto/profiler_kineto.h",
-        "bespoke/kineto/kineto_client_interface.h",
     ],
     exclude = ["Testing/**"],
     allow_empty = True,
@@ -191,16 +152,10 @@ cc_library(
     name = "Profiler",
     srcs = [
         ":profiler_srcs",
-    ] + glob(["native/**/*.cpp"], exclude = ["Testing/**"], allow_empty = True) + select({
-        "@xsigma//bazel:enable_itt": _ITT_BACKEND_SRCS,
-        "//conditions:default": _KINETO_BACKEND_SRCS,
-    }),
+    ] + glob(["native/**/*.cpp"], exclude = ["Testing/**"], allow_empty = True) + _KINETO_BACKEND_SRCS,
     hdrs = [
         ":profiler_hdrs",
-    ] + glob(["native/**/*.h", "native/**/*.hxx"], exclude = ["Testing/**"], allow_empty = True) + select({
-        "@xsigma//bazel:enable_itt": _ITT_BACKEND_HDRS,
-        "//conditions:default": _KINETO_BACKEND_HDRS,
-    }),
+    ] + glob(["native/**/*.h", "native/**/*.hxx"], exclude = ["Testing/**"], allow_empty = True) + _KINETO_BACKEND_HDRS,
     copts = profiler_copts(),
     defines = profiler_defines() + select({
         "@xsigma//bazel:shared_libs": ["PROFILER_SHARED_DEFINE", "PROFILER_BUILDING_DLL"],
@@ -222,10 +177,9 @@ cc_library(
         # -> Memory cycle once Memory takes a Profiler dependency (see
         # Docs/profiler/profiler.md, Instrumentation).
         "@fmt//:fmt",
+        # Kineto is private to @profiler (Profiler's default instrumentation).
+        "//third_party/kineto:kineto",
     ] + select({
-        "@xsigma//bazel:enable_itt": ["@ittapi//:ittnotify"],
-        "//conditions:default": ["@kineto//:kineto"],
-    }) + select({
         "@xsigma//bazel:enable_cuda": ["@local_config_cuda//:cuda"],
         "//conditions:default": [],
     }) + select({
@@ -247,42 +201,7 @@ cc_library(
     alwayslink = True,
 )
 
-
-cc_library(
-    name = "profilerTest_header",
-    hdrs = [
-        "Testing/ProfilerTest.h",
-        "Testing/ProfilerTest.h.in",
-    ],
-    includes = [
-        "Testing",
-        ".",
-    ],
-    deps = [":Profiler"],
-)
-
-cc_test(
-    name = "ProfilerCxxTests",
-    size = "large",
-    timeout = "long",
-    srcs = glob(["Testing/Cxx/Test*.cpp"], allow_empty = True),
-    copts = profiler_copts(),
-    defines = profiler_defines() + [
-        "PROFILER_GOOGLE_TEST",
-        "USE_GTEST",
-        "_VARIADIC_MAX=10",
-        "PROFILER_HAS_GTEST=1",
-        "PROFILER_HAS_LIBTORCH=0",
-    ],
-    includes = [
-        "Testing/Cxx",
-        "Testing",
-    ],
-    linkopts = profiler_linkopts(),
-    deps = [
-        ":Profiler",
-        ":profilerTest_header",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
+# Profiler is consumed as a pure third-party dependency: its test suite
+# (Testing/Cxx, ProfilerCxxTests) builds only from the standalone Profiler
+# repo, never from XSigma — same as the CMake side (xsigma_add_profiler
+# forces PROFILER_ENABLE_TESTING/EXAMPLES OFF).

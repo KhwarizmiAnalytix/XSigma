@@ -23,7 +23,6 @@ ALL_KEYS=(
     proj-logging-loguru proj-logging-native proj-logging-glog proj-logging-spdlog
     proj-memory-on proj-memory-off
     proj-parallel-std proj-parallel-openmp proj-parallel-tbb
-    proj-profiler-itt proj-profiler-kineto
     proj-vectorization-on proj-vectorization-off
     proj-models-on proj-models-off
     vec-neon vec-sve
@@ -39,7 +38,6 @@ ALL_KEYS=(
     bazel-proj-core bazel-proj-memory
     bazel-proj-logging-loguru bazel-proj-logging-native bazel-proj-logging-glog bazel-proj-logging-spdlog
     bazel-proj-parallel-std bazel-proj-parallel-openmp bazel-proj-parallel-tbb
-    bazel-proj-profiler-itt bazel-proj-profiler-kineto
     bazel-proj-vectorization bazel-proj-models
     bazel-vec-neon bazel-vec-sve
     bazel-feature-numa bazel-feature-gcc
@@ -76,8 +74,6 @@ dispatch() {
         proj-parallel-std)     job_project_backend "$key" Parallel ON std -DPARALLEL_BACKEND=std ;;
         proj-parallel-openmp)  job_project_backend "$key" Parallel OFF openmp -DPARALLEL_BACKEND=openmp ;;
         proj-parallel-tbb)     job_project_backend "$key" Parallel ON tbb -DPARALLEL_BACKEND=tbb ;;
-        proj-profiler-itt)     job_project_backend "$key" Profiler OFF ITT -DPROFILER_BACKEND=ITT ;;
-        proj-profiler-kineto)  job_project_backend "$key" Profiler ON KINETO -DPROFILER_BACKEND=KINETO ;;
         proj-vectorization-on)  job_project_backend "$key" Vectorization ON default ;;
         proj-vectorization-off) job_project_backend "$key" Vectorization OFF default ;;
         proj-models-on)         job_project_backend "$key" Models ON default ;;
@@ -111,8 +107,6 @@ dispatch() {
         bazel-proj-parallel-std)     job_bazel_project_backend parallel parallel.std ;;
         bazel-proj-parallel-openmp)  job_bazel_project_backend parallel parallel.openmp ;;
         bazel-proj-parallel-tbb)     job_bazel_project_backend parallel parallel.tbb ;;
-        bazel-proj-profiler-itt)     job_bazel_project_backend profiler profiler_itt ;;
-        bazel-proj-profiler-kineto)  job_bazel_project_backend profiler profiler_kineto ;;
         bazel-proj-logging-spdlog)   job_bazel_project_backend logging logging_spdlog ;;
         bazel-proj-vectorization)    job_bazel_project_backend vectorization ;;
         bazel-proj-models)           job_bazel_project_backend models ;;
@@ -120,15 +114,12 @@ dispatch() {
         bazel-vec-neon) job_bazel_vectorization_simd neon ;;
         bazel-vec-sve)  job_bazel_vectorization_simd sve ;;
 
-        feature-examples)        job_feature_flag examples -DCORE_ENABLE_EXAMPLES=ON -DMEMORY_ENABLE_EXAMPLES=ON -DLOGGING_ENABLE_EXAMPLES=ON -DVECTORIZATION_ENABLE_EXAMPLES=ON -DPARALLEL_ENABLE_EXAMPLES=ON -DPROFILER_ENABLE_EXAMPLES=ON -DMODELS_ENABLE_EXAMPLES=ON ;;
+        feature-examples)        job_feature_flag examples -DCORE_ENABLE_EXAMPLES=ON -DMEMORY_ENABLE_EXAMPLES=ON -DLOGGING_ENABLE_EXAMPLES=ON -DVECTORIZATION_ENABLE_EXAMPLES=ON -DPARALLEL_ENABLE_EXAMPLES=ON -DMODELS_ENABLE_EXAMPLES=ON ;;
         feature-numa)            job_feature_flag numa -DMEMORY_ENABLE_NUMA=ON ;;
         feature-mimalloc-off)    job_feature_flag mimalloc-off -DMEMORY_ENABLE_MIMALLOC=OFF ;;
         feature-shared)          job_feature_flag shared -DBUILD_SHARED_LIBS=ON ;;
         feature-magic-enum-off)  job_feature_flag magic-enum-off -DCORE_ENABLE_MAGICENUM=OFF ;;
         feature-packet-size-8)   job_feature_flag psize8 -DVECTORIZATION_PACKET_SIZE=8 -DVECTORIZATION_CPU_BACKEND=avx2 ;;
-        feature-lto-thin)        job_feature_flag lto-thin -DCORE_LTO_MODE=thin -DMEMORY_LTO_MODE=thin -DLOGGING_LTO_MODE=thin -DVECTORIZATION_LTO_MODE=thin -DPARALLEL_LTO_MODE=thin -DPROFILER_LTO_MODE=thin ;;
-        feature-ccache)          job_feature_flag ccache -DCORE_CACHE_BACKEND=ccache -DMEMORY_CACHE_BACKEND=ccache -DLOGGING_CACHE_BACKEND=ccache -DVECTORIZATION_CACHE_BACKEND=ccache -DPARALLEL_CACHE_BACKEND=ccache -DPROFILER_CACHE_BACKEND=ccache ;;
-        feature-linker-lld)      job_feature_flag linker-lld -DCORE_LINKER_CHOICE=lld -DMEMORY_LINKER_CHOICE=lld -DLOGGING_LINKER_CHOICE=lld -DVECTORIZATION_LINKER_CHOICE=lld -DPARALLEL_LINKER_CHOICE=lld -DPROFILER_LINKER_CHOICE=lld ;;
 
         bazel-feature-numa) job_bazel_feature numa ;;
         bazel-feature-gcc)  job_bazel_feature gcc ;;

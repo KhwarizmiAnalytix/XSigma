@@ -60,27 +60,21 @@ new_local_repository(
 # Note: Using local ThirdParty/cpuinfo instead of downloading
 
 # -----------------------------------------------------------------------------
-# magic_enum - Static reflection for enums
+# magic_enum - Static reflection for enums (vendored ThirdParty/magic_enum)
 # -----------------------------------------------------------------------------
-http_archive(
+new_local_repository(
     name = "magic_enum",
+    path = "ThirdParty/magic_enum",
     build_file = "//ThirdParty:magic_enum.BUILD",
-    strip_prefix = "magic_enum-0.9.5",
-    urls = [
-        "https://github.com/Neargye/magic_enum/archive/refs/tags/v0.9.5.tar.gz",
-    ],
 )
 
 # -----------------------------------------------------------------------------
-# mimalloc - Microsoft's high-performance memory allocator
+# mimalloc - Microsoft's high-performance memory allocator (vendored, v2.x)
 # -----------------------------------------------------------------------------
-http_archive(
+new_local_repository(
     name = "mimalloc",
+    path = "ThirdParty/mimalloc",
     build_file = "//ThirdParty:mimalloc.BUILD",
-    strip_prefix = "mimalloc-2.1.2",
-    urls = [
-        "https://github.com/microsoft/mimalloc/archive/refs/tags/v2.1.2.tar.gz",
-    ],
 )
 
 # -----------------------------------------------------------------------------
@@ -129,26 +123,11 @@ new_local_repository(
 )
 
 # -----------------------------------------------------------------------------
-# Google Benchmark - Microbenchmarking framework
+# Google Benchmark - Microbenchmarking framework (vendored ThirdParty/benchmark)
 # -----------------------------------------------------------------------------
-http_archive(
+local_repository(
     name = "com_google_benchmark",
-    strip_prefix = "benchmark-1.8.3",
-    urls = [
-        "https://github.com/google/benchmark/archive/refs/tags/v1.8.3.tar.gz",
-    ],
-)
-
-# -----------------------------------------------------------------------------
-# Kineto - Profiling library (from local ThirdParty directory)
-# -----------------------------------------------------------------------------
-# Note: Kineto is a git submodule in ThirdParty/kineto
-# We use new_local_repository to provide our own BUILD file without modifying
-# the third-party submodule (as per .augment/rules/ThirdParty.md)
-new_local_repository(
-    name = "kineto",
-    path = "ThirdParty/kineto",
-    build_file = "//ThirdParty:kineto.BUILD",
+    path = "ThirdParty/benchmark",
 )
 
 # -----------------------------------------------------------------------------
@@ -156,24 +135,16 @@ new_local_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Profiler. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
+# Kineto/ITT live under Profiler/third_party and are staged privately into
+# @profiler — XSigma must not register @kineto / @ittapi.
 load("//bazel:profiler_repository.bzl", "local_profiler_repository")
 
 local_profiler_repository(
     name = "profiler",
     path = "ThirdParty/Profiler",
     build_file = "//ThirdParty:profiler.BUILD",
-)
-
-# -----------------------------------------------------------------------------
-# Intel ITT API (ittnotify) — VTune instrumentation, used by Profiler's ITT backend
-# -----------------------------------------------------------------------------
-# Note: ittapi is a git submodule in ThirdParty/ittapi (v3.27.0)
-# We use new_local_repository to provide our own BUILD file without modifying
-# the third-party submodule (as per .augment/rules/ThirdParty.md)
-new_local_repository(
-    name = "ittapi",
-    path = "ThirdParty/ittapi",
-    build_file = "//ThirdParty:ittapi.BUILD",
+    kineto_build_file = "//ThirdParty:kineto.BUILD",
+    ittapi_build_file = "//ThirdParty:ittapi.BUILD",
 )
 
 # -----------------------------------------------------------------------------
@@ -224,8 +195,8 @@ hip_configure(name = "local_config_hip")
 http_archive(
     name = "tbb",
     build_file = "//ThirdParty:tbb.BUILD",
-    strip_prefix = "oneTBB-2021.10.0",
+    strip_prefix = "oneTBB-2023.1.0",
     urls = [
-        "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.10.0.tar.gz",
+        "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2023.1.0.tar.gz",
     ],
 )

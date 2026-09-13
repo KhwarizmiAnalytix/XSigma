@@ -61,7 +61,6 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 | Variable | Default | Supported values |
 |---|---|---|
 | `LOGGING_BACKEND` | `LOGURU` | `NATIVE`, `LOGURU`, `GLOG`, `SPDLOG`. |
-| `PROFILER_BACKEND` | `KINETO` | `KINETO`, `ITT`. The native TraceMe/XPlane pipeline is always compiled. |
 | `MEMORY_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Metal requires Apple platforms. HIP is not supported on Windows in this project. |
 | `VECTORIZATION_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Keep it equal to `MEMORY_GPU_BACKEND` for GPU Vectorization. |
 | `VECTORIZATION_CPU_BACKEND` | host-dependent | `no`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve`. Defaults to AVX2 on recognised x86, NEON on AArch64, otherwise `no`. |
@@ -93,7 +92,6 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DLOGGING_BACKEND=SPDLOG \
-  -DPROFILER_BACKEND=KINETO \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none
@@ -110,7 +108,6 @@ cmake -S . -B build-asan -G Ninja \
   -DLOGGING_ENABLE_SANITIZER=ON -DLOGGING_SANITIZER_TYPE=address \
   -DMEMORY_ENABLE_SANITIZER=ON -DMEMORY_SANITIZER_TYPE=address \
   -DPARALLEL_ENABLE_SANITIZER=ON -DPARALLEL_SANITIZER_TYPE=address \
-  -DPROFILER_ENABLE_SANITIZER=ON -DPROFILER_SANITIZER_TYPE=address \
   -DVECTORIZATION_ENABLE_SANITIZER=ON -DVECTORIZATION_SANITIZER_TYPE=address \
   -DMODELS_ENABLE_SANITIZER=ON -DMODELS_SANITIZER_TYPE=address \
   -DGRAPH_ENABLE_SANITIZER=ON -DGRAPH_SANITIZER_TYPE=address

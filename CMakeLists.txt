@@ -143,16 +143,16 @@ set(XSIGMA_LIBRARY_PROJECT
     ""
     CACHE
       STRING
-      "If non-empty: only this Library module and deps (Logging|Memory|Vectorization|Core|Parallel|Profiler|Models|Graph). Empty: all Library/* (default)."
+      "If non-empty: only this Library module and deps (Logging|Memory|Vectorization|Core|Parallel|Models|Graph). Empty: all Library/* (default)."
 )
 
 string(TOLOWER "${XSIGMA_LIBRARY_PROJECT}" _xsigma_libproj_lc)
 
+# Profiler is not in this list: it is a pure third-party dependency
+# (ThirdParty/Profiler), added via xsigma_add_profiler() by the libraries that
+# consume it — same treatment as cpuinfo or fmt.
 set(_xsigma_lib_order
     Logging
-    # Profiler is ThirdParty/Profiler (KhwarizmiAnalytix/Profiler). Add it
-    # before Memory/Vectorization/Parallel so Profiler::Profiler is visible.
-    Profiler
     Memory
     Vectorization
     Core
@@ -163,31 +163,9 @@ set(_xsigma_lib_order
     Graph
 )
 
-function(xsigma_add_profiler)
-  set(_profiler_src "${XSIGMA_THIRDPARTY_DIR}/Profiler")
-  if(NOT EXISTS "${_profiler_src}/CMakeLists.txt")
-    message(FATAL_ERROR "ThirdParty/Profiler is missing. Initialize the submodule:\n"
-                        "  git submodule update --init ThirdParty/Profiler"
-    )
-  endif()
-  set(PROFILER_THIRD_PARTY_DIR "${XSIGMA_THIRDPARTY_DIR}"
-      CACHE PATH "Reuse XSigma ThirdParty for fmt/kineto/ittapi" FORCE
-  )
-  if(DEFINED MEMORY_GPU_BACKEND AND NOT MEMORY_GPU_BACKEND STREQUAL "")
-    set(PROFILER_GPU_BACKEND "${MEMORY_GPU_BACKEND}" CACHE STRING "Mapped from MEMORY_GPU_BACKEND"
-                                                           FORCE
-    )
-  endif()
-  add_subdirectory("${_profiler_src}" "${CMAKE_BINARY_DIR}/ThirdParty/Profiler")
-endfunction()
-
 if(_xsigma_libproj_lc STREQUAL "")
   foreach(_lib IN LISTS _xsigma_lib_order)
-    if(_lib STREQUAL "Profiler")
-      xsigma_add_profiler()
-    else()
-      add_subdirectory(Library/${_lib})
-    endif()
+    add_subdirectory(Library/${_lib})
   endforeach()
 else()
   if(_xsigma_libproj_lc STREQUAL "logging")
@@ -200,22 +178,20 @@ else()
     set(MEMORY_ENABLE_BENCHMARK OFF CACHE BOOL "Skip Memory benchmarks when building Vectorization"
                                           FORCE
     )
-    set(_xsigma_lib_enabled Logging Memory Vectorization Profiler)
+    set(_xsigma_lib_enabled Logging Memory Vectorization)
   elseif(_xsigma_libproj_lc STREQUAL "core")
-    set(_xsigma_lib_enabled Parallel Profiler Logging Memory Vectorization Core)
+    set(_xsigma_lib_enabled Parallel Logging Memory Vectorization Core)
   elseif(_xsigma_libproj_lc STREQUAL "parallel")
-    set(_xsigma_lib_enabled Parallel Profiler)
-  elseif(_xsigma_libproj_lc STREQUAL "profiler")
-    set(_xsigma_lib_enabled Profiler)
+    set(_xsigma_lib_enabled Parallel)
   elseif(_xsigma_libproj_lc STREQUAL "models")
     set(_xsigma_lib_enabled Models)
   elseif(_xsigma_libproj_lc STREQUAL "graph")
-    set(_xsigma_lib_enabled Parallel Profiler Graph)
+    set(_xsigma_lib_enabled Parallel Graph)
   else()
     message(
       FATAL_ERROR
         "XSIGMA_LIBRARY_PROJECT='${XSIGMA_LIBRARY_PROJECT}' is invalid. "
-        "Use one of: Logging, Memory, Vectorization, Core, Parallel, Profiler, Models, Graph, or leave empty for all."
+        "Use one of: Logging, Memory, Vectorization, Core, Parallel, Models, Graph, or leave empty for all."
     )
   endif()
 
@@ -223,11 +199,7 @@ else()
 
   foreach(_lib IN LISTS _xsigma_lib_order)
     if(_lib IN_LIST _xsigma_lib_enabled)
-      if(_lib STREQUAL "Profiler")
-        xsigma_add_profiler()
-      else()
-        add_subdirectory(Library/${_lib})
-      endif()
+      add_subdirectory(Library/${_lib})
     endif()
   endforeach()
 endif()

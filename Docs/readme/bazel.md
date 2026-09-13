@@ -32,8 +32,8 @@ run the test suite.
 # AddressSanitizer.
 python Scripts/setup_bazel.py build.test.debug.asan
 
-# Logging and profiler backends.
-python Scripts/setup_bazel.py build.test.release --logging.glog --profiler.itt
+# Logging backend.
+python Scripts/setup_bazel.py build.test.release --logging.glog
 
 # Parallel backend.
 python Scripts/setup_bazel.py build.test.release --parallel.tbb
@@ -43,6 +43,7 @@ python Scripts/setup_bazel.py build.test.release --project.memory
 ```
 
 `.bazelrc` defines `debug`, `release`, `relwithdebinfo`, `cxx17`, `cxx20`,
-`cxx23`, the supported SIMD tiers, `lto`, sanitizer configurations,
-`logging_*`, `kineto`, and `itt`. See the canonical guide for raw Bazel
+`cxx23`, the supported SIMD tiers, `lto`, sanitizer configurations, and
+`logging_*`. Profiler instrumentation backends are not XSigma Bazel configs —
+they live inside `ThirdParty/Profiler`. See the canonical guide for raw Bazel
 commands, CMake differences, and current GPU limitations.

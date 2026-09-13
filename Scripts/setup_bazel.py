@@ -178,13 +178,14 @@ _CMAKE_SAN_TO_BAZEL = {
 }
 
 # Library/* scope for --project.NAME / dotted project.NAME (matches CMake XSIGMA_LIBRARY_PROJECT)
+# Profiler is deliberately absent: it is a pure third-party dependency (@profiler),
+# not an XSigma library project.
 _BAZEL_LIBRARY_PROJECTS = (
     "logging",
     "memory",
     "vectorization",
     "core",
     "parallel",
-    "profiler",
     "models",
 )
 
@@ -194,15 +195,12 @@ _BAZEL_LIBRARY_PACKAGE_DIR = {
     "vectorization": "Vectorization",
     "core": "Core",
     "parallel": "Parallel",
-    "profiler": "Profiler",
     "models": "Models",
 }
 
 
 def _bazel_project_pattern(name: str) -> str:
-    """Bazel target pattern for --project.NAME (Profiler lives in @profiler)."""
-    if name == "profiler":
-        return "@profiler//..."
+    """Bazel target pattern for --project.NAME."""
     pkg = _BAZEL_LIBRARY_PACKAGE_DIR[name]
     return f"//Library/{pkg}/..."
 
@@ -232,7 +230,7 @@ def _merge_dotted_segments(parts: list[str]) -> list[str]:
             and i + 1 < len(pl)
             and pl[i + 1] in ("kineto", "itt", "native")
         ):
-            out.append(f"profiler_{pl[i + 1]}")
+            # Swallow legacy tokens; backend is owned by ThirdParty/Profiler.
             i += 2
         elif (
             pl[i] == "logging"
@@ -311,7 +309,6 @@ class BazelConfiguration:
 
         # Default backends (matching CMake defaults)
         self.logging_backend = "loguru"  # Default: LOGURU (matches CMake)
-        self.profiler_backend = "kineto"  # Default: KINETO (matches CMake)
 
         # Compiler and build tool configuration
         self.compiler: Optional[str] = (
@@ -621,21 +618,13 @@ class BazelConfiguration:
                     self.logging_backend = backend
                     self.configs.append(arg_lower)
 
-            # Profiler backends (with profiler_ prefix)
+            # Profiler backends — owned by ThirdParty/Profiler; ignore legacy tokens
             elif arg_lower.startswith("profiler_"):
-                backend = arg_lower[9:]  # Remove "profiler_" prefix
-                if backend in ["kineto", "itt"]:
-                    self.profiler_backend = backend
-                    self.configs.append(backend)
-                elif backend == "native":
-                    # The native traceme/xplane pipeline is always compiled now (no longer a
-                    # selectable backend -- see bazel/profiler.bzl); "native" only used to mean
-                    # "skip the Kineto/ITT instrumentation backend", which no longer applies.
-                    print_status(
-                        "profiler_native is a no-op: the native profiler pipeline is always "
-                        "compiled now, independent of the Kineto/ITT instrumentation backend.",
-                        "WARNING",
-                    )
+                print_status(
+                    f"Ignoring '{arg_lower}': Profiler instrumentation backend is "
+                    "configured inside ThirdParty/Profiler (not an XSigma Bazel flag).",
+                    "WARNING",
+                )
 
             # Sanitizers: sanitizer_asan or legacy sanitizer_address -> asan
             elif arg_lower.startswith("sanitizer_"):
@@ -693,12 +682,9 @@ class BazelConfiguration:
             )
             return
 
-        # If Xcode is specified on macOS, use it (Kineto unsupported — matches setup.py). ITT is
-        # the only other instrumentation backend, so use it to avoid Kineto under Xcode (the
-        # native traceme/xplane pipeline compiles either way, independent of this choice).
+        # If Xcode is specified on macOS, use it.
         if self.build_tool == "xcode" and self.system == "Darwin":
             print_status("Using Xcode generator", "INFO")
-            self.profiler_backend = "itt"
             return
 
         # Default to Ninja + Clang on all platforms
@@ -756,12 +742,6 @@ class BazelConfiguration:
         # Add default logging backend if not explicitly set
         if not any(c.startswith("logging_") for c in cfg_list):
             cfg_list.append(f"logging_{self.logging_backend}")
-
-        # Add default profiler backend if not explicitly set
-        profiler_configs = ["kineto", "itt"]
-        if not any(c in profiler_configs for c in cfg_list):
-            if self.profiler_backend in profiler_configs:
-                cfg_list.append(self.profiler_backend)
 
         # Add all config flags
         for config in cfg_list:
@@ -828,9 +808,7 @@ class BazelConfiguration:
         # narrowed the target set, otherwise cover all of //Library.
         if action == "coverage":
             filter_pkg = "//Library"
-            if self.library_project == "profiler":
-                filter_pkg = "@profiler"
-            elif self.library_project:
+            if self.library_project:
                 pkg = _BAZEL_LIBRARY_PACKAGE_DIR.get(self.library_project)
                 if pkg:
                     filter_pkg = f"//Library/{pkg}"
@@ -1000,7 +978,11 @@ class BazelConfiguration:
         print(
             f"\n{COLOR_CYAN}******** Profiler module (Bazel flags) ********{COLOR_RESET}"
         )
-        self._pf("Backend", self.profiler_backend.upper(), W)
+        self._pf(
+            "Instrumentation",
+            "(owned by ThirdParty/Profiler)",
+            W,
+        )
         self._pf("Cxx standard", cxx, W)
         common()
 
@@ -1075,11 +1057,9 @@ class BazelConfiguration:
             else:
                 print(f"  {flag:30} {self._on_off(state)}")
 
-        # Logging / Profiler backends
+        # Logging backend
         print(f"\n{COLOR_CYAN}Logging Backend:{COLOR_RESET}")
         print(f"  Backend:           {self.logging_backend.upper()}")
-        print(f"\n{COLOR_CYAN}Profiler Backend:{COLOR_RESET}")
-        print(f"  Backend:           {self.profiler_backend.upper()}")
 
         # Sanitizers
         sanitizers = [c for c in self.configs if c in ["asan", "tsan", "ubsan", "msan"]]
@@ -1619,7 +1599,7 @@ def parse_args(args: list[str]) -> list[str]:
     """Parse argv like Scripts/setup.py: long flags, dotted shortcuts, compiler paths.
 
     Supports the same long-option spellings as setup.py where applicable:
-      --sanitizer.address, --logging.LOGURU, --profiler.kineto, --parallel.tbb
+      --sanitizer.address, --logging.LOGURU, --parallel.tbb
     """
     processed: list[str] = []
 
@@ -1692,17 +1672,11 @@ def parse_args(args: list[str]) -> list[str]:
             continue
 
         if arg.startswith("--profiler."):
-            bt = arg.split(".", 1)[1].lower()
-            prof_map = {"kineto": "kineto", "itt": "itt", "native": "native"}
-            if bt in prof_map:
-                processed.append(f"profiler_{bt}")
-                print_status(f"Profiler backend set to {prof_map[bt]}", "INFO")
-            else:
-                print_status(
-                    f"Invalid profiler backend: {bt}. Valid: {', '.join(prof_map)}",
-                    "ERROR",
-                )
-                sys.exit(1)
+            print_status(
+                f"Ignoring '{arg}': Profiler instrumentation backend is configured "
+                "inside ThirdParty/Profiler (not an XSigma Bazel flag).",
+                "WARNING",
+            )
             continue
 
         if arg.startswith("--parallel."):
@@ -1837,7 +1811,7 @@ def print_help() -> None:
     print(
         "  project.NAME | --project.NAME  — only //Library/<Name>/... (logging, memory, …)"
     )
-    print("  --parallel.* / --logging.* / --profiler.*  — same long flags as setup.py")
+    print("  --parallel.* / --logging.*  — same long flags as setup.py")
     print("  vv            - Verbose Bazel test output (--test_output=all)")
     print(
         "  batch         - Pass --batch to Bazel; script runs `bazel shutdown` first to avoid"

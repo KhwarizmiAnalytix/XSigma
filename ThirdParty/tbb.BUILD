@@ -2,7 +2,7 @@
 # Intel TBB (Threading Building Blocks) BUILD Configuration
 # =============================================================================
 # High-performance task scheduling and memory allocation library
-# Built from source (oneTBB v2021.10.0)
+# Built from source (oneTBB v2023.1.0)
 # =============================================================================
 
 package(default_visibility = ["//visibility:public"])

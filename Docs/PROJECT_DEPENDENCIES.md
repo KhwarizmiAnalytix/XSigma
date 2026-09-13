@@ -57,7 +57,11 @@ flowchart TB
 
 In a **full CMake configure** or **any Bazel build**, the dashed edges are
 present (defaults ON / targets exist). `--project.memory` still builds Logging
-(required) and drops the Profiler edge. `--project.profiler` builds Profiler alone.
+(required). Profiler is a pure third-party dependency (`ThirdParty/Profiler`,
+like cpuinfo/fmt): each consuming library adds it through
+`xsigma_add_profiler()` in `ThirdParty/CMakeLists.txt`, so the Profiler edge
+is present whenever a consumer is configured. There is no `--project.profiler`
+— build the standalone Profiler repo for that.
 
 `Models` has no `Library/*` link. `Graph` requires `Parallel::Parallel` and
 inherits its Profiler dependency when enabled. Its current executor uses
@@ -86,12 +90,14 @@ flowchart LR
 
 ### CMake add_subdirectory order
 
-Profiler is configured **before** Memory / Vectorization / Parallel so
-`TARGET Profiler::Profiler` succeeds.
+`Library/*` modules are added in this order. Profiler is **not** in the list —
+it is vendored third-party (`ThirdParty/Profiler`) and is configured on demand
+by the first consuming library via `xsigma_add_profiler()` (idempotent), so
+`TARGET Profiler::Profiler` succeeds in Memory / Vectorization / Parallel.
 
 ```mermaid
 flowchart LR
-  L[1 Logging] --> P[2 Profiler] --> M[3 Memory] --> V[4 Vectorization] --> C[5 Core] --> Par[6 Parallel] --> Mod[7 Models] --> G[8 Graph]
+  L[1 Logging] --> M[2 Memory] --> V[3 Vectorization] --> C[4 Core] --> Par[5 Parallel] --> Mod[6 Models] --> G[7 Graph]
 ```
 
 ### `--project.NAME` scopes
@@ -104,24 +110,19 @@ flowchart TB
   subgraph logging["--project.logging"]
     L1[Logging]
   end
-  subgraph profiler["--project.profiler"]
-    P1[Profiler]
-  end
   subgraph memory["--project.memory"]
     M1[Memory] --> Lmem[Logging]
   end
   subgraph vectorization["--project.vectorization"]
     V2[Vectorization] --> L2[Logging]
     V2 --> M2[Memory]
-    V2 --> P2[Profiler]
   end
   subgraph parallel["--project.parallel"]
-    Par2[Parallel] --> P3[Profiler]
+    Par2[Parallel]
   end
   subgraph core["--project.core"]
     C3[Core] --> L3[Logging]
     C3 --> M3[Memory]
-    M3 --> P4[Profiler]
     V3[Vectorization]
     Par3[Parallel]
   end
@@ -130,9 +131,12 @@ flowchart TB
   end
   subgraph graph_scope["--project.graph"]
     G1[Graph] --> Par4[Parallel]
-    Par4 --> P5[Profiler]
   end
 ```
+
+Profiler (`ThirdParty/Profiler`) is configured additionally whenever Memory,
+Vectorization, or Parallel is in scope — it comes from the third-party layer,
+not from `XSIGMA_LIBRARY_PROJECT`.
 
 ### Third-party (typical)
 
@@ -141,7 +145,7 @@ flowchart LR
   Logging --> fmt
   Logging --> loguru_glog_spdlog["loguru / glog / spdlog"]
   Profiler --> fmt
-  Profiler --> kineto_or_itt["kineto xor ittapi"]
+  Profiler --> nested_backends["Profiler/third_party: kineto xor ittapi"]
   Profiler --> gpu_rt["CUDA / HIP / Metal"]
   Memory --> fmt
   Memory --> cpuinfo
@@ -162,7 +166,7 @@ Vendored trees live under `ThirdParty/` — do not edit them. See
 | Library | Role | Depends on (`Library/*`) | Compile-time gates |
 |---|---|---|---|
 | **Logging** | Log backends (native / loguru / glog / spdlog) | none | — |
-| **Profiler** | Native XPlane + Kineto/ITT | none | `PROFILER_HAS_KINETO` / `PROFILER_HAS_ITT`; `PROFILER_HAS_METAL` / `CUDA` / `HIP` |
+| **Profiler** | Native XPlane + Kineto/ITT (backend owned by Profiler) | none | `PROFILER_HAS_*` from Profiler; `PROFILER_HAS_METAL` / `CUDA` / `HIP` |
 | **Memory** | Allocators, GPU pools | Logging, Profiler | `MEMORY_HAS_PROFILER` |
 | **Vectorization** | SIMD / GPU packets | Logging, Memory, Profiler | `VECTORIZATION_HAS_PROFILER` |
 | **Core** | Legacy computational core | Logging, Memory | (inherits Memory’s Profiler link when Memory has it) |
@@ -222,17 +226,18 @@ applies):
 | `--project.` | Modules configured |
 |---|---|
 | `logging` | Logging |
-| `profiler` | Profiler |
 | `memory` | Logging, Memory |
-| `vectorization` | Logging, Memory, Vectorization, Profiler |
-| `parallel` | Parallel, Profiler |
-| `core` | Parallel, Profiler, Logging, Memory, Vectorization, Core |
+| `vectorization` | Logging, Memory, Vectorization |
+| `parallel` | Parallel |
+| `core` | Parallel, Logging, Memory, Vectorization, Core |
 | `models` | Models |
-| `graph` | Profiler, Parallel, Graph |
-| *(empty)* | all eight |
+| `graph` | Parallel, Graph |
+| *(empty)* | all seven |
 
-`--project.memory` therefore has `MEMORY_HAS_PROFILER=0` (Profiler is not
-configured) and always has Logging. `--project.profiler` does not build Memory.
+Profiler is not listed: it is pure third-party and is configured automatically
+whenever Memory, Vectorization, or Parallel is in scope, so
+`--project.memory` now also has `MEMORY_HAS_PROFILER=1` (when
+`MEMORY_ENABLE_PROFILER` is ON) and always has Logging.
 
 ## Third-party (by library)
 
@@ -241,7 +246,7 @@ Always-vendored under `ThirdParty/` — do not edit those trees.
 | Library | Typical third-party / system deps |
 |---|---|
 | Logging | fmt; one of loguru / spdlog / glog (`LOGGING_BACKEND`, default **LOGURU**) |
-| Profiler | fmt; kineto **or** ittapi; CUDA / HIP / Metal+Foundation when that GPU backend is on |
+| Profiler | `ThirdParty/Profiler` only at XSigma root; kineto **or** ittapi live under `Profiler/third_party/` (private); CUDA / HIP / Metal+Foundation when that GPU backend is on |
 | Memory | fmt, cpuinfo; optional mimalloc, tbbmalloc, numa, CUDA / HIP / Metal |
 | Vectorization | Logging/Memory/Profiler as above; optional SLEEF, SVML, MKL, Accelerate, LibTorch (tests), CUDA / HIP / Metal |
 | Core | fmt, cpuinfo; optional magic_enum, Enzyme, compression/snappy, MKL |

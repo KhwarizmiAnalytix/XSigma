@@ -14,21 +14,16 @@ def profiler_defines():
     """
     defines = xsigma_defines()
 
-    # Instrumentation backend — mutually exclusive; default KINETO (matches CMake
-    # PROFILER_BACKEND default). PROFILER_HAS_KINETO / PROFILER_HAS_ITT
-    defines += select({
-        "@xsigma//bazel:enable_itt": [
-            "PROFILER_HAS_ITT=1",
-            "PROFILER_HAS_KINETO=0",
-        ],
-        "//conditions:default": [
-            "PROFILER_HAS_KINETO=1",
-            "PROFILER_HAS_ITT=0",
-        ],
-    })
+    # Instrumentation backend is owned by ThirdParty/Profiler (CMake
+    # PROFILER_BACKEND). XSigma always builds Profiler's default Kineto path;
+    # do not expose enable_itt / enable_kineto flags here.
+    defines += [
+        "PROFILER_HAS_KINETO=1",
+        "PROFILER_HAS_ITT=0",
+    ]
 
     # Native pipeline (traceme/xplane/host_tracer/profiler_session) is always compiled
-    # alongside whichever instrumentation backend is selected above — no HAS_* gate.
+    # alongside the instrumentation backend — no HAS_* gate.
 
     # PROFILER_HAS_CUDA / PROFILER_HAS_HIP — independent of backend selection
     # above, and of each other's build (MEMORY_GPU_BACKEND only ever selects

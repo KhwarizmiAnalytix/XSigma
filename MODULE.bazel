@@ -30,7 +30,10 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 # Third-Party Dependencies
 # =============================================================================
 
-# Google Test - testing framework
+# Google Test - bzlmod pin for glog/other module deps. CMake and
+# @com_google_googletest use the vendored ThirdParty/googletest (v1.18.0).
+# Keep this at 1.15.2: googletest 1.18.0 pulls abseil-cpp@20260526.0 with a
+# compatibility_level that conflicts with the root abseil pin.
 bazel_dep(name = "googletest", version = "1.15.2")
 
 # Abseil - C++ common libraries

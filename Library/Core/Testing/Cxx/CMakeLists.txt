@@ -91,6 +91,7 @@ endif()
 # CORE_DEPENDENCY_LIBS
 target_link_libraries(CoreCxxTests PRIVATE Gtest::gtest Gtest::gtest_main Core::Core)
 
+xsigma_add_profiler()
 if(TARGET Profiler::Profiler)
   target_include_directories(CoreCxxTests PRIVATE "${XSIGMA_THIRDPARTY_DIR}/Profiler")
 endif()
@@ -115,7 +116,7 @@ add_test(NAME CoreCxxTests COMMAND CoreCxxTests
 set_tests_properties(CoreCxxTests PROPERTIES TIMEOUT 120 LABELS "Core;Unit")
 
 # Set coverage environment variable if enabled
-if((PARALLEL_ENABLE_COVERAGE OR PROFILER_ENABLE_COVERAGE) AND DEFINED PROJECT_LLVM_PROFILE_FILE)
+if(PARALLEL_ENABLE_COVERAGE AND DEFINED PROJECT_LLVM_PROFILE_FILE)
   set_tests_properties(
     CoreCxxTests PROPERTIES ENVIRONMENT "LLVM_PROFILE_FILE=${PROJECT_LLVM_PROFILE_FILE}"
   )

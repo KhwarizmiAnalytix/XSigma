@@ -210,7 +210,7 @@ Tests whether `-i_dynamic` is needed via `TestNO_ICC_IDYNAMIC_NEEDED.cmake`. If 
 | `/bigobj` | C + C++ | Increase COFF symbol-table limit for large translation units |
 | `/Zi` | C + C++ | Produce a separate PDB file for fast incremental linking |
 | `/DEBUG:FASTLINK` (default) | EXE + shared linker | Fast PDB generation during development builds |
-| `/DEBUG:FULL /INCREMENTAL:NO` | EXE + shared linker | Full PDB when any of `CORE_ENABLE_COVERAGE`, `LOGGING_ENABLE_COVERAGE`, `MEMORY_ENABLE_COVERAGE`, `PARALLEL_ENABLE_COVERAGE`, or `PROFILER_ENABLE_COVERAGE` is `ON` (coverage tools need complete symbols) |
+| `/DEBUG:FULL /INCREMENTAL:NO` | EXE + shared linker | Full PDB when any of `CORE_ENABLE_COVERAGE`, `LOGGING_ENABLE_COVERAGE`, `MEMORY_ENABLE_COVERAGE`, or `PARALLEL_ENABLE_COVERAGE` is `ON` (coverage tools need complete symbols) |
 | `/utf-8` | C + C++ | Treat source and object files as UTF-8 |
 | `/EHsc` | C + C++ | Standard C++ synchronous exception handling (catch C++ exceptions only, extern "C" functions do not throw) |
 

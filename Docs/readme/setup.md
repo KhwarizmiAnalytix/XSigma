@@ -39,7 +39,6 @@ default; the action controls whether tests are executed by this invocation.
 | CPU SIMD | `no`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve` | `VECTORIZATION_CPU_BACKEND` |
 | GPU backend | `cuda`, `hip`, `metal`, or `--gpu_backend.<name>` | Matching `MEMORY_GPU_BACKEND` and `VECTORIZATION_GPU_BACKEND` |
 | Logging | `--logging=SPDLOG|LOGURU|GLOG|NATIVE` | `LOGGING_BACKEND` |
-| Profiler instrumentation | `--profiler.kineto` or `--profiler.itt` | `PROFILER_BACKEND` |
 | Parallel backend | `--parallel.std`, `--parallel.openmp`, `--parallel.tbb` | `PARALLEL_BACKEND`; TBB also enables the Memory TBB allocator |
 | LTO | `lto`, `--lto.auto`, `--lto.thin`, `--lto.full`, `--lto.ipo`, `--lto.off` | Fans `*_LTO_MODE` to loaded modules |
 | Sanitizer | `--sanitizer.address`, `.undefined`, `.thread`, `.memory`, `.leak` | Fans `*_ENABLE_SANITIZER` and `*_SANITIZER_TYPE` |
@@ -109,14 +108,12 @@ CMake directly.
 
 ```bash
 python Scripts/setup.py config.build.test.ninja.clang.release --logging=GLOG
-python Scripts/setup.py config.build.test.ninja.clang.release --profiler.itt
 python Scripts/setup.py config.build.test.ninja.clang.debug.coverage
 python Scripts/setup.py config.build.ninja.clang.release.ccache
 ```
 
-The native TraceMe/XPlane profiler pipeline always compiles. `PROFILER_BACKEND`
-only selects the Kineto or ITT instrumentation layer, so `--profiler.native` is
-a no-op.
+Profiler instrumentation (Kineto/ITT) is configured inside
+`ThirdParty/Profiler`, not via XSigma setup flags.
 
 ## Direct CMake
 
@@ -127,7 +124,6 @@ module, for example:
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DLOGGING_BACKEND=LOGURU \
-  -DPROFILER_BACKEND=KINETO \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none

@@ -1,14 +1,10 @@
 # =============================================================================
 # Intel ITT API (ittnotify) BUILD Configuration
 # =============================================================================
-# VTune instrumentation/tracing API, used by Library/Profiler's ITT backend.
-# Mirrors ThirdParty/ittapi/CMakeLists.txt's `ittnotify` target: only
-# src/ittnotify/ittnotify_static.c is compiled (the jitprofiling.c source
-# CMake's own file(GLOB "src/ittnotify/*.c") also happens to sweep into the
-# same target is a separate, unrelated JIT-profiling API Profiler's ITT code
-# never includes -- see Cmake/packages/FindITT.cmake's Itt::itt target,
-# which is all Library/Profiler/CMakeLists.txt actually links).
-# Equivalent to ThirdParty/ittapi
+# VTune instrumentation/tracing API — private Profiler backend template.
+# Staged into @profiler//third_party/ittapi by bazel/profiler_repository.bzl
+# when needed; XSigma does not expose ITT as a setup/Bazel flag.
+# Mirrors ittapi's `ittnotify` target (ittnotify_static.c only).
 # =============================================================================
 
 package(default_visibility = ["//visibility:public"])

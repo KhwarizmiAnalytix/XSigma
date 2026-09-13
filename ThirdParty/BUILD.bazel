@@ -1,8 +1,10 @@
-# Third-party BUILD files for external dependencies
+# Third-party BUILD overlay templates for external / nested dependencies.
+# kineto.BUILD and ittapi.BUILD are staged into @profiler by
+# //bazel:profiler_repository.bzl — not registered as top-level WORKSPACE repos.
 exports_files([
-    "cpuinfo.BUILD",
     "fmt.BUILD",
     "kineto.BUILD",
+    "ittapi.BUILD",
     "profiler.BUILD",
     "loguru.BUILD",
     "spdlog.BUILD",

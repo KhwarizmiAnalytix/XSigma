@@ -84,9 +84,14 @@ cmake -S . -B build-minimal -G Ninja \
   -DLOGGING_ENABLE_TESTING=OFF \
   -DMEMORY_ENABLE_TESTING=OFF \
   -DPARALLEL_ENABLE_TESTING=OFF \
-  -DPROFILER_ENABLE_TESTING=OFF \
   -DVECTORIZATION_ENABLE_TESTING=OFF
 ```
+
+`ThirdParty/Profiler` is consumed as a pure third-party dependency: its
+tests, examples, and benchmarks are always disabled from XSigma (they build
+only from the standalone Profiler repo), and XSigma feature flags
+(coverage, sanitizers, clang-tidy, IWYU, spell, C++ standard) do not fan
+into it.
 
 For sanitizers and coverage, the helper is clearer because it applies the
 matching per-module pair:

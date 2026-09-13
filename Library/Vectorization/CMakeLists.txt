@@ -141,7 +141,9 @@ endif()
 # Profiler presence — detected from the CMake target; not a user option.
 # Lets kernel entry points call the always-safe PROFILER_RECORD_USER_SCOPE shim from
 # Profiler's common/instrumentation.h (Docs/profiler/profiler.md,
-# Instrumentation) without depending on which PROFILER_BACKEND was selected.
+# Instrumentation) without depending on Profiler's private instrumentation backend.
+# Profiler is pure third-party (ThirdParty/CMakeLists.txt).
+xsigma_add_profiler()
 if(TARGET Profiler::Profiler)
   set(_vec_has_profiler 1)
 else()
@@ -437,7 +439,11 @@ if(VECTORIZATION_ENABLE_SLEEF)
   set(SLEEF_BUILD_INLINE_HEADERS OFF CACHE BOOL "Disable SLEEF inline headers" FORCE)
   set(SLEEF_ENABLE_TESTER OFF CACHE BOOL "Disable SLEEF tester binaries" FORCE)
   set(SLEEF_ENABLE_TESTER4 OFF CACHE BOOL "Disable SLEEF tester4 binaries" FORCE)
-  set(SLEEF_ENABLE_SSL OFF CACHE BOOL "Disable SLEEF SSL-backed tester checks" FORCE)
+  # SLEEF 3.x gates OpenSSL behind SLEEF_DISABLE_SSL (the old SLEEF_ENABLE_SSL name no
+  # longer exists). Without this, a system OpenSSL makes src/common register
+  # test_psha/test_psha_capi in CTest even though SLEEF_BUILD_TESTS is OFF — those
+  # phantom third-party tests then fail as "Not Run" in XSigma's ctest run.
+  set(SLEEF_DISABLE_SSL ON CACHE BOOL "Disable SLEEF SSL-backed tester checks" FORCE)
   set(SLEEF_SHOW_CONFIG OFF CACHE BOOL "Suppress SLEEF config output" FORCE)
   set(SLEEF_BUILD_SHARED_LIBS OFF CACHE BOOL "Build SLEEF as static library" FORCE)
 

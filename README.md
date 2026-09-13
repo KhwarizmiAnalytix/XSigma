@@ -74,8 +74,8 @@ Use Bazelisk so the repository-selected version is used:
 # Build and test the default Debug configuration.
 python Scripts/setup_bazel.py build.test
 
-# Release build with AVX2 and the ITT instrumentation backend.
-python Scripts/setup_bazel.py build.test.release.avx2 --profiler.itt
+# Release build with AVX2.
+python Scripts/setup_bazel.py build.test.release.avx2
 
 # Run a single test target directly.
 bazel test --config=release //Library/Core/Testing/Cxx:CoreCxxTests
@@ -98,9 +98,9 @@ configurations and known limitations.
 - A Release CMake configuration selects per-module `*_LTO_MODE=auto`; Debug,
   coverage, and sanitizer configurations do not apply LTO. The `lto` token
   explicitly requests `auto` mode.
-- The default CMake logging backend is `LOGURU`. Profiler instrumentation is
-  selected with `PROFILER_BACKEND=KINETO|ITT`; `native` is not a selectable
-  backend because the native pipeline is always built.
+- The default CMake logging backend is `LOGURU`. Profiler instrumentation
+  (Kineto/ITT) is configured inside `ThirdParty/Profiler` — XSigma does not
+  expose `PROFILER_BACKEND` or `--profiler.*` setup flags.
 - CPU SIMD defaults are host-dependent: AVX2 on recognised x86 hosts, NEON on
   AArch64, and `no` elsewhere. Choose a tier explicitly for portable binaries.
 - CUDA, HIP, and Metal are compile-time-exclusive GPU backends. When enabling

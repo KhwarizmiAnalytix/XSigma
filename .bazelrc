@@ -273,12 +273,6 @@ build:mimalloc --define=memory_enable_mimalloc=true
 # Enable magic_enum
 build:magic_enum --define=core_enable_magic_enum=true
 
-# Enable Kineto profiling (default instrumentation backend; native profiler pipeline is always on)
-build:kineto --define=profiler_enable_kineto=true
-
-# Enable ITT profiling
-build:itt --define=profiler_enable_itt=true
-
 # Enable LU pivoting
 build:lu_pivoting --define=core_lu_pivoting=true
 

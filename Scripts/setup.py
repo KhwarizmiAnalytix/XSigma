@@ -709,7 +709,6 @@ class XSigmaFlags:
             "mimalloc": "MEMORY_ENABLE_MIMALLOC",
             "mimalloc_stats": "MEMORY_ENABLE_MIMALLOC_STATS",
             "external": "XSIGMA_ENABLE_EXTERNAL",
-            "profiler_type": "PROFILER_BACKEND",
             "enzyme": "CORE_ENABLE_ENZYME",
             "parallel_backend": "PARALLEL_BACKEND",
             "sleef": "VECTORIZATION_ENABLE_SLEEF",
@@ -752,7 +751,6 @@ class XSigmaFlags:
                 "torch": self.OFF,  # LibTorch install is not guaranteed to be present
                 "examples": self.ON,
                 "linker": "default",  # Keep auto-detect in "all" mode
-                "profiler_type": "KINETO",
                 "cache": self.ON,
                 "cache_type": "ccache",
                 "library_project": "",
@@ -784,7 +782,6 @@ class XSigmaFlags:
                 "benchmark": self.OFF,  # *_ENABLE_BENCHMARK CMake defaults are ON
                 "magic_enum": self.ON,
                 "mimalloc": self.ON,
-                "profiler_type": "KINETO",
                 "icecc": self.OFF,
                 "native": self.OFF,
                 "examples": self.OFF,
@@ -799,7 +796,6 @@ class XSigmaFlags:
         gpu_backend_list = ["none", "hip", "cuda", "metal"]
         cxx_std_list = ["cxx17", "cxx20", "cxx23"]
         logging_backend_list = ["native", "loguru", "glog", "spdlog"]
-        profiler_choices = {"kineto": "KINETO", "itt": "ITT"}
         cache_type_list = ["none", "ccache", "sccache", "buildcache"]
         parallel_backend_list = ["std", "openmp", "tbb"]
         linker_list = ["default", "mold", "lld", "gold", "lld-link"]
@@ -880,26 +876,13 @@ class XSigmaFlags:
                 self.builder_suffix += f"_psize{n}"
                 print_status(f"Setting VECTORIZATION_PACKET_SIZE to {n}", "INFO")
             elif arg.startswith("profiler."):
-                backend_key = arg.split(".", 1)[1].lower()
-                if backend_key in profiler_choices:
-                    self.__value["profiler_type"] = profiler_choices[backend_key]
-                    self.builder_suffix += f"_profiler_{backend_key}"
-                    print_status(
-                        f"Selecting profiler backend: {profiler_choices[backend_key]}",
-                        "INFO",
-                    )
-                elif backend_key == "native":
-                    print_status(
-                        "profiler.native is a no-op: the native profiler pipeline is always "
-                        "compiled now, independent of the Kineto/ITT instrumentation backend.",
-                        "WARNING",
-                    )
-                else:
-                    print_status(
-                        f"Unknown profiler option '{arg}'. Valid options: {', '.join(profiler_choices.keys())}",
-                        "WARNING",
-                    )
-                # Skip other processing for profiler flags
+                # Instrumentation backend (Kineto/ITT) is owned by ThirdParty/Profiler
+                # via its own PROFILER_BACKEND cache var — XSigma must not set it.
+                print_status(
+                    f"Ignoring '{arg}': Profiler instrumentation backend is configured "
+                    "inside ThirdParty/Profiler (not an XSigma setup flag).",
+                    "WARNING",
+                )
             elif arg.startswith("project."):
                 proj_key = arg.split(".", 1)[1].lower()
                 valid_projects = (
@@ -908,7 +891,6 @@ class XSigmaFlags:
                     "vectorization",
                     "core",
                     "parallel",
-                    "profiler",
                     "models",
                     "graph",
                 )
@@ -1090,7 +1072,7 @@ class XSigmaFlags:
         # from an earlier configure (empty = full Library/* tree).
         _lp = self.__value.get("library_project") or ""
         cmake_cmd_flags.append(f"-DXSIGMA_LIBRARY_PROJECT={_lp}")
-        # "Profiler" -> "PROFILER". Empty means fan flags to every module.
+        # Empty means fan flags to every module.
         _lp_mod = _lp.upper()
 
         # ------------------------------------------------------------------ per-module fan-outs
@@ -1099,12 +1081,15 @@ class XSigmaFlags:
         # --project.NAME is set, only that module's CMakeLists.txt is loaded, so
         # fanning CORE_*/MEMORY_*/… flags would produce CMake unused-variable
         # warnings.
+        # NOTE: PROFILER is deliberately absent — ThirdParty/Profiler is consumed as a
+        # pure third-party dependency (like fmt/googletest): XSigma feature flags must
+        # not fan into it. It builds with its own defaults (C++20, KINETO backend,
+        # tests/examples disabled — see xsigma_add_profiler() in ThirdParty/CMakeLists.txt).
         ALL_MODULES = [
             "CORE",
             "LOGGING",
             "MEMORY",
             "PARALLEL",
-            "PROFILER",
             "VECTORIZATION",
             "MODELS",
             "GRAPH",
@@ -1142,15 +1127,12 @@ class XSigmaFlags:
                     cmake_cmd_flags.append(f"-D{flag_name}={flag_value}")
 
         # `torch` maps to VECTORIZATION_ENABLE_LIBTORCH above, which is out of
-        # scope for --project.profiler / --project.memory. Those modules have
-        # their own ENABLE_LIBTORCH options keyed off the same token.
+        # scope for --project.memory. Memory has its own ENABLE_LIBTORCH option
+        # keyed off the same token. (Profiler is pure third-party — no fan-out.)
         _torch_val = self.__value.get("torch")
         if _torch_val in [self.ON, self.OFF]:
             _torch_onoff = "ON" if _torch_val == self.ON else "OFF"
-            for _torch_flag in (
-                "MEMORY_ENABLE_LIBTORCH",
-                "PROFILER_ENABLE_LIBTORCH",
-            ):
+            for _torch_flag in ("MEMORY_ENABLE_LIBTORCH",):
                 if _cmake_flag_in_scope(_torch_flag):
                     cmake_cmd_flags.append(f"-D{_torch_flag}={_torch_onoff}")
 
@@ -1398,9 +1380,6 @@ class XSigmaConfiguration:
                 if not self.__compiler_user_specified:
                     self.__value["cmake_c_compiler"] = ""
                     self.__value["cmake_cxx_compiler"] = ""
-                # Kineto is not supported on macOS/Xcode; ITT is the only other instrumentation
-                # backend, so use it (the native traceme/xplane pipeline compiles either way).
-                self.__value["profiler_type"] = "ITT"
                 print_status("Using Xcode generator", "SUCCESS")
             else:
                 print_status("Xcode not found, falling back to Ninja", "WARNING")
@@ -1891,17 +1870,12 @@ def parse_args(args):
                 )
                 sys.exit(1)
         elif arg.startswith("--profiler."):
-            backend_type = arg.split(".", 1)[1].upper()
-            valid_backends = ["KINETO", "ITT", "NATIVE"]
-            if backend_type in valid_backends:
-                processed_args.append(f"profiler.{backend_type.lower()}")
-                print_status(f"Profiler backend set to {backend_type}", "INFO")
-            else:
-                print_status(
-                    f"Invalid profiler backend: {backend_type}. Valid options: {', '.join(valid_backends)}",
-                    "ERROR",
-                )
-                sys.exit(1)
+            # Accepted only so old scripts fail softly; backend is Profiler's concern.
+            print_status(
+                f"Ignoring '{arg}': Profiler instrumentation backend is configured "
+                "inside ThirdParty/Profiler (not an XSigma setup flag).",
+                "WARNING",
+            )
         elif arg in ("--mimalloc_stats", "--mimalloc-stats"):
             # Multi-word option: the dotted-token splitter treats '_' as a
             # delimiter (re.split(r"_|\.|\ ", ...)), so this needs an explicit
@@ -1932,7 +1906,6 @@ def parse_args(args):
                 "vectorization",
                 "core",
                 "parallel",
-                "profiler",
                 "models",
                 "graph",
             )

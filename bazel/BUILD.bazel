@@ -135,20 +135,6 @@ config_setting(
 )
 
 # =============================================================================
-# Profiling Configuration (Profiler)
-# =============================================================================
-
-config_setting(
-    name = "enable_kineto",
-    define_values = {"profiler_enable_kineto": "true"},
-)
-
-config_setting(
-    name = "enable_itt",
-    define_values = {"profiler_enable_itt": "true"},
-)
-
-# =============================================================================
 # Logging Backend Configuration
 # =============================================================================
 

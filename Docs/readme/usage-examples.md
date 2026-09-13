@@ -71,17 +71,15 @@ python Scripts/setup.py config.build.ninja.clang.release.ccache
 The `cache` token disables compiler-cache launchers because they are enabled by
 default; use `none`, `ccache`, `sccache`, or `buildcache` to choose a backend.
 
-## Logging and profiling
+## Logging
 
 ```bash
 python Scripts/setup.py config.build.test.ninja.clang.release
 python Scripts/setup.py config.build.test.ninja.clang.release --logging=GLOG
-python Scripts/setup.py config.build.test.ninja.clang.release --profiler.kineto
-python Scripts/setup.py config.build.test.ninja.clang.release --profiler.itt
 ```
 
-LOGURU and Kineto are the defaults. The native profiler pipeline is always
-compiled, so `--profiler.native` is not a backend selection.
+LOGURU is the default logging backend. Profiler instrumentation (Kineto/ITT) is
+owned by `ThirdParty/Profiler` — XSigma setup does not expose `--profiler.*`.
 
 ## GPU Vectorization
 
@@ -106,7 +104,6 @@ Metal requires an Apple platform.
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DLOGGING_BACKEND=LOGURU \
-  -DPROFILER_BACKEND=KINETO \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none
@@ -123,7 +120,7 @@ For direct instrumentation, use module-scoped variables such as
 
 ```bash
 python Scripts/setup_bazel.py build.test
-python Scripts/setup_bazel.py build.test.release.avx2 --profiler.itt
+python Scripts/setup_bazel.py build.test.release.avx2
 python Scripts/setup_bazel.py build.test.debug.asan
 bazel test --config=release //Library/Core/Testing/Cxx:CoreCxxTests
 ```

@@ -21,7 +21,8 @@ Library Build Files:
 Third-Party Dependencies:
 ------------------------
 ✓ third_party/fmt.BUILD        - fmt library (header-only formatting)
-✓ third_party/cpuinfo.BUILD    - cpuinfo library (CPU detection)
+✓ third_party/cpuinfo uses submodule BUILD.bazel (no overlay)
+
 ✓ third_party/magic_enum.BUILD - magic_enum library (enum reflection)
 ✓ third_party/mimalloc.BUILD   - mimalloc library (memory allocator)
 
@@ -73,7 +74,6 @@ CMake Option                          →  Bazel Equivalent
 -DPROJECT_ENABLE_LTO=ON               →  --config=lto
 -DMEMORY_ENABLE_MIMALLOC=ON          →  --config=mimalloc
 -DCORE_ENABLE_MAGICENUM=ON         →  --config=magic_enum
--DXSIGMA_ENABLE_KINETO=ON            →  --config=kineto
 -DMEMORY_ENABLE_TBB=ON               →  --config=tbb
 -DMEMORY_GPU_BACKEND=cuda            →  --config=cuda
 -DENABLE_GTEST=ON             →  --config=gtest

@@ -832,6 +832,50 @@ function(xsigma_add_googletest)
 endfunction()
 
 # =============================================================================
+# Profiler — bundled via add_third_party_library (ThirdParty/Profiler submodule)
+#
+# Profiler is a pure third-party dependency (same treatment as cpuinfo):
+# XSigma sets no PROFILER_* feature flags anywhere outside this file, never
+# fans coverage/sanitizer/clang-tidy/IWYU/spell/C++-standard into it, and
+# exposes no setup.py/Bazel switches for it. Its Kineto/ITT backends and fmt
+# live in its own nested third_party/; tests and examples build only from the
+# standalone Profiler repo. Called by consuming libraries (Memory, Parallel,
+# Vectorization) before their if(TARGET Profiler::Profiler) checks — idempotent.
+# =============================================================================
+function(xsigma_add_profiler)
+    if(TARGET Profiler::Profiler)
+        return()
+    endif()
+    set(_profiler_src "${XSIGMA_THIRDPARTY_DIR}/Profiler")
+    if(NOT EXISTS "${_profiler_src}/CMakeLists.txt")
+        message(FATAL_ERROR "ThirdParty/Profiler is missing. Initialize the submodule:\n"
+                            "  git submodule update --init ThirdParty/Profiler")
+    endif()
+    # Kineto/ITT/fmt are Profiler-owned nested submodules — never XSigma's root ThirdParty.
+    set(_profiler_tp "${_profiler_src}/third_party")
+    if(NOT EXISTS "${_profiler_tp}/kineto/libkineto/CMakeLists.txt"
+       OR NOT EXISTS "${_profiler_tp}/ittapi/CMakeLists.txt")
+        message(FATAL_ERROR
+            "Profiler nested third_party (kineto/ittapi) is missing. Initialize:\n"
+            "  git submodule update --init --recursive ThirdParty/Profiler")
+    endif()
+    # Path wiring only: without this, Profiler's dependency resolver would
+    # fall back to fetching Kineto from git instead of using its nested copy.
+    set(PROFILER_THIRD_PARTY_DIR "${_profiler_tp}"
+        CACHE PATH "Profiler-owned third_party (kineto/ittapi/fmt)" FORCE)
+    set(PROFILER_ENABLE_TESTING OFF CACHE BOOL "Profiler tests build only standalone" FORCE)
+    set(PROFILER_ENABLE_EXAMPLES OFF CACHE BOOL "Profiler examples build only standalone" FORCE)
+    add_third_party_library(
+        profiler
+        SOURCE_DIR "${_profiler_src}"
+        BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Profiler"
+        EXTERNAL_NAME Profiler
+        EXCLUDE_FROM_ALL
+        AUTO_ADD_TO_DEPENDENCIES OFF
+    )
+endfunction()
+
+# =============================================================================
 # NOTE: All per-project third-party declarations have been moved to each
 # project's own CMakeLists.txt (and Testing/Cxx/CMakeLists.txt for testing
 # frameworks).  This file only defines helper functions and global options.
@@ -839,7 +883,9 @@ endfunction()
 # Project → third-party mapping:
 #   Library/Core       → fmt, cpuinfo, magic_enum
 #   Library/Logging    → fmt, loguru, glog, spdlog
-#   Library/Memory     → mimalloc
-#   Library/Profiler   → kineto, ITT
+#   Library/Memory     → mimalloc, Profiler (via xsigma_add_profiler)
+#   Library/Parallel   → Profiler (via xsigma_add_profiler)
+#   Library/Vectorization → sleef, Profiler (via xsigma_add_profiler)
+#   ThirdParty/Profiler → owns nested third_party/kineto and ittapi (not XSigma root)
 #   */Testing/Cxx      → xsigma_add_googletest(), google-benchmark
 # =============================================================================

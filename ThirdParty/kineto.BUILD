@@ -1,8 +1,9 @@
 # =============================================================================
 # Kineto Library BUILD Configuration
 # =============================================================================
-# Kineto profiling library with conditional CUPTI support
-# Equivalent to ThirdParty/kineto/libkineto
+# Kineto profiling library with conditional CUPTI support — private Profiler
+# backend. Staged into @profiler//third_party/kineto by
+# bazel/profiler_repository.bzl (not a top-level XSigma WORKSPACE repo).
 # =============================================================================
 
 package(default_visibility = ["//visibility:public"])
