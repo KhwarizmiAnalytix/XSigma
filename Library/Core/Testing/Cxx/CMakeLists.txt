@@ -91,8 +91,8 @@ endif()
 # CORE_DEPENDENCY_LIBS
 target_link_libraries(CoreCxxTests PRIVATE Gtest::gtest Gtest::gtest_main Core::Core)
 
-if(PROFILER_ENABLE_NATIVE_PROFILER)
-  target_include_directories(CoreCxxTests PRIVATE "${CMAKE_SOURCE_DIR}/Library/Profiler")
+if(TARGET Profiler::Profiler)
+  target_include_directories(CoreCxxTests PRIVATE "${XSIGMA_THIRDPARTY_DIR}/Profiler")
 endif()
 
 # Set target properties

@@ -1,16 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
+alias(
     name = "profilerTest_header",
-    hdrs = [
-        "ProfilerTest.h",
-        "ProfilerTest.h.in",
-    ],
-    includes = [
-        ".",
-        "../..",
-    ],
-    deps = [
-        "//Library/Profiler:Profiler",
-    ],
+    actual = "@profiler//:profilerTest_header",
 )

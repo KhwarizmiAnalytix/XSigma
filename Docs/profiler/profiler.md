@@ -1,9 +1,9 @@
 # XSigma Profiler
 
 User guide, API, backends, examples, and architecture for
-[`Library/Profiler`](../../Library/Profiler/). Link `XSigma::Profiler`
-(CMake) or `//Library/Profiler:Profiler` (Bazel). Include root is
-`Library/Profiler`.
+[`ThirdParty/Profiler`](../../ThirdParty/Profiler) (KhwarizmiAnalytix/Profiler).
+Link `Profiler::Profiler` (CMake) or `@profiler//:Profiler` /
+`//Library/Profiler:Profiler` (Bazel). Include `profiler.h`.
 
 C++ only — there are no Python or C bindings in this repository.
 

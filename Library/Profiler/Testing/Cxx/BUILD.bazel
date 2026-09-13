@@ -1,55 +1,6 @@
-# =============================================================================
-# Profiler C++ tests (moved from Library/Core/Testing/Cxx)
-# =============================================================================
-
-load("//bazel:profiler.bzl", "profiler_copts", "profiler_defines", "profiler_linkopts")
-
 package(default_visibility = ["//visibility:public"])
 
-# =============================================================================
-# Test files: must match Library/Profiler/Testing/Cxx/CMakeLists.txt TestFiles.
-# Real-use-case coverage — backend function/memory/output formats, Chrome
-# trace, threadpool+tracing, XPlane pipeline, heavy function, hotspot report,
-# native GpuTracer device plane.
-# =============================================================================
-
-_PROFILER_COMMON_TESTS = [
-    "TestHotspotReport.cpp",
-    "TestProfilerBackendFunction.cpp",
-    "TestProfilerBackendGpuFallback.cpp",
-    "TestProfilerBackendMemory.cpp",
-    "TestProfilerBackendMetadata.cpp",
-    "TestProfilerBackendMetal.cpp",
-    "TestProfilerBackendOutput.cpp",
-    "TestProfilerChromeTraceHierarchical.cpp",
-    "TestProfilerHeavyFunction.cpp",
-    "TestProfilerGpuTracer.cpp",
-    "TestProfilerNativeHotspot.cpp",
-    "TestProfilerThreadpoolTracing.cpp",
-    "TestProfilerXPlanePipeline.cpp",
-]
-
-cc_test(
+alias(
     name = "ProfilerCxxTests",
-    size = "large",
-    timeout = "long",
-    srcs = _PROFILER_COMMON_TESTS,
-    copts = profiler_copts(),
-    defines = profiler_defines() + [
-        "PROFILER_GOOGLE_TEST",
-        "USE_GTEST",
-        "_VARIADIC_MAX=10",
-        "PROFILER_HAS_GTEST=1",
-        # LibTorch is CMake-only (setup.py `torch` token). Keep the heavy-function
-        # PyTorch profiler path compiled out under Bazel.
-        "PROFILER_HAS_LIBTORCH=0",
-    ],
-    includes = ["."],
-    linkopts = profiler_linkopts(),
-    deps = [
-        "//Library/Profiler:Profiler",
-        "//Library/Profiler/Testing:profilerTest_header",
-        "@com_google_googletest//:gtest",
-        "@com_google_googletest//:gtest_main",
-    ],
+    actual = "@profiler//:ProfilerCxxTests",
 )

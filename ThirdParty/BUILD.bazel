@@ -3,6 +3,7 @@ exports_files([
     "cpuinfo.BUILD",
     "fmt.BUILD",
     "kineto.BUILD",
+    "profiler.BUILD",
     "loguru.BUILD",
     "spdlog.BUILD",
     "magic_enum.BUILD",

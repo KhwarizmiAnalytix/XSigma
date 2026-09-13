@@ -115,7 +115,7 @@ configurations and known limitations.
 | `Library/Logging` | Logging facade with Loguru, spdlog, glog, and native backends. |
 | `Library/Memory` | CPU allocators plus CUDA/HIP/Metal caching allocators. |
 | `Library/Parallel` | Standard-thread, OpenMP, and TBB execution backends. |
-| `Library/Profiler` | Always-on native traces plus Kineto or ITT instrumentation. |
+| `ThirdParty/Profiler` | [KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler) third-party submodule. CMake `Profiler::Profiler`, Bazel `@profiler//:Profiler` (aliased as `//Library/Profiler:Profiler`). |
 | `Library/Vectorization` | CPU SIMD expressions and CUDA/HIP/Metal evaluators. |
 | `Library/Models` | SABR/ZABR smile routines, calibration, and MLP inference. |
 | `Library/Graph` | Dependency DAG construction, parallel execution, target pruning, and caller-managed incremental caching. |

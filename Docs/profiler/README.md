@@ -1,7 +1,12 @@
-# XSigma Profiler
+# Profiler
 
-The complete profiler guide (native and Kineto pipelines, GPU correlation,
-hotspots, tests, APIs) is **[profiler.md](profiler.md)**.
+Standalone C++ profiler
+([KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler)),
+consumed by XSigma as the third-party submodule
+[`ThirdParty/Profiler`](../../ThirdParty/Profiler).
 
-Sources: [`Library/Profiler/`](../../Library/Profiler/). Runnable examples:
-[`Examples/Profiling/`](../../Examples/Profiling/).
+CMake target: `Profiler::Profiler`. Bazel: `@profiler//:Profiler`
+(also `//Library/Profiler:Profiler`). Public include: `profiler.h`.
+
+The complete guide is **[profiler.md](profiler.md)**. Examples ship in the
+Profiler repo (`examples/example_quickstart.cpp`).

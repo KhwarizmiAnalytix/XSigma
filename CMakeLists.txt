@@ -150,12 +150,9 @@ string(TOLOWER "${XSIGMA_LIBRARY_PROJECT}" _xsigma_libproj_lc)
 
 set(_xsigma_lib_order
     Logging
-    # Profiler has no CMake dependency on any other XSigma library (only
-    # third-party fmt/kineto/itt/cuda), so it can build early. It must come
-    # before Memory/Vectorization/Parallel: each optionally links
-    # Profiler::Profiler when it exists (see e.g. Library/Memory/CMakeLists.txt's
-    # VECTORIZATION_ENABLE_PROFILER-style gate), and that `TARGET Profiler::Profiler`
-    # check only succeeds if Profiler's add_subdirectory has already run.
+    # Profiler is the ThirdParty/Profiler submodule (KhwarizmiAnalytix/Profiler),
+    # not Library/Profiler. Add it before Memory/Vectorization/Parallel so
+    # `TARGET Profiler::Profiler` is visible to those modules.
     Profiler
     Memory
     Vectorization
@@ -167,9 +164,31 @@ set(_xsigma_lib_order
     Graph
 )
 
+function(xsigma_add_profiler)
+  set(_profiler_src "${XSIGMA_THIRDPARTY_DIR}/Profiler")
+  if(NOT EXISTS "${_profiler_src}/CMakeLists.txt")
+    message(FATAL_ERROR "ThirdParty/Profiler is missing. Initialize the submodule:\n"
+                        "  git submodule update --init ThirdParty/Profiler"
+    )
+  endif()
+  set(PROFILER_THIRD_PARTY_DIR "${XSIGMA_THIRDPARTY_DIR}"
+      CACHE PATH "Reuse XSigma ThirdParty for fmt/kineto/ittapi" FORCE
+  )
+  if(DEFINED MEMORY_GPU_BACKEND AND NOT MEMORY_GPU_BACKEND STREQUAL "")
+    set(PROFILER_GPU_BACKEND "${MEMORY_GPU_BACKEND}" CACHE STRING "Mapped from MEMORY_GPU_BACKEND"
+                                                           FORCE
+    )
+  endif()
+  add_subdirectory("${_profiler_src}" "${CMAKE_BINARY_DIR}/ThirdParty/Profiler")
+endfunction()
+
 if(_xsigma_libproj_lc STREQUAL "")
   foreach(_lib IN LISTS _xsigma_lib_order)
-    add_subdirectory(Library/${_lib})
+    if(_lib STREQUAL "Profiler")
+      xsigma_add_profiler()
+    else()
+      add_subdirectory(Library/${_lib})
+    endif()
   endforeach()
 else()
   if(_xsigma_libproj_lc STREQUAL "logging")
@@ -205,7 +224,11 @@ else()
 
   foreach(_lib IN LISTS _xsigma_lib_order)
     if(_lib IN_LIST _xsigma_lib_enabled)
-      add_subdirectory(Library/${_lib})
+      if(_lib STREQUAL "Profiler")
+        xsigma_add_profiler()
+      else()
+        add_subdirectory(Library/${_lib})
+      endif()
     endif()
   endforeach()
 endif()

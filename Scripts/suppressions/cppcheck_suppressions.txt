@@ -6,9 +6,9 @@
 
 # If cppcheck is run without XSIGMA_CPPCHECK, it mis-parses the branch-hint macros and
 # reports syntaxError — suppress those false positives for affected translation units:
-syntaxError:Library/Profiler/bespoke/common/record_function.cpp
-syntaxError:Library/Profiler/native/core/profiler_lock.cpp
-syntaxError:Library/Profiler/native/cpu/annotation_stack.cpp
+syntaxError:ThirdParty/Profiler/bespoke/common/record_function.cpp
+syntaxError:ThirdParty/Profiler/native/core/profiler_lock.cpp
+syntaxError:ThirdParty/Profiler/native/cpu/annotation_stack.cpp
 
 # Exclude third-party and test code
 *:ThirdParty/*
@@ -19,7 +19,7 @@ syntaxError:Library/Profiler/native/cpu/annotation_stack.cpp
 unknownMacro:XSIGMA_UNLIKELY
 unknownMacro:XSIGMA_LIKELY
 unknownMacro:XSIGMA_CHECK
-unknownMacro:Library/Profiler/kineto/kineto_shim.cpp:171
+unknownMacro:ThirdParty/Profiler/kineto/kineto_shim.cpp:171
 syntaxError:Library/Core/parallel/parallel.h:267
 
 # Suppress missing include warnings
@@ -28,7 +28,7 @@ missingInclude:*
 
 # Suppress false positives for intentional design patterns
 # Virtual call in destructor is intentional (stop() is final in host_tracer)
-#virtualCallInConstructor:Library/Profiler/native/cpu/host_tracer.cpp:71
+#virtualCallInConstructor:ThirdParty/Profiler/native/cpu/host_tracer.cpp:71
 
 # Test helper function - pointer is not modified
 #constParameterPointer:Library/Core/Testing/baseTest.h:234
@@ -39,7 +39,7 @@ missingInclude:*
 noExplicitConstructor:Library/Parallel/tools/parallel_tools.h
 noExplicitConstructor:Library/Parallel/std_thread/parallel_thread_pool.cpp
 noExplicitConstructor:Library/Parallel/tools/threaded_callback_queue.h
-noExplicitConstructor:Library/Profiler/kineto/profiler_kineto.cpp
+noExplicitConstructor:ThirdParty/Profiler/kineto/profiler_kineto.cpp
 
 # Destructor deletes members - making loop variable const would be misleading
 constVariableReference:Library/Parallel/tools/multi_threader.cpp:145
@@ -51,12 +51,12 @@ redundantAssignment:Library/Parallel/tools/multi_threader.cpp:107
 unusedStructMember:Library/Core/util/small_vector.cpp
 
 # Future use or API compatibility
-unusedStructMember:Library/Profiler/common/standalone/execution_trace_observer.cpp:177
-unusedStructMember:Library/Profiler/common/standalone/execution_trace_observer.cpp:178
+unusedStructMember:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp:177
+unusedStructMember:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp:178
 
 # Intentional state machine condition
 knownConditionTrueFalse:Library/Parallel/tools/threaded_callback_queue.h:108
-knownConditionTrueFalse:Library/Profiler/common/standalone/execution_trace_observer.cpp:851
+knownConditionTrueFalse:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp:851
 
 # Functor may need to modify state - cannot be const
 constVariableReference:Library/Parallel/tools/threaded_callback_queue.h:584
@@ -70,15 +70,15 @@ useStlAlgorithm:Library/Parallel/std_thread/parallel_thread_pool.cpp:615
 useStlAlgorithm:Library/Parallel/tools/threaded_callback_queue.h:671
 
 # Profiler code - const correctness suggestions for imported/adapted code
-constVariableReference:Library/Profiler/common/collection.cpp
-constParameterReference:Library/Profiler/common/standalone/execution_trace_observer.cpp
-constParameterPointer:Library/Profiler/kineto/kineto_shim.cpp
-constVariablePointer:Library/Profiler/common/standalone/execution_trace_observer.cpp
-cstyleCast:Library/Profiler/common/standalone/execution_trace_observer.cpp
-unreadVariable:Library/Profiler/kineto/kineto_shim.cpp
+constVariableReference:ThirdParty/Profiler/common/collection.cpp
+constParameterReference:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
+constParameterPointer:ThirdParty/Profiler/kineto/kineto_shim.cpp
+constVariablePointer:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
+cstyleCast:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
+unreadVariable:ThirdParty/Profiler/kineto/kineto_shim.cpp
 
 # Portability - localtime vs localtime_r in profiler code
-localtimeCalled:Library/Profiler/common/standalone/execution_trace_observer.cpp
+localtimeCalled:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
 
 # Examples and test code - unused results are acceptable
 unreadVariable:Examples/*
@@ -87,7 +87,7 @@ unreadVariable:Examples/*
 unusedStructMember:Library/Logging/logger/back_trace.cpp:53
 
 # Profiler xplane exporter - raw accumulate loop is clearer here
-useStlAlgorithm:Library/Profiler/native/exporters/xplane/xplane_utils.cpp:664
+useStlAlgorithm:ThirdParty/Profiler/native/exporters/xplane/xplane_utils.cpp:664
 
 # Library API functions - called from user code outside the scanned Library tree
 unusedFunction:Library/*

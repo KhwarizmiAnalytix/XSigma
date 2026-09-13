@@ -152,6 +152,19 @@ new_local_repository(
 )
 
 # -----------------------------------------------------------------------------
+# Profiler — standalone product (https://github.com/KhwarizmiAnalytix/Profiler)
+# -----------------------------------------------------------------------------
+# Git submodule ThirdParty/Profiler. Overlay BUILD so we do not edit the
+# vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
+load("//bazel:profiler_repository.bzl", "local_profiler_repository")
+
+local_profiler_repository(
+    name = "profiler",
+    path = "ThirdParty/Profiler",
+    build_file = "//ThirdParty:profiler.BUILD",
+)
+
+# -----------------------------------------------------------------------------
 # Intel ITT API (ittnotify) — VTune instrumentation, used by Profiler's ITT backend
 # -----------------------------------------------------------------------------
 # Note: ittapi is a git submodule in ThirdParty/ittapi (v3.27.0)
