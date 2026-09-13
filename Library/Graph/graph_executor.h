@@ -49,7 +49,7 @@ namespace graph
 /// the worker thread around each node's work_. They are called with the
 /// node's id and name. Exceptions thrown by a hook are swallowed so they
 /// cannot kill a worker thread; hooks are for observation (e.g. wiring
-/// Library/Profiler) and must not mutate graph state. Both default to
+/// Profiler) and must not mutate graph state. Both default to
 /// nullptr (no hook). Set them before run(); they are read once per run().
 struct graph_executor_options
 {

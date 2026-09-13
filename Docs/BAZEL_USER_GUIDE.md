@@ -142,7 +142,7 @@ Metal is Apple-only. HIP is not supported on Windows by the CMake project.
 ```bash
 bazel test //Library/Core/Testing/Cxx:CoreCxxTests
 bazel test //Library/Vectorization/Testing/Cxx:VectorizationCxxTests
-bazel test //Library/Profiler/Testing/Cxx:ProfilerCxxTests
+bazel test @profiler//:ProfilerCxxTests
 bazel test //Library/Graph/Testing/Cxx:GraphCxxTests
 bazel query 'kind(cc_test, //Library/...)'
 ```

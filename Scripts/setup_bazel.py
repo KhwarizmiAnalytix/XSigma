@@ -199,6 +199,14 @@ _BAZEL_LIBRARY_PACKAGE_DIR = {
 }
 
 
+def _bazel_project_pattern(name: str) -> str:
+    """Bazel target pattern for --project.NAME (Profiler lives in @profiler)."""
+    if name == "profiler":
+        return "@profiler//..."
+    pkg = _BAZEL_LIBRARY_PACKAGE_DIR[name]
+    return f"//Library/{pkg}/..."
+
+
 def _merge_dotted_segments(parts: list[str]) -> list[str]:
     """Merge split segments like parallel.openmp, sanitizer.address into single tokens."""
     out: list[str] = []
@@ -385,12 +393,12 @@ class BazelConfiguration:
         """Narrow self.targets to one Library/* tree when project.NAME was set."""
         if not self.library_project:
             return
-        pkg = _BAZEL_LIBRARY_PACKAGE_DIR.get(self.library_project)
-        if not pkg:
+        if self.library_project not in _BAZEL_LIBRARY_PACKAGE_DIR:
             return
-        self.targets = [f"//Library/{pkg}/..."]
+        pattern = _bazel_project_pattern(self.library_project)
+        self.targets = [pattern]
         print_status(
-            f"Library scope: targets = //Library/{pkg}/... (Bazel does not trim transitive deps)",
+            f"Library scope: targets = {pattern} (Bazel does not trim transitive deps)",
             "INFO",
         )
 
@@ -820,7 +828,9 @@ class BazelConfiguration:
         # narrowed the target set, otherwise cover all of //Library.
         if action == "coverage":
             filter_pkg = "//Library"
-            if self.library_project:
+            if self.library_project == "profiler":
+                filter_pkg = "@profiler"
+            elif self.library_project:
                 pkg = _BAZEL_LIBRARY_PACKAGE_DIR.get(self.library_project)
                 if pkg:
                     filter_pkg = f"//Library/{pkg}"
@@ -1029,10 +1039,7 @@ class BazelConfiguration:
             print("  Vectorization:     None")
 
         if self.library_project:
-            pkg = _BAZEL_LIBRARY_PACKAGE_DIR.get(
-                self.library_project, self.library_project
-            )
-            print(f"  Library scope:     //Library/{pkg}/...")
+            print(f"  Library scope:     {_bazel_project_pattern(self.library_project)}")
 
         # Feature flags — computed from the same state as per-module summaries
         mimalloc_on = True  # Bazel default ON (see .bazelrc memory_enable_mimalloc)
@@ -1627,7 +1634,7 @@ def parse_args(args: list[str]) -> list[str]:
                 sys.exit(1)
             processed.append(f"project.{proj}")
             print_status(
-                f"Library scope: //Library/{_BAZEL_LIBRARY_PACKAGE_DIR[proj]}/...",
+                f"Library scope: {_bazel_project_pattern(proj)}",
                 "INFO",
             )
             continue

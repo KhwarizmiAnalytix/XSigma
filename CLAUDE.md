@@ -119,7 +119,7 @@ above — skip it deliberately for trivial edits, don't skip it by default.
   structs/enums) and handle it with ordinary control flow.
 - **Exception:** boundary/interop code that wraps a third-party API which
   itself throws is allowed to keep `try`/`catch` — e.g. the GPU allocator
-  code in `Library/Memory/gpu/`, the `Library/Profiler/bespoke/` kineto
+  code in `Library/Memory/gpu/`, the `ThirdParty/Profiler/bespoke/` kineto
   fork, `Library/Logging/util/exception.cpp`, and the test-assertion macros
   in `Library/*/Testing/**/baseTest.h`-style headers (whose `ASSERT_*`
   macros throw internally in non-gtest builds so failures abort the test).

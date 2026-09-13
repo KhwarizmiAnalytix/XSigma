@@ -70,7 +70,6 @@ cc_library(
         "//Library/Core:__pkg__",
         "//Library/Memory:__pkg__",
         "//Library/Vectorization:__pkg__",
-        "//Library/Profiler:__pkg__",
     ],
 )
 

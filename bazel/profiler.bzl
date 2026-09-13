@@ -7,9 +7,9 @@ def profiler_copts():
     return xsigma_copts(cxx_std = PROFILER_CXX_STD)
 
 def profiler_defines():
-    """Returns compile definitions for Library/Profiler.
+    """Returns compile definitions for the ThirdParty Profiler package.
 
-    Mirrors Library/Profiler/CMakeLists.txt: PROFILER_HAS_* flags.
+    Mirrors ThirdParty/Profiler/CMakeLists.txt: PROFILER_HAS_* flags.
     Project-wide PROJECT_HAS_* flags are included via xsigma_defines().
     """
     defines = xsigma_defines()

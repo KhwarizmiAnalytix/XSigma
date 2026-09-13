@@ -150,9 +150,8 @@ string(TOLOWER "${XSIGMA_LIBRARY_PROJECT}" _xsigma_libproj_lc)
 
 set(_xsigma_lib_order
     Logging
-    # Profiler is the ThirdParty/Profiler submodule (KhwarizmiAnalytix/Profiler),
-    # not Library/Profiler. Add it before Memory/Vectorization/Parallel so
-    # `TARGET Profiler::Profiler` is visible to those modules.
+    # Profiler is ThirdParty/Profiler (KhwarizmiAnalytix/Profiler). Add it
+    # before Memory/Vectorization/Parallel so Profiler::Profiler is visible.
     Profiler
     Memory
     Vectorization

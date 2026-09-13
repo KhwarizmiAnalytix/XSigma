@@ -1,9 +1,0 @@
-# Third-party Profiler (@profiler). Keep these labels so Memory / Vectorization /
-# Parallel BUILD files do not churn.
-
-package(default_visibility = ["//visibility:public"])
-
-alias(
-    name = "Profiler",
-    actual = "@profiler//:Profiler",
-)

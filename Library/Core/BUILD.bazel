@@ -1,7 +1,7 @@
 # =============================================================================
 # XSigma Core Library — utilities, intrusive_ptr, compression.
 # Memory is //Library/Memory; Logging is //Library/Logging (standalone macro headers per module).
-# Parallel is //Library/Parallel; Profiler is //Library/Profiler.
+# Parallel is //Library/Parallel; Profiler is @profiler.
 # =============================================================================
 
 load("//bazel:core.bzl", "core_copts", "core_defines", "core_enzyme_copts", "core_enzyme_linkopts", "core_linkopts")
@@ -74,7 +74,6 @@ cc_library(
     }),
     alwayslink = False,
     visibility = [
-        "//Library/Profiler:__pkg__",
         "//Library/Core:__pkg__",
     ],
 )

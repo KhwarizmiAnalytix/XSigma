@@ -1,7 +1,7 @@
 # GPU Backend Review — CUDA / HIP
 
 Scope: the CUDA and HIP paths across `Library/Memory`, `Library/Vectorization`,
-and `Library/Profiler`, reviewed 2026-09-07. This document records **where the
+and Profiler (now `ThirdParty/Profiler`), reviewed 2026-09-07. This document records **where the
 GPU implementation stands today**, the measured performance of the CUDA path,
 and the open gaps ranked by impact.
 
@@ -81,7 +81,7 @@ provides a thread-local ambient current stream per device (PyTorch
 give explicit async entry points that thread through to `record_stream`.
 
 **Profiler** routes CUDA GPU activity through the vendored Kineto fork
-(CUPTI on CUDA, roctracer on HIP), wired in `Library/Profiler/CMakeLists.txt`.
+(CUPTI on CUDA, roctracer on HIP), wired in `ThirdParty/Profiler/CMakeLists.txt`.
 
 ### 2.2 Test status (verified 2026-09-07)
 

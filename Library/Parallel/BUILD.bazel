@@ -109,7 +109,7 @@ cc_library(
             "//bazel:enable_openmp",
         ): ["@parallel_openmp//:openmp_check"],
         "//conditions:default": [],
-    }) + ["//Library/Profiler:Profiler"],
+    }) + ["@profiler//:Profiler"],
     alwayslink = False,
     visibility = [
         "//Library/Parallel:__pkg__",

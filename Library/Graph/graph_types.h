@@ -49,7 +49,7 @@ enum class graph_build_status_code
  * A small status/result type in place of exceptions (root /CLAUDE.md's
  * error-handling default for new application code). Factory methods are
  * named success()/failure() rather than profiler::profiler_status's
- * Ok()/Error() precedent (Library/Profiler/native/core/profiler_status.h):
+ * Ok()/Error() precedent (ThirdParty/Profiler/native/core/profiler_status.h):
  * that PascalCase naming does not itself follow the project's snake_case
  * function convention, so it isn't repeated here.
  */

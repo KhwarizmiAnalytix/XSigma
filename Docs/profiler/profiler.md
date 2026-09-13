@@ -2,8 +2,8 @@
 
 User guide, API, backends, examples, and architecture for
 [`ThirdParty/Profiler`](../../ThirdParty/Profiler) (KhwarizmiAnalytix/Profiler).
-Link `Profiler::Profiler` (CMake) or `@profiler//:Profiler` /
-`//Library/Profiler:Profiler` (Bazel). Include `profiler.h`.
+Link `Profiler::Profiler` (CMake) or `@profiler//:Profiler` (Bazel).
+Include `profiler.h`.
 
 C++ only — there are no Python or C bindings in this repository.
 
@@ -866,7 +866,7 @@ kernel events can pick up `kCorrelationId` from the host scope.
 ### CUDA / CUPTI (Kineto)
 
 Profiler **Kineto activity tracing** is CUDA-only. No HIP activity backend
-under `Library/Profiler`. Memory **allocators** call `report_memory_usage`
+under `ThirdParty/Profiler`. Memory **allocators** call `report_memory_usage`
 directly (CUDA, HIP, and Metal caching allocators are all wired), independent
 of Kineto activity tracing.
 
@@ -1265,7 +1265,7 @@ Platforms: Windows, Linux, macOS (CUDA/CUPTI: Linux + Toolkit).
 
 ## See also
 
-- Implementation: [`Library/Profiler/README.md`](../../Library/Profiler/README.md)
+- Implementation: [`ThirdParty/Profiler/README.md`](../../ThirdParty/Profiler/README.md)
 - Examples: [`Examples/Profiling/`](../../Examples/Profiling/)
 - [Chrome Trace Event Format](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU)
 - [Perfetto UI](https://ui.perfetto.dev)
