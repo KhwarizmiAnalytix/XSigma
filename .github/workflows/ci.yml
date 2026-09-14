@@ -296,9 +296,9 @@ jobs:
       run: |
         # Set up linker flags for Homebrew LLVM libc++
         # This fixes the missing std::__1::__hash_memory symbol issue
-        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> $GITHUB_ENV
-        echo "/opt/homebrew/opt/llvm/bin" >> $GITHUB_PATH
+        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> "$GITHUB_ENV"
+        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> "$GITHUB_ENV"
+        echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
 
     # Temporarily disabled - CUDA testing
     # - name: Install CUDA Toolkit (Windows)
@@ -430,8 +430,8 @@ jobs:
           -S . \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_C_COMPILER=$CC_COMPILER \
-          -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
+          -DCMAKE_C_COMPILER="$CC_COMPILER" \
+          -DCMAKE_CXX_COMPILER="$CXX_COMPILER" \
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} \
           -DLOGGING_BACKEND=${{ matrix.logging_backend }} \
           -DBUILD_TESTING=ON \
@@ -552,10 +552,11 @@ jobs:
     - name: Prepare test results artifact name
       if: failure()
       shell: bash
+      env:
+        MATRIX_NAME: ${{ matrix.name }}
       run: |
-        # upload-artifact rejects: " : < > | * ? CR LF \ /
-        raw='${{ matrix.name }}'
-        safe=$(printf '%s' "$raw" | tr -d '\015\012' | tr ':"<>|*?/' '-' | tr '\\' '-' | tr '"' '-' | tr -s '-')
+        # upload-artifact rejects quotes, colon, and path separators
+        safe=$(python3 -c 'import os,re; print(re.sub(r"-+","-", re.sub(r"[^A-Za-z0-9._]+","-", os.environ["MATRIX_NAME"].replace("\r","").replace("\n",""))))')
         echo "TEST_RESULTS_ARTIFACT_NAME=test-results-${safe}" >> "$GITHUB_ENV"
 
     - name: Upload test results
@@ -636,9 +637,9 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         # Set up linker flags for Homebrew LLVM libc++
-        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> $GITHUB_ENV
-        echo "/opt/homebrew/opt/llvm/bin" >> $GITHUB_PATH
+        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> "$GITHUB_ENV"
+        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> "$GITHUB_ENV"
+        echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
 
     # ===== Python Setup =====
     - name: Setup Python
@@ -796,14 +797,14 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install ninja cmake llvm tbb cppcheck sccache
-        echo "/opt/homebrew/opt/llvm/bin" >> $GITHUB_PATH
+        echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
 
     - name: Setup macOS linker environment (Sanitizer tests)
       if: matrix.os == 'macos-latest'
       run: |
         # Set up linker flags for Homebrew LLVM libc++
-        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> $GITHUB_ENV
+        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> "$GITHUB_ENV"
+        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> "$GITHUB_ENV"
 
     # ===== Python Setup =====
     - name: Setup Python
@@ -853,19 +854,19 @@ jobs:
         # Set up sanitizer-specific environment variables
         case "${{ matrix.sanitizer }}" in
           "address")
-            echo "ASAN_OPTIONS=print_stacktrace=1:check_initialization_order=1:strict_init_order=1:suppressions=${{ github.workspace }}/Scripts/suppressions/asan_suppressions.txt" >> $GITHUB_ENV
+            echo "ASAN_OPTIONS=print_stacktrace=1:check_initialization_order=1:strict_init_order=1:suppressions=${{ github.workspace }}/Scripts/suppressions/asan_suppressions.txt" >> "$GITHUB_ENV"
             ;;
           "leak")
-            echo "LSAN_OPTIONS=print_suppressions=0:suppressions=${{ github.workspace }}/Scripts/suppressions/lsan_suppressions.txt" >> $GITHUB_ENV
+            echo "LSAN_OPTIONS=print_suppressions=0:suppressions=${{ github.workspace }}/Scripts/suppressions/lsan_suppressions.txt" >> "$GITHUB_ENV"
             ;;
           "thread")
-            echo "TSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/tsan_suppressions.txt" >> $GITHUB_ENV
+            echo "TSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/tsan_suppressions.txt" >> "$GITHUB_ENV"
             ;;
           "undefined")
-            echo "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/ubsan_suppressions.txt" >> $GITHUB_ENV
+            echo "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/ubsan_suppressions.txt" >> "$GITHUB_ENV"
             ;;
           "memory")
-            echo "MSAN_OPTIONS=print_stats=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/msan_suppressions.txt" >> $GITHUB_ENV
+            echo "MSAN_OPTIONS=print_stats=1:halt_on_error=1:suppressions=${{ github.workspace }}/Scripts/suppressions/msan_suppressions.txt" >> "$GITHUB_ENV"
             ;;
         esac
 
@@ -1435,7 +1436,7 @@ jobs:
     - name: Record build start time (Baseline)
       shell: bash
       run: |
-        echo "BUILD_START_TIME=$(date +%s)" >> $GITHUB_ENV
+        echo "BUILD_START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
     - name: Build (Baseline - No Sccache)
       run: cmake --build build --config ${{ matrix.build_type }} -j 2
@@ -1443,9 +1444,9 @@ jobs:
     - name: Record build end time (Baseline)
       shell: bash
       run: |
-        echo "BUILD_END_TIME=$(date +%s)" >> $GITHUB_ENV
+        echo "BUILD_END_TIME=$(date +%s)" >> "$GITHUB_ENV"
         BUILD_DURATION=$((BUILD_END_TIME - BUILD_START_TIME))
-        echo "BUILD_DURATION_BASELINE=$BUILD_DURATION" >> $GITHUB_ENV
+        echo "BUILD_DURATION_BASELINE=$BUILD_DURATION" >> "$GITHUB_ENV"
 
     - name: Run Tests (Baseline)
       working-directory: ${{ github.workspace }}/build
@@ -1557,7 +1558,7 @@ jobs:
         curl -L https://github.com/mozilla/sccache/releases/download/v${{ env.SCCACHE_VERSION }}/sccache-v${{ env.SCCACHE_VERSION }}-x86_64-unknown-linux-musl.tar.gz \
           | tar xz -C ~/.local/bin --strip-components=1
         chmod +x ~/.local/bin/sccache
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         sccache --version
 
     - name: Install sccache (macOS)
@@ -1568,7 +1569,7 @@ jobs:
         curl -L https://github.com/mozilla/sccache/releases/download/v${{ env.SCCACHE_VERSION }}/sccache-v${{ env.SCCACHE_VERSION }}-x86_64-apple-darwin.tar.gz \
           | tar xz -C ~/.local/bin --strip-components=1
         chmod +x ~/.local/bin/sccache
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         sccache --version
 
     # ===== CMake Configuration (With Sccache) =====
@@ -1612,7 +1613,7 @@ jobs:
     - name: Record build start time (Sccache)
       shell: bash
       run: |
-        echo "BUILD_START_TIME=$(date +%s)" >> $GITHUB_ENV
+        echo "BUILD_START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
     - name: Build (With Sccache)
       run: cmake --build build --config ${{ matrix.build_type }} -j 2
@@ -1620,9 +1621,9 @@ jobs:
     - name: Record build end time (Sccache)
       shell: bash
       run: |
-        echo "BUILD_END_TIME=$(date +%s)" >> $GITHUB_ENV
+        echo "BUILD_END_TIME=$(date +%s)" >> "$GITHUB_ENV"
         BUILD_DURATION=$((BUILD_END_TIME - BUILD_START_TIME))
-        echo "BUILD_DURATION_SCCACHE=$BUILD_DURATION" >> $GITHUB_ENV
+        echo "BUILD_DURATION_SCCACHE=$BUILD_DURATION" >> "$GITHUB_ENV"
 
     - name: Run Tests (With Sccache)
       working-directory: ${{ github.workspace }}/build
@@ -1694,7 +1695,7 @@ jobs:
     - name: Install coverage tool
       shell: bash
       run: |
-        pip install coverage-tool
+        pip install coverage-tool==2026.9.14
 
     - name: Run coverage build
       shell: bash
@@ -2188,9 +2189,9 @@ jobs:
     - name: Setup macOS linker environment
       if: runner.os == 'macOS'
       run: |
-        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> $GITHUB_ENV
-        echo "/opt/homebrew/opt/llvm/bin" >> $GITHUB_PATH
+        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> "$GITHUB_ENV"
+        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> "$GITHUB_ENV"
+        echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
 
     - name: Start sccache
       if: runner.os != 'Windows'
@@ -2207,9 +2208,11 @@ jobs:
       run: |
         # TBB is tested separately on Windows (see build-matrix); this job's
         # Windows install step doesn't provision it.
-        tbb_flags="-DPARALLEL_BACKEND=tbb -DMEMORY_ENABLE_TBB=ON"
+        tbb_backend=tbb
+        tbb_on=ON
         if [ "${{ runner.os }}" = "Windows" ]; then
-          tbb_flags="-DPARALLEL_BACKEND=std -DMEMORY_ENABLE_TBB=OFF"
+          tbb_backend=std
+          tbb_on=OFF
         fi
         cmake -B build \
           -C .github/cmake/configure_cache.cmake \
@@ -2224,7 +2227,8 @@ jobs:
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=${{ runner.os == 'Windows' && matrix.backend == 'cuda' && 'ON' || 'OFF' }} \
-          $tbb_flags \
+          -DPARALLEL_BACKEND="${tbb_backend}" \
+          -DMEMORY_ENABLE_TBB="${tbb_on}" \
           ${{ matrix.extra_cmake }}
 
     - name: Restart sccache after configure
@@ -2463,9 +2467,9 @@ jobs:
     - name: Setup macOS linker environment
       if: runner.os == 'macOS'
       run: |
-        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> $GITHUB_ENV
-        echo "/opt/homebrew/opt/llvm/bin" >> $GITHUB_PATH
+        echo "LDFLAGS=-L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib" >> "$GITHUB_ENV"
+        echo "CPPFLAGS=-I/opt/homebrew/opt/llvm/include" >> "$GITHUB_ENV"
+        echo "/opt/homebrew/opt/llvm/bin" >> "$GITHUB_PATH"
 
     - name: Configure
       shell: bash
