@@ -22,10 +22,12 @@ never import one library's macro/namespace prefix into another library.
 ## Hard rules
 
 - **Never modify anything under `ThirdParty/`.** These are vendored git
-  submodules (fmt, googletest, mimalloc, benchmark, sleef, kineto, dynolog,
-  etc.) and must stay pristine — no source edits, no patches applied in
-  place, under any condition, even to fix a build error that traces back to
-  vendored code.
+  submodules (fmt, googletest, mimalloc, benchmark, sleef, Logging, Parallel,
+  Profiler, and Logging/Profiler nested backends) and must stay pristine —
+  no source edits, no patches applied in place, under any condition, even to
+  fix a build error that traces back to vendored code. Host XSigma does not
+  vendor loguru, glog, spdlog, magic_enum, kineto, or ittapi as its own
+  submodules; those live under Logging and Profiler.
   - If a build/compile issue is caused by code inside `ThirdParty/`, fix it
     from our own side instead: an ADL shim / compat header in the consuming
     library (see `Library/Vectorization/Testing/Cxx/cuda_fmt_int128_fix.h`

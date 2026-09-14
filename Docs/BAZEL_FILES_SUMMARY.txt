@@ -48,10 +48,11 @@ Key Features Implemented:
    - OpenMP/TBB parallel computing
    - Intel MKL
    - mimalloc allocator
-   - magic_enum
-   - Kineto/Native/ITT profiling
-   - Logging backends (glog, loguru, native)
+   - Logging backend (`--config=logging_{loguru,glog,spdlog,native}`)
    - GPU allocation strategies
+
+   magic_enum, Kineto, and ITT are not XSigma host packages: magic_enum is
+   nested under Logging; Kineto/ITT are nested under Profiler.
 
 3. Platform Support:
    - macOS (with Framework linking)

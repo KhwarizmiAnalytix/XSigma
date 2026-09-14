@@ -120,6 +120,12 @@ configurations and known limitations.
 | `ThirdParty/Parallel` | [KhwarizmiAnalytix/Parallel](https://github.com/KhwarizmiAnalytix/Parallel) third-party submodule. CMake `Parallel::Parallel`, Bazel `@parallel//:Parallel`. |
 | `ThirdParty/Profiler` | [KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler) third-party submodule. CMake `Profiler::Profiler`, Bazel `@profiler//:Profiler`. |
 
+Host git submodules are fmt, cpuinfo, googletest, mimalloc, benchmark, sleef,
+Logging, Parallel, and Profiler. loguru / glog / spdlog / magic_enum live under
+`ThirdParty/Logging/ThirdParty/`; kineto / ittapi live under
+`ThirdParty/Profiler/third_party/`. See
+[third-party dependencies](Docs/readme/third-party-dependencies.md).
+
 ## Documentation
 
 - [Documentation index](Docs/README.md)

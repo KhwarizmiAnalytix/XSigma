@@ -9,6 +9,40 @@ git submodule sync --recursive
 git submodule update --init --recursive
 ```
 
+`--recursive` is required so Logging and Profiler can initialize their *private*
+nested backends. Those nested trees are not XSigma host packages.
+
+## Host submodules (`ThirdParty/` on XSigma)
+
+These are the only third-party checkouts registered in XSigma's `.gitmodules`.
+There is no host `ThirdParty/loguru`, `spdlog`, `glog`, `magic_enum`, `kineto`,
+or `ittapi`.
+
+| Path | Role |
+|---|---|
+| `ThirdParty/fmt` | Formatting (shared with Logging / Profiler) |
+| `ThirdParty/cpuinfo` | CPU feature detection |
+| `ThirdParty/googletest` | Unit tests |
+| `ThirdParty/mimalloc` | Optional Memory allocator |
+| `ThirdParty/benchmark` | Microbenchmarks |
+| `ThirdParty/sleef` | Optional SIMD math |
+| `ThirdParty/Logging` | Logging product ([KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging)) |
+| `ThirdParty/Parallel` | Parallel product ([KhwarizmiAnalytix/Parallel](https://github.com/KhwarizmiAnalytix/Parallel)) |
+| `ThirdParty/Profiler` | Profiler product ([KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler)) |
+
+`ThirdParty/svml` is vendored binaries, not a git submodule. TBB is fetched by
+the build (CMake/Bazel), not stored as an XSigma submodule.
+
+## Nested backends (not XSigma packages)
+
+| Lives under | Private copies |
+|---|---|
+| `ThirdParty/Logging/ThirdParty/` | loguru, glog, spdlog, magic_enum (and a fmt copy unused when host fmt is present) |
+| `ThirdParty/Profiler/third_party/` | kineto, ittapi |
+
+`LOGGING_BACKEND=LOGURU|GLOG|SPDLOG|NATIVE` still selects Logging's backend;
+it does not add a host submodule.
+
 ## Dependency selection
 
 Dependency policy is owned by the consuming library, not by a generic
