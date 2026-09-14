@@ -75,11 +75,7 @@ default; use `none`, `ccache`, `sccache`, or `buildcache` to choose a backend.
 
 ```bash
 python Scripts/setup.py config.build.test.ninja.clang.release
-python Scripts/setup.py config.build.test.ninja.clang.release --logging=GLOG
 ```
-
-LOGURU is the default logging backend. Profiler instrumentation (Kineto/ITT) is
-owned by `ThirdParty/Profiler` — XSigma setup does not expose `--profiler.*`.
 
 ## GPU Vectorization
 
@@ -103,7 +99,6 @@ Metal requires an Apple platform.
 ```bash
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DLOGGING_BACKEND=LOGURU \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none

@@ -11,7 +11,7 @@
 #include <mutex>
 #include <vector>
 
-#include <util/exception.h>
+#include <logging/util/exception.h>
 
 #include "common/macros.h"
 #include "util/flat_hash.h"

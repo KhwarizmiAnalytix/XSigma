@@ -80,8 +80,8 @@ provides a thread-local ambient current stream per device (PyTorch
 `CUDAStreamGuard` shape), and `tensor::assign_async` / `copy_from_host(..., stream)`
 give explicit async entry points that thread through to `record_stream`.
 
-**Profiler** routes CUDA GPU activity through the vendored Kineto fork
-(CUPTI on CUDA, roctracer on HIP), wired in `ThirdParty/Profiler/CMakeLists.txt`.
+**Profiler** records GPU activity through `profiler::session` and native GPU
+probes compiled from Profiler product sources.
 
 ### 2.2 Test status (verified 2026-09-07)
 
@@ -279,9 +279,9 @@ and none of the benefit is realized.
 
 ### Lower priority
 
-12. **No native CUPTI path in the Profiler.** `run_gpu_kernel_probe` returns
-    false on CUDA (real kernel only under `PROFILER_HAS_METAL`); GPU activity
-    depends entirely on the vendored Kineto fork.
+12. **Native GPU kernel timestamps are Metal-first.** `run_gpu_kernel_probe`
+    is implemented for Metal; CUDA/HIP probes depend on the Profiler product's
+    native GPU path.
 13. **No multi-GPU collectives** — no NCCL/RCCL. Peer-to-peer `cudaMemcpyPeer`
     in `allocator.h` is the whole story.
 14. **HIP `all` architecture list includes `gfx803`**, dropped in ROCm 6

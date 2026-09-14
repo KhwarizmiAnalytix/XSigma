@@ -12,9 +12,6 @@
 # fmt library - suppress formatting-related leaks
 leak:*fmt*
 
-# loguru library - suppress logging-related leaks (common in logging libraries)
-leak:*loguru*
-
 # Google Test - suppress test framework leaks
 leak:*gtest*
 leak:*testing*
@@ -88,7 +85,3 @@ leak:*allocator*registry*
 # Suppress leaks in thread pool infrastructure (threads may not be cleanly shut down)
 leak:*thread_pool*
 leak:*ThreadPool*
-
-# Suppress leaks in logging infrastructure (often acceptable)
-leak:loguru::set_thread_name
-leak:loguru::init

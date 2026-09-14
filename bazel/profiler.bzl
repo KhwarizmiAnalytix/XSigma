@@ -9,28 +9,19 @@ def profiler_copts():
 def profiler_defines():
     """Returns compile definitions for the ThirdParty Profiler package.
 
-    Mirrors ThirdParty/Profiler/CMakeLists.txt: PROFILER_HAS_* flags.
-    Project-wide PROJECT_HAS_* flags are included via xsigma_defines().
+    Native product pipeline only. Project-wide PROJECT_HAS_* flags come from
+    xsigma_defines(). Product sources require the HAS_* macros below.
     """
     defines = xsigma_defines()
 
-    # Instrumentation backend is owned by ThirdParty/Profiler (CMake
-    # PROFILER_BACKEND). XSigma always builds Profiler's default Kineto path;
-    # do not expose enable_itt / enable_kineto flags here.
     defines += [
-        "PROFILER_HAS_KINETO=1",
+        "PROFILER_HAS_KINETO=0",
         "PROFILER_HAS_ITT=0",
     ]
 
-    # Native pipeline (traceme/xplane/host_tracer/profiler_session) is always compiled
-    # alongside the instrumentation backend — no HAS_* gate.
-
-    # PROFILER_HAS_CUDA / PROFILER_HAS_HIP — independent of backend selection
-    # above, and of each other's build (MEMORY_GPU_BACKEND only ever selects
-    # one GPU vendor). Both gate bespoke/base/cuda.cpp's event-fallback stub
-    # (generalized to also serve HIP via bespoke/base/gpu_runtime.h) and
-    # profiler_kineto.h's hasGPU(). Mirrors CMakeLists.txt's
-    # find_package(CUDAToolkit) / find_package(hip) gates.
+    # PROFILER_HAS_CUDA / PROFILER_HAS_HIP — independent of each other's build
+    # (MEMORY_GPU_BACKEND only ever selects one GPU vendor). Mirrors
+    # CMakeLists.txt's find_package(CUDAToolkit) / find_package(hip) gates.
     defines += select({
         # Match CMake: prefer the NVTX C API (nvToolsExt.h / CUDA::nvToolsExt).
         # CUDA 12's cuda-nvtx package often has no nvtx3.hpp, so forcing

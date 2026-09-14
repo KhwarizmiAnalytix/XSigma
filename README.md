@@ -61,7 +61,7 @@ ctest --test-dir build --output-on-failure
 ```
 
 Library options are intentionally module-scoped. For example, use
-`-DLOGGING_BACKEND=GLOG`, `-DMEMORY_GPU_BACKEND=cuda`, or
+`-DMEMORY_GPU_BACKEND=cuda`, or
 `-DVECTORIZATION_CPU_BACKEND=avx2`; do not rely on removed global
 `PROJECT_ENABLE_*` switches. See [Docs/PROJECT_FLAGS.md](Docs/PROJECT_FLAGS.md)
 for the authoritative option reference.
@@ -81,9 +81,9 @@ python Scripts/setup_bazel.py build.test.release.avx2
 bazel test --config=release //Library/Core/Testing/Cxx:CoreCxxTests
 ```
 
-Bazel defaults to the LOGURU logging backend and the Kineto instrumentation
-backend. The native TraceMe/XPlane profiler pipeline is compiled independently
-of that choice. GPU configuration flags exist in Bazel, but CMake remains the
+Bazel and CMake both consume Logging and Profiler as product libraries
+(`Logging::Logging` / `@logging//:Logging`, `Profiler::Profiler` /
+`@profiler//:Profiler`). GPU configuration flags exist in Bazel, but CMake remains the
 recommended path for CUDA/HIP device-language development and tests.
 
 See [Docs/BAZEL_USER_GUIDE.md](Docs/BAZEL_USER_GUIDE.md) for supported
@@ -98,9 +98,8 @@ configurations and known limitations.
 - A Release CMake configuration selects per-module `*_LTO_MODE=auto`; Debug,
   coverage, and sanitizer configurations do not apply LTO. The `lto` token
   explicitly requests `auto` mode.
-- The default CMake logging backend is `LOGURU`. Profiler instrumentation
-  (Kineto/ITT) is configured inside `ThirdParty/Profiler` — XSigma does not
-  expose `PROFILER_BACKEND` or `--profiler.*` setup flags.
+- The hosted Logging and Profiler overlays compile product sources only.
+  XSigma does not expose Logging or Profiler nested-backend setup flags.
 - CPU SIMD defaults are host-dependent: AVX2 on recognised x86 hosts, NEON on
   AArch64, and `no` elsewhere. Choose a tier explicitly for portable binaries.
 - CUDA, HIP, and Metal are compile-time-exclusive GPU backends. When enabling
@@ -121,9 +120,7 @@ configurations and known limitations.
 | `ThirdParty/Profiler` | [KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler) third-party submodule. CMake `Profiler::Profiler`, Bazel `@profiler//:Profiler`. |
 
 Host git submodules are fmt, cpuinfo, googletest, mimalloc, benchmark, sleef,
-Logging, Parallel, and Profiler. loguru / glog / spdlog / magic_enum live under
-`ThirdParty/Logging/ThirdParty/`; kineto / ittapi live under
-`ThirdParty/Profiler/third_party/`. See
+Logging, Parallel, and Profiler. See
 [third-party dependencies](Docs/readme/third-party-dependencies.md).
 
 ## Documentation

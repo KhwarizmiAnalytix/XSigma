@@ -224,26 +224,6 @@ def _merge_dotted_segments(parts: list[str]) -> list[str]:
             out.append(_CMAKE_SAN_TO_BAZEL[pl[i + 1]])
             i += 2
         elif (
-            pl[i] == "profiler"
-            and i + 1 < len(pl)
-            and pl[i + 1] in ("kineto", "itt", "native")
-        ):
-            # Swallow legacy tokens; backend is owned by ThirdParty/Profiler.
-            i += 2
-        elif (
-            pl[i] == "logging"
-            and i + 1 < len(pl)
-            and pl[i + 1]
-            in (
-                "native",
-                "loguru",
-                "glog",
-                "spdlog",
-            )
-        ):
-            out.append(f"logging_{pl[i + 1]}")
-            i += 2
-        elif (
             pl[i] == "lto"
             and i + 1 < len(pl)
             and pl[i + 1] in ("off", "thin", "full", "ipo", "auto")
@@ -304,9 +284,6 @@ class BazelConfiguration:
         self.verbose_tests = False
         # Timeout in seconds for build/test/coverage subprocesses (default: 10 min)
         self.subprocess_timeout: int = 600
-
-        # Default backends (matching CMake defaults)
-        self.logging_backend = "loguru"  # Default: LOGURU (matches CMake)
 
         # Compiler and build tool configuration
         self.compiler: Optional[str] = (
@@ -488,7 +465,7 @@ class BazelConfiguration:
                     )
                     sys.exit(1)
 
-            elif arg_lower in ["mimalloc", "magic_enum", "tbb", "mkl", "openmp"]:
+            elif arg_lower in ["mimalloc", "tbb", "mkl", "openmp"]:
                 self.configs.append(arg_lower)
 
             # NUMA / memkind (see .bazelrc build:numa / build:memkind)
@@ -609,18 +586,9 @@ class BazelConfiguration:
             elif arg_lower == "batch":
                 self.use_batch = True
 
-            # Logging backends (with logging_ prefix)
-            elif arg_lower.startswith("logging_"):
-                backend = arg_lower[8:]  # Remove "logging_" prefix
-                if backend in ["glog", "loguru", "native", "spdlog"]:
-                    self.logging_backend = backend
-                    self.configs.append(arg_lower)
-
-            # Profiler backends — owned by ThirdParty/Profiler; ignore legacy tokens
-            elif arg_lower.startswith("profiler_"):
+            elif arg_lower.startswith("logging_") or arg_lower.startswith("profiler_"):
                 print_status(
-                    f"Ignoring '{arg_lower}': Profiler instrumentation backend is "
-                    "configured inside ThirdParty/Profiler (not an XSigma Bazel flag).",
+                    f"Ignoring '{arg_lower}': not an XSigma Bazel flag.",
                     "WARNING",
                 )
 
@@ -736,10 +704,6 @@ class BazelConfiguration:
         # Google Benchmark: CMake defaults *ENABLE_BENCHMARK ON for all library modules.
         if "benchmark" not in cfg_list:
             cfg_list.append("benchmark")
-
-        # Add default logging backend if not explicitly set
-        if not any(c.startswith("logging_") for c in cfg_list):
-            cfg_list.append(f"logging_{self.logging_backend}")
 
         # Add all config flags
         for config in cfg_list:
@@ -935,7 +899,6 @@ class BazelConfiguration:
         self._pf("Svml", na, W)
         self._pf("Rocm", na, W)
         self._pf("Experimental", na, W)
-        self._pf("Magic enum", self._on_off(True), W)
         self._pf("Enzyme", self._on_off("enzyme" in self.configs), W)
         self._pf("Compression", na, W)
         self._pf("Cxx standard", cxx, W)
@@ -945,7 +908,6 @@ class BazelConfiguration:
         print(
             f"\n{COLOR_CYAN}******** Logging module (Bazel flags) ********{COLOR_RESET}"
         )
-        self._pf("Backend", self.logging_backend.upper(), W)
         self._pf("Cxx standard", cxx, W)
         common()
 
@@ -1032,7 +994,6 @@ class BazelConfiguration:
         print(f"\n{COLOR_CYAN}Feature Flags:{COLOR_RESET}")
         flags: list[tuple[str, bool | str]] = [
             ("MEMORY_ENABLE_MIMALLOC", mimalloc_on),
-            ("LOGGING_HAS_MAGICENUM", True),
             ("PARALLEL/MEMORY_HAS_TBB", "tbb" in self.configs),
             ("PARALLEL_HAS_OPENMP", "openmp" in self.configs),
             ("MEMORY_HAS_CUDA", "cuda" in self.configs),
@@ -1056,10 +1017,6 @@ class BazelConfiguration:
                 print(f"  {flag:30} {state}")
             else:
                 print(f"  {flag:30} {self._on_off(state)}")
-
-        # Logging backend
-        print(f"\n{COLOR_CYAN}Logging Backend:{COLOR_RESET}")
-        print(f"  Backend:           {self.logging_backend.upper()}")
 
         # Sanitizers
         sanitizers = [c for c in self.configs if c in ["asan", "tsan", "ubsan", "msan"]]
@@ -1599,7 +1556,7 @@ def parse_args(args: list[str]) -> list[str]:
     """Parse argv like Scripts/setup.py: long flags, dotted shortcuts, compiler paths.
 
     Supports the same long-option spellings as setup.py where applicable:
-      --sanitizer.address, --logging.LOGURU, --parallel.tbb
+      --sanitizer.address, --parallel.tbb
     """
     processed: list[str] = []
 
@@ -1645,36 +1602,9 @@ def parse_args(args: list[str]) -> list[str]:
                 sys.exit(1)
             continue
 
-        if arg.startswith("--logging="):
-            bt = arg.split("=", 1)[1].lower()
-            if bt in ("native", "loguru", "glog", "spdlog"):
-                processed.append(f"logging_{bt}")
-                print_status(f"Logging backend set to {bt.upper()}", "INFO")
-            else:
-                print_status(
-                    f"Invalid logging backend: {bt}. Valid: native, loguru, glog, spdlog",
-                    "ERROR",
-                )
-                sys.exit(1)
-            continue
-
-        if arg.startswith("--logging."):
-            bt = arg.split(".", 1)[1].lower()
-            if bt in ("native", "loguru", "glog", "spdlog"):
-                processed.append(f"logging_{bt}")
-                print_status(f"Logging backend set to {bt.upper()}", "INFO")
-            else:
-                print_status(
-                    f"Invalid logging backend: {bt}. Valid: native, loguru, glog, spdlog",
-                    "ERROR",
-                )
-                sys.exit(1)
-            continue
-
-        if arg.startswith("--profiler."):
+        if arg.startswith("--logging=") or arg.startswith("--logging.") or arg.startswith("--profiler."):
             print_status(
-                f"Ignoring '{arg}': Profiler instrumentation backend is configured "
-                "inside ThirdParty/Profiler (not an XSigma Bazel flag).",
+                f"Ignoring '{arg}': not an XSigma Bazel flag.",
                 "WARNING",
             )
             continue
@@ -1752,7 +1682,7 @@ def print_help() -> None:
     print("  5. Release build with optimizations:")
     print("     python setup_bazel.py build.test.release.lto.avx2")
     print("  6. Build with optional features:")
-    print("     python setup_bazel.py build.release.avx2.mimalloc.magic_enum")
+    print("     python setup_bazel.py build.release.avx2.mimalloc")
     print("  7. Run tests only:")
     print("     python setup_bazel.py test")
     print("  8. Clean build:")
@@ -1796,7 +1726,6 @@ def print_help() -> None:
     print("  --lto.auto    - Auto-select mode (same as bare 'lto')")
     print("  --lto.off     - Explicitly disable LTO")
     print("  mimalloc      - Microsoft mimalloc allocator")
-    print("  magic_enum    - magic_enum in Logging")
     print("  tbb           - Intel TBB")
     print("  openmp        - OpenMP support")
     print("  enzyme        - Enzyme AD defines (see .bazelrc build:enzyme)")
@@ -1811,7 +1740,7 @@ def print_help() -> None:
     print(
         "  project.NAME | --project.NAME  — only //Library/<Name>/... (logging, memory, …)"
     )
-    print("  --parallel.* / --logging.*  — same long flags as setup.py")
+    print("  --parallel.*  — same long flags as setup.py")
     print("  vv            - Verbose Bazel test output (--test_output=all)")
     print(
         "  batch         - Pass --batch to Bazel; script runs `bazel shutdown` first to avoid"
@@ -1825,11 +1754,6 @@ def print_help() -> None:
     print(
         "  clangtidy     - (CMake only) Clang-tidy — ignored in Bazel, warning emitted"
     )
-    print("\nLogging backends:")
-    print("  glog          - Google glog")
-    print("  loguru        - Loguru logging")
-    print("  native        - Native logging")
-    print("  spdlog        - spdlog (header-only, external fmt)")
     print(
         "\nSanitizers (Bazel --config; CMake names accepted via dotted args or --sanitizer.*):"
     )

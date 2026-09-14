@@ -456,14 +456,14 @@ python setup.py config.build.ninja.clang.iwyu
 // ❌ Incorrect
 #include "Core/xxx/yyy/a.h"
 #include "fmt/format.h"
-#include "logger/logger.h"
+#include "logging/logging.h"
 
 // ✅ Correct
 #include "xxx/yyy/a.h"
 #include <fmt/format.h>
-#include <logger/logger.h>
-#include <native/session/profiler.h>
-#include <tools/threaded_callback_queue.h>
+#include <logging/logging.h>
+#include <profiler.h>
+#include <parallel.h>
 ```
 
 ### DLL Export Macros

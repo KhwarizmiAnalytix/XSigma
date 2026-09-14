@@ -70,7 +70,7 @@ include(CTest)
 
 # Our Library/*/Testing suites call add_test() regardless of BUILD_TESTING.
 # Keep CTest enabled, then turn BUILD_TESTING off so vendored ThirdParty/
-# CMakeLists (fmt, kineto, cpuinfo, mimalloc, googletest, …) do not
+# CMakeLists (fmt, cpuinfo, mimalloc, googletest, …) do not
 # register or build their own tests. Do not edit anything under ThirdParty/.
 enable_testing()
 set(BUILD_TESTING OFF CACHE BOOL "Disable testing for third-party libraries" FORCE)
@@ -88,7 +88,6 @@ set(CPUINFO_BUILD_UNIT_TESTS OFF CACHE BOOL "Disable cpuinfo unit tests" FORCE)
 set(CPUINFO_BUILD_MOCK_TESTS OFF CACHE BOOL "Disable cpuinfo mock tests" FORCE)
 set(CPUINFO_BUILD_BENCHMARKS OFF CACHE BOOL "Disable cpuinfo benchmarks" FORCE)
 set(MI_BUILD_TESTS OFF CACHE BOOL "Disable mimalloc tests" FORCE)
-set(KINETO_BUILD_TESTS OFF CACHE BOOL "Disable Kineto tests" FORCE)
 set(SLEEF_BUILD_TESTS OFF CACHE BOOL "Disable SLEEF tests" FORCE)
 
 # Always use bundled googletest — external shared gtest (e.g. from conda) causes rpath failures at

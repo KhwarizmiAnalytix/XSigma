@@ -2,8 +2,8 @@
 
 This reference describes the public CMake cache variables in the current
 source tree. XSigma intentionally keeps most configuration at library scope:
-replace `<MODULE>` below with `CORE`, `LOGGING`, `MEMORY`, `PARALLEL`,
-`PROFILER`, `VECTORIZATION`, `MODELS`, or `GRAPH` where that module provides
+replace `<MODULE>` below with `CORE`, `MEMORY`,
+`VECTORIZATION`, `MODELS`, or `GRAPH` where that module provides
 the option.
 
 `Scripts/setup.py` is the preferred interface when configuring the whole
@@ -16,7 +16,7 @@ project because it fans supported choices out to the loaded modules. See
 |---|---:|---|
 | `BUILD_SHARED_LIBS` | `ON` | Build shared libraries. The `static` helper token toggles this to `OFF`. |
 | `XSIGMA_ENABLE_EXTERNAL` | `ON` | Prefer discoverable external third-party packages when supported. |
-| `XSIGMA_LIBRARY_PROJECT` | empty | Build one library module and the dependencies selected by the root CMake file. Valid names: `Logging`, `Memory`, `Vectorization`, `Core`, `Parallel`, `Models`, `Graph`. |
+| `XSIGMA_LIBRARY_PROJECT` | empty | Build one library module and the dependencies selected by the root CMake file. Valid names: `Memory`, `Vectorization`, `Core`, `Models`, `Graph`. |
 
 CTest is always enabled by the root configuration. XSigma disables tests and
 examples owned by third-party projects, while library test subtrees are
@@ -60,7 +60,6 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 
 | Variable | Default | Supported values |
 |---|---|---|
-| `LOGGING_BACKEND` | `LOGURU` | `NATIVE`, `LOGURU`, `GLOG`, `SPDLOG`. Consumed by the third-party `ThirdParty/Logging` build. |
 | `MEMORY_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Metal requires Apple platforms. HIP is not supported on Windows in this project. |
 | `VECTORIZATION_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Keep it equal to `MEMORY_GPU_BACKEND` for GPU Vectorization. |
 | `VECTORIZATION_CPU_BACKEND` | host-dependent | `no`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve`. Defaults to AVX2 on recognised x86, NEON on AArch64, otherwise `no`. |
@@ -70,18 +69,15 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 > Logging, Parallel, and Profiler are pure third-party dependencies
 > (`ThirdParty/Logging`, `ThirdParty/Parallel`, `ThirdParty/Profiler`
 > submodules). XSigma per-module fan-out flags do not reach them: the only
-> selectors that cross the boundary are `LOGGING_BACKEND`, `PARALLEL_BACKEND`,
-> and the global `BUILD_SHARED_LIBS` / `BUILD_TESTING` /
-> `XSIGMA_ENABLE_EXTERNAL`. Flags such as `LOGGING_ENABLE_SANITIZER`,
-> `PARALLEL_ENABLE_TBB`, or `LOGGING_ENABLE_BENCHMARK` are no longer consumed
-> by the XSigma build (TBB selection is `PARALLEL_BACKEND=tbb`, which also
-> turns on `PARALLEL_ENABLE_TBB` inside the Parallel subproject).
+> selectors that cross the boundary are `PARALLEL_BACKEND` and the global
+> `BUILD_SHARED_LIBS` / `BUILD_TESTING` / `XSIGMA_ENABLE_EXTERNAL`.
+> `PARALLEL_BACKEND=tbb` also turns on OpenMP/TBB wiring inside the Parallel
+> subproject.
 
 ## Optional feature selectors
 
 | Variable | Default | Description |
 |---|---:|---|
-| `LOGGING_ENABLE_MAGICENUM` | `ON` | Enable `magic_enum` inside Logging. |
 | `MEMORY_ENABLE_MIMALLOC` | `ON` | Use mimalloc for the Memory CPU allocator. |
 | `MEMORY_ENABLE_MIMALLOC_STATS` | `OFF` | Build mimalloc statistics support. |
 | `MEMORY_ENABLE_TBB` | `OFF` | Use the TBB memory allocator. This is separate from the Parallel TBB backend. |
@@ -101,7 +97,6 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 # A complete Release configuration using explicit selectors.
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DLOGGING_BACKEND=SPDLOG \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none

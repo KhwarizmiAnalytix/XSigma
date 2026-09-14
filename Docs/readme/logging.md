@@ -2,15 +2,17 @@
 
 ## Overview
 
-Logging is a compile-time pluggable logging facade, consumed as a pure
-third-party dependency: the `ThirdParty/Logging` submodule from
+Logging is consumed as a pure third-party dependency: the `ThirdParty/Logging`
+submodule from
 [KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging)
 (CMake target `Logging::Logging`, Bazel `@logging//:Logging`). The public
-C++ namespace is `logging`. Include paths are relative to the Logging repo
-root (`logger/logger.h`, `util/exception.h`).
+C++ namespace is `logging`. Include:
 
-Select a backend at configure time with `setup.py --logging=SPDLOG|LOGURU|GLOG|NATIVE`
-(default **LOGURU**). Application source does not change when you switch backends.
+```cpp
+#include <logging/logging.h>
+#include <logging/logger/logger.h>
+#include <logging/util/exception.h>
+```
 
 Memory, Vectorization, and Core **always** link `Logging::Logging`. There is
 no `MEMORY_HAS_LOGGING` / `VECTORIZATION_HAS_LOGGING` opt-out: Memory calls
@@ -19,69 +21,8 @@ no `MEMORY_HAS_LOGGING` / `VECTORIZATION_HAS_LOGGING` opt-out: Memory calls
 
 The library is **host/CPU only**. Do not call these macros from `__device__` code.
 
-## Backends
-
-| Backend | When to use | Notes |
-|---------|-------------|--------|
-| **LOGURU** (default) | Development and full-featured diagnostics | Scopes, callbacks, files, optional signal traces |
-| **SPDLOG** | Fast sinks, colored stderr, file + callback | Best throughput in the comparison below. No process signal handlers |
-| **GLOG** | Google-style severity logging | Callbacks are not supported; signal handlers honor `enable_unsafe_signal_handler` |
-| **NATIVE** | Minimal dependency (fmt only) | stderr + files + callbacks; `LOGGING_LOG_FATAL` still aborts |
-
-```bash
-cd Scripts
-python3 setup.py config.build.ninja.clang                  # LOGURU (default)
-python3 setup.py config.build.ninja.clang --logging=SPDLOG
-python3 setup.py config.build.ninja.clang --logging=GLOG
-python3 setup.py config.build.ninja.clang --logging=NATIVE
-```
-
-## Performance comparison
-
-Backends are exclusive at compile time, so the comparison is four Release
-binaries of the same `benchmark_logging_logger` target. Logging's tests and
-benchmarks build in the standalone repo, not in XSigma — source:
-`Testing/Cxx/BenchmarkLogger.cpp` in
-[KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging).
-
-```bash
-git clone https://github.com/KhwarizmiAnalytix/Logging.git
-cd Logging && cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target benchmark_logging_logger
-# binary: build/bin/benchmark_logging_logger
-# then reconfigure with -DLOGGING_BACKEND=SPDLOG|GLOG|NATIVE (separate build dirs)
-```
-
-Run the binary **without** `--benchmark_min_time=0.01s` (that filter is only
-for ctest). Suggested: `--benchmark_min_time=0.5s`.
-
-### What is measured
-
-| Benchmark | Meaning |
-|-----------|---------|
-| `DisabledInfo` | `VERBOSITY_OFF` + `LOGGING_LOG_INFO` — cost of the cutoff check (no emit) |
-| `FileLiteral` | Enabled `INFO` to a temp file, literal string (stderr redirected to `/dev/null`) |
-| `FileFormatted` | Enabled `INFO` to a temp file, two format arguments |
-| `CallbackDiscard` | Enabled `INFO` to a no-op callback (not available on glog) |
-
-### Results
-
-Apple Silicon (14-core), Clang 22.1.2, Release, `--benchmark_min_time=0.5s`,
-26 Aug 2026. Values are **CPU ns / log** (lower is better). Re-run locally
-before treating this as a ranking on your hardware.
-
-| Benchmark | SPDLOG | NATIVE | GLOG | LOGURU |
-|-----------|--------|--------|------|--------|
-| DisabledInfo (1 thread) | 1.22 | 0.94 | 1.04 | 1.15 |
-| FileLiteral | **561** | 594 | 1006 | 2155 |
-| FileFormatted | **622** | 712 | 1069 | 2267 |
-| CallbackDiscard | **560** | 596 | n/a | 1017 |
-
-**SPDLOG** is fastest on every enabled path (file and callback), which is why
-it is the default. Disabled-path cost is ~1 ns for all backends because
-`LOGGING_LOG` checks `get_current_verbosity_cutoff()` before formatting.
-Glog has no callback sink; that row is skipped. Loguru pays extra for
-preamble/scopes on the emit path.
+XSigma compiles Logging product sources only. Work on Logging itself in the
+standalone Logging repository.
 
 ## Logging levels
 
@@ -97,7 +38,7 @@ the level is disabled.
 ### Programmatic
 
 ```cpp
-#include "logger/logger.h"
+#include <logging/logging.h>
 
 int main(int argc, char* argv[])
 {
@@ -123,8 +64,7 @@ There is no YAML config file and no `XSIGMA_LOG_*` environment variables.
 ## Usage
 
 ```cpp
-#include "logger/logger.h"
-#include "util/exception.h"
+#include <logging/logging.h>
 
 LOGGING_LOG_INFO("Application started");
 LOGGING_LOG_DEBUG(INFO, "debug only in non-NDEBUG builds");
@@ -161,6 +101,6 @@ does not log; the catcher decides whether to print `e.what()`.
 
 ## Related documentation
 
-- [KhwarizmiAnalytix/Logging README](https://github.com/KhwarizmiAnalytix/Logging#readme) — CMake/Bazel flags
-- [Setup Guide](setup.md) — configuring the backend during build
+- [KhwarizmiAnalytix/Logging README](https://github.com/KhwarizmiAnalytix/Logging#readme)
+- [Setup Guide](setup.md)
 - [PROJECT_DEPENDENCIES.md](../PROJECT_DEPENDENCIES.md) — who links Logging

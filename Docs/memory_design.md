@@ -248,8 +248,8 @@ deallocate. `empty_cache()` force-releases everything.
 
 When `MEMORY_HAS_PROFILER=1`, CUDA/HIP and Metal `allocate` / `deallocate`
 report the **known block size** (not a pool scan) after a predicted-false
-`memory_profiling_active()` check — Kineto `[memory]` events, same contract
-as `c10::reportMemoryUsageToProfiler`. OOM calls `report_out_of_memory`.
+`memory_profiling_active()` check — the same `report_memory_usage` contract
+as Memory's CPU reporter. OOM calls `report_out_of_memory`.
 
 Separately, `record_memory_history` / `snapshot` (and process-wide
 `gpu::record_memory_history` / `gpu::memory_snapshot`) port

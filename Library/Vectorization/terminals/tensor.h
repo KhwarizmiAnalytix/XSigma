@@ -37,14 +37,14 @@
 #include <utility>
 #include <vector>
 
+#if VECTORIZATION_HAS_PROFILER
+#include <profiler.h>
+#endif
+
 #include "backend/simd.h"
 #include "expressions/expressions.h"
 #include "sizes_and_strides.h"
 #include "stream_guard.h"
-
-#if VECTORIZATION_HAS_PROFILER
-#include "common/instrumentation.h"
-#endif
 
 namespace vectorization
 {

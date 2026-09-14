@@ -13,10 +13,6 @@
 # fmt library - suppress formatting-related races
 race:*fmt*
 
-# loguru library - suppress logging-related races (common in logging libraries)
-race:*loguru*
-mutex:*loguru*
-
 # Google Test - suppress test framework races
 race:*gtest*
 race:*testing*

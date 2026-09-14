@@ -141,9 +141,7 @@ if(NOT TARGET Memory::Memory)
 endif()
 
 # Profiler presence — detected from the CMake target; not a user option.
-# Lets kernel entry points call the always-safe PROFILER_RECORD_USER_SCOPE shim from
-# Profiler's common/instrumentation.h (Docs/profiler/profiler.md,
-# Instrumentation) without depending on Profiler's private instrumentation backend.
+# Lets kernel entry points call PROFILER_SCOPE from `<profiler.h>`.
 # Profiler is pure third-party (ThirdParty/CMakeLists.txt).
 xsigma_add_profiler()
 if(TARGET Profiler::Profiler)

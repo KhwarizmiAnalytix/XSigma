@@ -48,11 +48,7 @@ Key Features Implemented:
    - OpenMP/TBB parallel computing
    - Intel MKL
    - mimalloc allocator
-   - Logging backend (`--config=logging_{loguru,glog,spdlog,native}`)
    - GPU allocation strategies
-
-   magic_enum, Kineto, and ITT are not XSigma host packages: magic_enum is
-   nested under Logging; Kineto/ITT are nested under Profiler.
 
 3. Platform Support:
    - macOS (with Framework linking)
@@ -73,7 +69,6 @@ CMake Option                          →  Bazel Equivalent
 -DVECTORIZATION_CPU_BACKEND=avx2       →  --config=avx2
 -DPROJECT_ENABLE_LTO=ON               →  --config=lto
 -DMEMORY_ENABLE_MIMALLOC=ON          →  --config=mimalloc
--DLOGGING_ENABLE_MAGICENUM=ON         →  --config=magic_enum
 -DMEMORY_ENABLE_TBB=ON               →  --config=tbb
 -DMEMORY_GPU_BACKEND=cuda            →  --config=cuda
 -DENABLE_GTEST=ON             →  --config=gtest
@@ -90,7 +85,7 @@ bazel build //...
 bazel build --config=release --config=avx2 //...
 
 # With features
-bazel build --config=release --config=avx2 --config=mimalloc --config=magic_enum //...
+bazel build --config=release --config=avx2 --config=mimalloc //...
 
 # Specific library
 bazel build //Library/Core:Core

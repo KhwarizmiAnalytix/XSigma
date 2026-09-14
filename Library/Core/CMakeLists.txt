@@ -284,7 +284,7 @@ set(BUILD_TESTING OFF CACHE BOOL "Disable testing for third-party libraries" FOR
 set(BUILD_EXAMPLES OFF CACHE BOOL "Disable examples for third-party libraries" FORCE)
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Disable benchmarks for third-party libraries" FORCE)
 
-# fmt — modern formatting library; also consumed by Kineto (via FMT_SOURCE_DIR).
+# fmt — modern formatting library.
 set(FMT_TEST OFF CACHE BOOL "Disable fmt tests" FORCE)
 set(FMT_DOC OFF CACHE BOOL "Disable fmt documentation" FORCE)
 set(FMT_INSTALL OFF CACHE BOOL "Disable fmt install" FORCE)

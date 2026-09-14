@@ -5,8 +5,7 @@
 # This CMakeLists.txt configures and builds the XSigma Profiling example programs that
 # demonstrate the usage of profiling APIs.
 #
-# Examples included: - example_profiling_basic: Comprehensive profiling example with XSigma,
-# Kineto, and ITT
+# Examples included: - example_profiling_basic: profiler::session CPU example
 #
 # Build these examples with: python setup.py config.build.examples.ninja.clang python setup.py
 # config.build.examples.vs22

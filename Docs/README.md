@@ -27,7 +27,7 @@ when a new option is added.
   Metal evaluator contracts.
 - [GPU backend review](gpu_cuda_hip_review.md) - CUDA/HIP current state,
   measured performance, and ranked gaps.
-- [Profiler guide](profiler/profiler.md) - Native, Kineto, and ITT profiling.
+- [Logging guide](readme/logging.md) - Logging public API.
 - [Vectorization SIMD guide](readme/vectorization.md) - CPU backend selection.
 - [Project dependencies](PROJECT_DEPENDENCIES.md) - Library dependency graph.
 

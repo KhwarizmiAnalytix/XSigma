@@ -45,9 +45,6 @@ The helper adds these configurations unless a different one is selected:
 |---|---|
 | Build type | `debug` when no build-type token is supplied |
 | C++ standard | C++20 through platform and library settings |
-| Logging backend | `LOGURU` (`--config=logging_loguru`) |
-| Profiler instrumentation | Kineto (compiled from `@profiler`; not a host `--config`) |
-| Native profiler pipeline | Always compiled; not a selectable backend |
 | Parallel backend | `std` |
 | mimalloc | Enabled through root `.bazelrc` and `memory.bzl` |
 | GoogleTest and benchmark defines | Enabled by the helper's `gtest` and `benchmark` configs |
@@ -65,25 +62,21 @@ The `gtest` helper token is an inverse toggle: it emits
 | C++ standard | `cxx17`, `cxx20`, `cxx23` | C++ standard options and `.bazelrc` configs |
 | SIMD | `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve` | `vectorization_type` define |
 | LTO | `lto`, `--lto.thin`, `--lto.full`, `--lto.ipo` | `--config=lto` (ThinLTO flags) |
-| Logging | `--logging.spdlog`, `.glog`, `.loguru`, `.native` | `--config=logging_*` |
-| Profiler | `--profiler.kineto` / `--profiler.itt` (legacy, ignored) | Kineto is always built from `profiler.BUILD` |
 | Sanitizer | `asan`, `tsan`, `ubsan`, `msan`, `lsan`; `--sanitizer.address` etc. | Matching sanitizer `--config` |
 | Parallel | `--parallel.std`, `.openmp`, `.tbb` | `parallel_backend` define; OpenMP/TBB config as needed |
-| Memory and optional features | `mimalloc`, `magic_enum`, `numa`, `memkind`, `enzyme`, `sleef` | Matching `.bazelrc` config or define |
+| Memory and optional features | `mimalloc`, `numa`, `memkind`, `enzyme`, `sleef` | Matching `.bazelrc` config or define |
 | Library scope | `--project.core`, `.memory`, `.vectorization`, etc. | Limits top-level target patterns to `//Library/<Name>/...` |
 
 Examples:
 
 ```bash
 python Scripts/setup_bazel.py build.test.debug.asan
-python Scripts/setup_bazel.py build.test.release.avx2 --logging.glog
+python Scripts/setup_bazel.py build.test.release.avx2
 python Scripts/setup_bazel.py build.test.release --parallel.tbb
 python Scripts/setup_bazel.py build.test.release --project.vectorization
 ```
 
-Only one parallel backend should be selected. Profiler instrumentation is
-Kineto from `ThirdParty/Profiler`; XSigma no longer switches ITT via host
-`--config`.
+Only one parallel backend should be selected.
 
 ## Raw Bazel commands
 
@@ -97,9 +90,6 @@ bazel build --config=clang --config=release --config=cxx20 --config=avx2 //...
 bazel test --config=release --test_output=all \
   //Library/Vectorization/Testing/Cxx:VectorizationCxxTests
 
-# Alternative logging backend (Profiler stays on Kineto).
-bazel test --config=release --config=logging_glog //...
-
 # Sanitizer configurations.
 bazel test --config=debug --config=asan //...
 ```
@@ -107,8 +97,7 @@ bazel test --config=debug --config=asan //...
 Current named configurations include `debug`, `release`, `relwithdebinfo`,
 `cxx17`, `cxx20`, `cxx23`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve`,
 `lto`, `asan`, `tsan`, `ubsan`, `msan`, `lsan`, `openmp`, `tbb`, `numa`,
-`memkind`, `mimalloc`, `magic_enum`, `gtest`, `benchmark`,
-and `logging_{spdlog,glog,loguru,native}`.
+`memkind`, `mimalloc`, `gtest`, and `benchmark`.
 
 ## GPU status
 

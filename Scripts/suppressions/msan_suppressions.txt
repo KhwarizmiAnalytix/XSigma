@@ -13,9 +13,6 @@
 # fmt library - suppress formatting-related uninitialized memory issues
 use-of-uninitialized-value:*fmt*
 
-# loguru library - suppress logging-related uninitialized memory issues
-use-of-uninitialized-value:*loguru*
-
 # Google Test - suppress test framework uninitialized memory issues
 use-of-uninitialized-value:*gtest*
 use-of-uninitialized-value:*testing*

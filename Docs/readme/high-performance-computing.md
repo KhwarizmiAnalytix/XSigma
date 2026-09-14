@@ -78,17 +78,12 @@ LTO. Do not use a removed project-wide `PROJECT_ENABLE_LTO` variable.
 
 ## Profiling
 
-The native TraceMe/XPlane profiler pipeline is always included. Instrumentation
-backends (Kineto/ITT) are owned by `ThirdParty/Profiler` — a pure third-party
-dependency, so XSigma setup exposes no `--profiler.*` / `--project.profiler`
-flags; build the standalone Profiler repo to work on Profiler itself.
+XSigma links `Profiler::Profiler` and uses `profiler::session` /
+`PROFILER_SCOPE`. Work on Profiler itself in the standalone Profiler repository.
 
 ```bash
 python Scripts/setup.py config.build.test.ninja.clang.release --project.memory
 ```
-
-See [the profiler guide](../profiler/profiler.md) for API and trace-output
-details.
 
 ## Practical guidance
 

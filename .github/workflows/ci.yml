@@ -39,11 +39,10 @@ jobs:
         include:
           # ===== C++17 Baseline Testing (Primary) =====
           # Ubuntu C++17 - Debug and Release with TBB variants
-          - name: "Ubuntu C++17 Debug - LOGURU - TBB:ON"
+          - name: "Ubuntu C++17 Debug - TBB:ON"
             os: ubuntu-latest
             build_type: Debug
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -51,11 +50,10 @@ jobs:
             generator: Ninja
             cache_path: ~/.cache
 
-          - name: "Ubuntu C++17 Debug - NATIVE - TBB:OFF"
+          - name: "Ubuntu C++17 Debug - TBB:OFF"
             os: ubuntu-latest
             build_type: Debug
             cxx_std: 17
-            logging_backend: NATIVE
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -63,11 +61,10 @@ jobs:
             generator: Ninja
             cache_path: ~/.cache
 
-          - name: "Ubuntu C++17 Release - GLOG - TBB:ON"
+          - name: "Ubuntu C++17 Release - TBB:ON"
             os: ubuntu-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: GLOG
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -77,11 +74,10 @@ jobs:
 
           # Windows C++17 - Debug and Release (no TBB, CUDA where available)
           # Temporarily disabled - CUDA testing
-          # - name: "Windows C++17 Debug - LOGURU - CUDA:ON"
+          # - name: "Windows C++17 Debug - CUDA:ON"
           #   os: windows-latest
           #   build_type: Debug
           #   cxx_std: 17
-          #   logging_backend: LOGURU
           #   tbb_enabled: OFF
           #   cuda_enabled: ON
           #   compiler_c: clang
@@ -89,11 +85,10 @@ jobs:
           #   generator: Ninja
           #   cache_path: ~/AppData/Local/Temp/chocolatey
 
-          - name: "Windows C++17 Release - NATIVE - TBB:OFF"
+          - name: "Windows C++17 Release - TBB:OFF"
             os: windows-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: NATIVE
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -101,11 +96,10 @@ jobs:
             generator: Ninja
             cache_path: ~/AppData/Local/Temp/chocolatey
 
-          - name: "Windows C++17 Debug - LOGURU - TBB:ON"
+          - name: "Windows C++17 Debug - TBB:ON"
             os: windows-latest
             build_type: Debug
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -113,11 +107,10 @@ jobs:
             generator: Ninja
             cache_path: ~/AppData/Local/Temp/chocolatey
 
-          - name: "Windows C++20 Release - LOGURU - TBB:OFF"
+          - name: "Windows C++20 Release - TBB:OFF"
             os: windows-latest
             build_type: Release
             cxx_std: 20
-            logging_backend: LOGURU
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -129,7 +122,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: gcc
@@ -137,24 +129,11 @@ jobs:
             generator: Ninja
             cache_path: ~/.cache
 
-          - name: "Ubuntu C++17 Release - SPDLOG - TBB:ON"
-            os: ubuntu-latest
-            build_type: Release
-            cxx_std: 17
-            logging_backend: SPDLOG
-            tbb_enabled: ON
-            cuda_enabled: OFF
-            compiler_c: clang
-            compiler_cxx: clang
-            generator: Ninja
-            cache_path: ~/.cache
-
           # macOS C++17 - Debug and Release with TBB variants
-          - name: "macOS C++17 Debug - LOGURU - TBB:ON"
+          - name: "macOS C++17 Debug - TBB:ON"
             os: macos-latest
             build_type: Debug
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF  # CUDA not officially supported on Apple Silicon
             compiler_c: clang
@@ -162,11 +141,10 @@ jobs:
             generator: Ninja
             cache_path: ~/Library/Caches
 
-          - name: "macOS C++17 Release - GLOG - TBB:OFF"
+          - name: "macOS C++17 Release - TBB:OFF"
             os: macos-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: GLOG
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -179,7 +157,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 20
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -192,7 +169,6 @@ jobs:
           #   os: ubuntu-latest
           #   build_type: Release
           #   cxx_std: 20
-          #   logging_backend: NATIVE
           #   tbb_enabled: OFF
           #   cuda_enabled: ON
           #   compiler_c: clang
@@ -205,7 +181,6 @@ jobs:
           #   os: windows-latest
           #   build_type: Release
           #   cxx_std: 20
-          #   logging_backend: LOGURU
           #   tbb_enabled: OFF
           #   cuda_enabled: ON
           #   compiler_c: clang
@@ -217,7 +192,6 @@ jobs:
             os: macos-latest
             build_type: Release
             cxx_std: 20
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF  # CUDA not supported on Apple Silicon
             compiler_c: clang
@@ -230,7 +204,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 23
-            logging_backend: GLOG
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -243,7 +216,6 @@ jobs:
           #   os: windows-latest
           #   build_type: Release
           #   cxx_std: 23
-          #   logging_backend: NATIVE
           #   tbb_enabled: OFF
           #   cuda_enabled: ON
           #   compiler_c: clang
@@ -433,7 +405,6 @@ jobs:
           -DCMAKE_C_COMPILER="$CC_COMPILER" \
           -DCMAKE_CXX_COMPILER="$CXX_COMPILER" \
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} \
-          -DLOGGING_BACKEND=${{ matrix.logging_backend }} \
           -DBUILD_TESTING=ON \
           -DPARALLEL_BACKEND=${{ matrix.tbb_enabled == 'ON' && 'tbb' || 'std' }} \
           -DMEMORY_ENABLE_TBB=${{ matrix.tbb_enabled }} \
@@ -474,7 +445,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang `
           -DCMAKE_CXX_COMPILER=clang++ `
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} `
-          -DLOGGING_BACKEND=${{ matrix.logging_backend }} `
           -DBUILD_TESTING=ON `
           -DPARALLEL_BACKEND=${{ matrix.tbb_enabled == 'ON' && 'tbb' || 'std' }} `
           -DMEMORY_ENABLE_TBB=${{ matrix.tbb_enabled }} `
@@ -506,7 +476,6 @@ jobs:
         echo "Build Directory: $BUILD_DIR"
         echo "C++ Standard: ${{ matrix.cxx_std }}"
         echo "Build Type: ${{ matrix.build_type }}"
-        echo "Logging Backend: ${{ matrix.logging_backend }}"
         echo "TBB Enabled: ${{ matrix.tbb_enabled }}"
         echo "CUDA Enabled: ${{ matrix.cuda_enabled }}"
         echo ""
@@ -664,7 +633,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -822,14 +790,12 @@ jobs:
     - name: Configure with ${{ matrix.sanitizer }} sanitizer
       shell: bash
       run: |
-        # Use NATIVE logging backend for sanitizer builds to avoid threading/memory issues
         cmake -B build -S . -G Ninja \
           -C .github/cmake/configure_cache.cmake \
           -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=NATIVE \
           -DCORE_ENABLE_SANITIZER=ON \
           -DCORE_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DMEMORY_ENABLE_SANITIZER=ON \
@@ -911,24 +877,8 @@ jobs:
             backend_label: default
             extra_cmake_flags: ""
 
-          # Logging/Parallel are ThirdParty submodules, not XSIGMA_LIBRARY_PROJECT
-          # values. Exercise their backends on the in-tree consumers (Core, Graph).
-          - project: Core
-            external: "ON"
-            backend_label: LOGURU
-            extra_cmake_flags: "-DLOGGING_BACKEND=LOGURU"
-          - project: Core
-            external: "OFF"
-            backend_label: NATIVE
-            extra_cmake_flags: "-DLOGGING_BACKEND=NATIVE"
-          - project: Core
-            external: "ON"
-            backend_label: GLOG
-            extra_cmake_flags: "-DLOGGING_BACKEND=GLOG"
-          - project: Core
-            external: "ON"
-            backend_label: SPDLOG
-            extra_cmake_flags: "-DLOGGING_BACKEND=SPDLOG"
+          # Logging, Parallel, and Profiler are ThirdParty submodules, not
+          # XSIGMA_LIBRARY_PROJECT values. Parallel backends are exercised on Graph.
 
           - project: Memory
             external: "ON"
@@ -1092,7 +1042,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
           -DVECTORIZATION_CPU_BACKEND=${{ matrix.vectorization_type }} \
-          -DLOGGING_BACKEND=NATIVE \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -1193,7 +1142,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_C_FLAGS="${{ matrix.opt_level }}" \
           -DCMAKE_CXX_FLAGS="${{ matrix.opt_level }}" \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON
 
     - name: Build
@@ -1254,7 +1202,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_LTO=${{ matrix.lto_enabled }} \
           -DMEMORY_ENABLE_LTO=${{ matrix.lto_enabled }} \
@@ -1317,7 +1264,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=ON \
           -DMEMORY_ENABLE_BENCHMARK=ON \
@@ -1364,7 +1310,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -1376,7 +1321,6 @@ jobs:
             os: macos-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -1426,7 +1370,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -1481,7 +1424,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -1493,7 +1435,6 @@ jobs:
             os: macos-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: LOGURU
             tbb_enabled: ON
             cuda_enabled: OFF
             compiler_c: clang
@@ -1602,7 +1543,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.compiler_cxx }} `
           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} `
-          -DLOGGING_BACKEND=${{ matrix.logging_backend }} `
           -DBUILD_TESTING=ON `
           -DCORE_ENABLE_BENCHMARK=OFF `
           -DMEMORY_ENABLE_BENCHMARK=OFF `
@@ -1655,7 +1595,6 @@ jobs:
             os: ubuntu-latest
             build_type: Release
             cxx_std: 17
-            logging_backend: NATIVE
             tbb_enabled: OFF
             cuda_enabled: OFF
             compiler_c: clang
@@ -1708,7 +1647,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=NATIVE \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_COVERAGE=ON \
           -DMEMORY_ENABLE_COVERAGE=ON \
@@ -1930,19 +1868,7 @@ jobs:
             backend_label: default
             extra_config: ""
           # Logging/Parallel/Profiler are @logging/@parallel/@profiler, not
-          # --project.NAME libraries. Exercise backends on in-tree consumers.
-          - project: core
-            backend_label: LOGURU
-            extra_config: logging_loguru
-          - project: core
-            backend_label: NATIVE
-            extra_config: logging_native
-          - project: core
-            backend_label: GLOG
-            extra_config: logging_glog
-          - project: core
-            backend_label: SPDLOG
-            extra_config: logging_spdlog
+          # --project.NAME libraries. Parallel backends are exercised on Graph.
           - project: graph
             backend_label: std
             extra_config: parallel.std
@@ -2222,7 +2148,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=20 \
-          -DLOGGING_BACKEND=NATIVE \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -2405,10 +2330,6 @@ jobs:
             os: ubuntu-latest
             extra_cmake: "-DBUILD_SHARED_LIBS=ON"
             extra_deps: ""
-          - name: "magic_enum-OFF"
-            os: ubuntu-latest
-            extra_cmake: "-DCORE_ENABLE_MAGICENUM=OFF"
-            extra_deps: ""
           - name: "examples"
             os: ubuntu-latest
             extra_cmake: "-DCORE_ENABLE_EXAMPLES=ON -DMEMORY_ENABLE_EXAMPLES=ON -DVECTORIZATION_ENABLE_EXAMPLES=ON -DMODELS_ENABLE_EXAMPLES=ON"
@@ -2482,7 +2403,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=LOGURU \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -2541,7 +2461,6 @@ jobs:
             -G "Visual Studio 17 2022" -A x64 `
             "-DCMAKE_GENERATOR_INSTANCE=$vsInstance" `
             -DCMAKE_CXX_STANDARD=17 `
-            -DLOGGING_BACKEND=NATIVE `
             -DBUILD_TESTING=ON `
             -DPARALLEL_BACKEND=std `
             -DMEMORY_ENABLE_TBB=OFF `
@@ -2557,7 +2476,6 @@ jobs:
             -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_CXX_STANDARD=17 `
-            -DLOGGING_BACKEND=NATIVE `
             -DBUILD_TESTING=ON `
             -DPARALLEL_BACKEND=std `
             -DMEMORY_ENABLE_TBB=OFF `
@@ -2634,7 +2552,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=NATIVE \
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_CLANGTIDY=ON \
           -DMEMORY_ENABLE_CLANGTIDY=ON \
@@ -2673,7 +2590,6 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_CXX_STANDARD=17 \
-          -DLOGGING_BACKEND=NATIVE \
           -DBUILD_TESTING=ON \
           -DMEMORY_ENABLE_MIMALLOC=OFF \
           -DCORE_ENABLE_VALGRIND=ON \
@@ -3008,7 +2924,7 @@ jobs:
 # To add a new test configuration to build-matrix:
 # 1. Add a new entry to the matrix.include section
 # 2. Follow the naming convention: "Platform C++XX BuildType - Backend - Feature:State"
-# 3. Set appropriate values for: os, build_type, cxx_std, logging_backend, tbb_enabled, cuda_enabled
+# 3. Set appropriate values for: os, build_type, cxx_std, tbb_enabled, cuda_enabled
 # 4. Add platform-specific compiler and cache path settings
 #
 # ## Dependency Installation Scripts:
@@ -3054,7 +2970,7 @@ jobs:
 # - compiler-version-tests-clang: Tests Clang versions (9, 18, 20, 21) with C++17/20/23
 # - compiler-version-tests-gcc: Tests GCC versions (8-13) with C++17/20/23
 # - Each job installs only one compiler version to avoid package conflicts
-# - Each compiler version tests with TBB enabled and LOGURU logging backend
+# - Each compiler version tests with TBB enabled
 # - Non-critical jobs (warnings only) - allows CI to pass even if specific compiler versions fail
 # - To add new compiler versions:
 #   1. Add new matrix entry to compiler-version-tests-clang or compiler-version-tests-gcc job

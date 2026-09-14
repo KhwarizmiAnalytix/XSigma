@@ -23,11 +23,12 @@ never import one library's macro/namespace prefix into another library.
 
 - **Never modify anything under `ThirdParty/`.** These are vendored git
   submodules (fmt, googletest, mimalloc, benchmark, sleef, Logging, Parallel,
-  Profiler, and Logging/Profiler nested backends) and must stay pristine —
+  Profiler) and must stay pristine —
   no source edits, no patches applied in place, under any condition, even to
-  fix a build error that traces back to vendored code. Host XSigma does not
-  vendor loguru, glog, spdlog, magic_enum, kineto, or ittapi as its own
-  submodules; those live under Logging and Profiler.
+  fix a build error that traces back to vendored code. Host XSigma compiles
+  Logging and Profiler product sources only (host overlays in
+  `ThirdParty/logging.cmake` / `ThirdParty/profiler.cmake` and the matching
+  Bazel BUILD files).
   - If a build/compile issue is caused by code inside `ThirdParty/`, fix it
     from our own side instead: an ADL shim / compat header in the consuming
     library (see `Library/Vectorization/Testing/Cxx/cuda_fmt_int128_fix.h`
@@ -53,7 +54,7 @@ never import one library's macro/namespace prefix into another library.
   - `--packet-size=N` sets the SIMD lane count
     (`VECTORIZATION_PACKET_SIZE`, default 4).
   - Run `python3 setup.py --help` from `Scripts/` for the full list of flags
-    (sanitizers, logging backend, coverage, spell check, etc.). The
+    (sanitizers, coverage, spell check, etc.). The
     `xsigma-build` skill has a distilled cheat sheet of common invocations.
 
 ## Reviewing major changes
@@ -125,8 +126,8 @@ above — skip it deliberately for trivial edits, don't skip it by default.
   structs/enums) and handle it with ordinary control flow.
 - **Exception:**  boundary/interop code that wraps a third-party API which
  itself throws is allowed to keep `try`/`catch` — e.g. the GPU allocator
- code in `Library/Memory/gpu/`, the `ThirdParty/Profiler/bespoke/` kineto
- fork, `ThirdParty/Logging/util/exception.cpp` (in the standalone Logging
+ code in `Library/Memory/gpu/`,
+ `ThirdParty/Logging/logging/util/exception.cpp` (in the standalone Logging
  repo), and the test-assertion macros
   in `Library/*/Testing/**/baseTest.h`-style headers (whose `ASSERT_*`
   macros throw internally in non-gtest builds so failures abort the test).
@@ -141,9 +142,9 @@ above — skip it deliberately for trivial edits, don't skip it by default.
   `#include "Core/xxx/yyy/a.h"` or an absolute path.
 - Third-party headers use angle brackets (`#include <fmt/format.h>`),
   never quotes. Quotes are for project headers only. This includes
-  Logging (`<logger/logger.h>`, `<util/exception.h>`), Parallel
-  (`<tools/threaded_callback_queue.h>`), and Profiler (`<native/...>`,
-  `<bespoke/...>`). `"profiler/"` is first-party Memory
+  Logging (`<logging/logging.h>`, `<logging/logger/logger.h>`,
+  `<logging/util/exception.h>`), Parallel (`<parallel.h>`), and Profiler
+  (`<profiler.h>`). `"profiler/"` is first-party Memory
   (`Library/Memory/profiler/`), not ThirdParty/Profiler.
 - Order: standard library → third-party → project headers, each group
   separated by a blank line.

@@ -409,7 +409,7 @@ if(VECTORIZATION_GPU_BACKEND STREQUAL "cuda" AND _vectorization_has_cuda_gpu_tes
     # std::_Linear_for_lerp<long double> — an MSVC-STL-internal symbol, so this
     # ambiguity is only reachable when the host STL is MSVC's <cmath> (confirmed
     # on Clang 22.1.2 + CUDA 13.2 + MSVC STL: TestTensor.cpp,
-    # TestTensorF1/F2/F3.cpp, TestTensorGpu.cpp, TestTensorGpuKineto.cpp,
+    # TestTensorF1/F2/F3.cpp, TestTensorGpu.cpp, TestTensorGpuProfiler.cpp,
     # TestGpuSimd.cu all fail with "call to 'fma' is ambiguous"). libstdc++ and
     # libc++'s <cmath> have no such helper, so the flag is scoped to WIN32
     # rather than to a Clang version: applying it unconditionally previously

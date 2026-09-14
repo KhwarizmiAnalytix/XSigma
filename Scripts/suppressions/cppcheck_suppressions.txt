@@ -6,9 +6,6 @@
 
 # If cppcheck is run without XSIGMA_CPPCHECK, it mis-parses the branch-hint macros and
 # reports syntaxError — suppress those false positives for affected translation units:
-syntaxError:ThirdParty/Profiler/bespoke/common/record_function.cpp
-syntaxError:ThirdParty/Profiler/native/core/profiler_lock.cpp
-syntaxError:ThirdParty/Profiler/native/cpu/annotation_stack.cpp
 
 # Exclude third-party and test code
 *:ThirdParty/*
@@ -19,7 +16,6 @@ syntaxError:ThirdParty/Profiler/native/cpu/annotation_stack.cpp
 unknownMacro:XSIGMA_UNLIKELY
 unknownMacro:XSIGMA_LIKELY
 unknownMacro:XSIGMA_CHECK
-unknownMacro:ThirdParty/Profiler/kineto/kineto_shim.cpp:171
 syntaxError:Library/Core/parallel/parallel.h:267
 
 # Suppress missing include warnings
@@ -39,7 +35,6 @@ missingInclude:*
 noExplicitConstructor:Library/Parallel/tools/parallel_tools.h
 noExplicitConstructor:Library/Parallel/std_thread/parallel_thread_pool.cpp
 noExplicitConstructor:Library/Parallel/tools/threaded_callback_queue.h
-noExplicitConstructor:ThirdParty/Profiler/kineto/profiler_kineto.cpp
 
 # Destructor deletes members - making loop variable const would be misleading
 constVariableReference:Library/Parallel/tools/multi_threader.cpp:145
@@ -70,12 +65,8 @@ useStlAlgorithm:Library/Parallel/std_thread/parallel_thread_pool.cpp:615
 useStlAlgorithm:Library/Parallel/tools/threaded_callback_queue.h:671
 
 # Profiler code - const correctness suggestions for imported/adapted code
-constVariableReference:ThirdParty/Profiler/common/collection.cpp
-constParameterReference:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
-constParameterPointer:ThirdParty/Profiler/kineto/kineto_shim.cpp
 constVariablePointer:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
 cstyleCast:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp
-unreadVariable:ThirdParty/Profiler/kineto/kineto_shim.cpp
 
 # Portability - localtime vs localtime_r in profiler code
 localtimeCalled:ThirdParty/Profiler/common/standalone/execution_trace_observer.cpp

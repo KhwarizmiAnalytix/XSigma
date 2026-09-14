@@ -13,16 +13,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
 # ---- build-matrix (ci.yml: build-matrix, Linux entries) --------------------
-# args: build_dir build_type cxx_std logging_backend tbb_enabled [c_compiler cxx_compiler]
+# args: build_dir build_type cxx_std tbb_enabled [c_compiler cxx_compiler]
 job_build_matrix() {
-    local build_dir="build/$1" build_type="$2" cxx_std="$3" logging_backend="$4" tbb_enabled="$5"
-    local c_compiler="${6:-clang}" cxx_compiler="${7:-clang++}"
+    local build_dir="build/$1" build_type="$2" cxx_std="$3" tbb_enabled="$4"
+    local c_compiler="${5:-clang}" cxx_compiler="${6:-clang++}"
     cmake_configure "$build_dir" no \
         -DCMAKE_BUILD_TYPE="$build_type" \
         -DCMAKE_C_COMPILER="$c_compiler" \
         -DCMAKE_CXX_COMPILER="$cxx_compiler" \
         -DCMAKE_CXX_STANDARD="$cxx_std" \
-        -DLOGGING_BACKEND="$logging_backend" \
         -DBUILD_TESTING=ON \
         -DPARALLEL_ENABLE_TBB="$tbb_enabled" \
         -DMEMORY_ENABLE_TBB="$tbb_enabled" \
@@ -40,7 +39,6 @@ job_tbb_specific() {
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_STANDARD=17 \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_BENCHMARK=OFF \
         -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -63,7 +61,6 @@ job_sanitizer() {
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_STANDARD=17 \
-        -DLOGGING_BACKEND=NATIVE \
         -DCORE_ENABLE_SANITIZER=ON -DCORE_SANITIZER_TYPE="$sanitizer" \
         -DMEMORY_ENABLE_SANITIZER=ON -DMEMORY_SANITIZER_TYPE="$sanitizer" \
         -DLOGGING_ENABLE_SANITIZER=ON -DLOGGING_SANITIZER_TYPE="$sanitizer" \
@@ -123,7 +120,6 @@ job_vectorization_simd() {
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_STANDARD=17 \
         -DVECTORIZATION_CPU_BACKEND="$vtype" \
-        -DLOGGING_BACKEND=NATIVE \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_BENCHMARK=OFF \
         -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -159,7 +155,6 @@ job_optimization() {
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_C_FLAGS="$opt_level" \
         -DCMAKE_CXX_FLAGS="$opt_level" \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON
     cmake_build "$build_dir"
     ctest_run "$build_dir"
@@ -173,7 +168,6 @@ job_lto() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_LTO="$lto" \
         -DMEMORY_ENABLE_LTO="$lto" \
@@ -193,7 +187,6 @@ job_benchmark() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_BENCHMARK=OFF \
         -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -219,7 +212,6 @@ job_sccache_baseline() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_BENCHMARK=OFF \
         -DMEMORY_ENABLE_BENCHMARK=OFF \
@@ -262,7 +254,6 @@ job_coverage() {
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_STANDARD=17 \
-        -DLOGGING_BACKEND=NATIVE \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_COVERAGE=ON \
         -DMEMORY_ENABLE_COVERAGE=ON \
@@ -323,7 +314,6 @@ job_feature_flag() {
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_CXX_STANDARD=17 \
-        -DLOGGING_BACKEND=LOGURU \
         -DBUILD_TESTING=ON \
         -DCORE_ENABLE_BENCHMARK=OFF \
         -DMEMORY_ENABLE_BENCHMARK=OFF \

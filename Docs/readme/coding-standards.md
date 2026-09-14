@@ -337,10 +337,10 @@ Order includes as follows (separated by blank lines):
 
 Third-party headers (fmt, gtest, benchmark, sleef, mimalloc, Logging,
 Parallel, Profiler, …) **must** use angle brackets (`#include <fmt/format.h>`,
-`#include <logger/logger.h>`, `#include <native/session/profiler.h>`,
-`#include <bespoke/kineto/profiler_kineto.h>`). Quotes
+`#include <logging/logging.h>`, `#include <profiler.h>`,
+`#include <parallel.h>`). Quotes
 are for project headers only. Do not write `#include "third_party/..."`.
-Logging's `<util/exception.h>` is third-party; Core's `"util/hash.h"` is not.
+Logging's `<logging/util/exception.h>` is third-party; Core's `"util/hash.h"` is not.
 `"profiler/"` is Memory's first-party profiler, not ThirdParty/Profiler.
 
 ## DLL Export Macros

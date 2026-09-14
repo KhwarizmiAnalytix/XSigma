@@ -4,7 +4,7 @@
 # Generic dependency-DAG task scheduler: build a graph of type-erased work
 # items with declared dependencies (graph_builder), then execute it in
 # parallel (graph_executor), respecting dependency order, on top of
-# Library/Parallel's threaded_callback_queue.
+# Parallel (`<parallel.h>`).
 # =============================================================================
 cmake_minimum_required(VERSION 3.16)
 
@@ -102,11 +102,10 @@ xsigma_find_linker(${GRAPH_LINKER_CHOICE} Graph GRAPH_LTO_MODE)
 xsigma_target_apply_cache(Graph GRAPH_ENABLE_CACHE GRAPH_CACHE_BACKEND)
 xsigma_target_optional_icecc(Graph GRAPH_ENABLE_ICECC)
 
-# Graph always links Parallel::Parallel: graph_executor is built on
-# threaded_callback_queue's push_dependent() continuation-chaining rather
-# than a bespoke thread pool. Parallel is pure third-party
+# Graph always links Parallel::Parallel. Parallel is pure third-party
 # (ThirdParty/CMakeLists.txt) with no XSigma-library dependency of its own,
-# so this keeps Graph's dependency footprint minimal.
+# so this keeps Graph's dependency footprint minimal. Clients include
+# `<parallel.h>`.
 xsigma_add_parallel()
 set(GRAPH_DEPENDENCY_LIBS "")
 if(NOT TARGET Parallel::Parallel)

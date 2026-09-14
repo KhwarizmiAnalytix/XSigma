@@ -218,4 +218,4 @@ Paths are under `Library/Vectorization/`.
 | `terminals/tensor.h` | `operator=` → `run`; `assign_async` / `fill_async` (stream) |
 
 Tests: `Testing/Cxx/TestTensorGpu.cpp` (including `FusedCatalogFloat`),
-`TestMetalDispatch.mm`, `TestTensorGpuKineto.cpp`.
+`TestMetalDispatch.mm`, `TestTensorGpuProfiler.cpp`.

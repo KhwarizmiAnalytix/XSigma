@@ -45,7 +45,7 @@ openmp_configure(name = "parallel_openmp")
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# fmt — vendored ThirdParty/fmt (shared with Logging / spdlog)
+# fmt — vendored ThirdParty/fmt (shared with Logging and Profiler)
 # -----------------------------------------------------------------------------
 new_local_repository(
     name = "fmt",
@@ -102,8 +102,7 @@ local_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Profiler. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
-# Kineto/ITT live under Profiler/third_party and are compiled from
-# profiler.BUILD — XSigma does not register @kineto / @ittapi.
+# XSigma depends on @profiler//:Profiler only.
 load("//bazel:profiler_repository.bzl", "local_profiler_repository")
 
 local_profiler_repository(
@@ -117,8 +116,7 @@ local_profiler_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Logging. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
-# Nested backends (loguru / glog / spdlog / magic_enum) are compiled from
-# logging.BUILD. fmt stays as an XSigma root repo so Core can share it.
+# fmt stays as an XSigma root repo so Core can share it.
 load("//bazel:logging_repository.bzl", "local_logging_repository")
 
 local_logging_repository(

@@ -92,13 +92,6 @@ python3 setup.py config.build.ninja.clang.release.lto.benchmark
 LTO variants: `--lto.thin` (Clang ThinLTO), `--lto.full`, `--lto.ipo`
 (GCC/MSVC IPO fallback).
 
-## Logging backend
-
-`--logging=NATIVE|LOGURU|GLOG|SPDLOG` (default `SPDLOG`):
-```
-python3 setup.py config.build.test.ninja.clang --logging=GLOG
-```
-
 ## Spell check / clang-tidy fix
 
 ```
@@ -109,7 +102,7 @@ python3 setup.py config.build.test.ninja.clang.fix     # clang-tidy --fix-errors
 ## Other useful tokens
 
 `tbb`, `openmp`, `mkl`, `numa`, `memkind`, `static`, `clangtidy`, `iwyu`,
-`valgrind`, `magic_enum`, `mimalloc`, `external`, `cxx17`/`cxx20`/`cxx23`,
+`valgrind`, `mimalloc`, `external`, `cxx17`/`cxx20`/`cxx23`,
 `cppcheck`, `icecc`, `examples`,
 `--linker.mold|lld|gold|lld-link`, cache backend
 `--cache=none|ccache|sccache|buildcache`.

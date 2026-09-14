@@ -621,9 +621,7 @@ class XSigmaFlags:
             "benchmark",
             "gtest",
             "test",
-            "logging_backend",
             "lto",
-            "magic_enum",
             "mimalloc",
             "mimalloc_stats",
             "external",
@@ -661,9 +659,7 @@ class XSigmaFlags:
             "enable google benchmark",
             "enable google test",
             "enable testing",
-            "logging backend: NATIVE, LOGURU, GLOG, or SPDLOG",
             "LTO mode for all modules: off | thin | full | ipo | auto (bare 'lto' = auto)",
-            "enable magic_enum static reflection in Logging",
             "enable Microsoft mimalloc high-performance memory allocator",
             "compile mimalloc statistics (MI_STAT=1); enable via --mimalloc_stats ('_' is a token delimiter in dotted args)",
             "use external copies of third party libraries by default",
@@ -680,8 +676,7 @@ class XSigmaFlags:
             "SMP backend: std, openmp, or tbb",
             "Clang/GCC: -march=native for max CPU tuning (binary may not run on older CPUs)",
             "enable SLEEF SIMD math library for NEON/SVE (AArch64; auto-enabled when Accelerate vForce is unavailable)",
-            "enable LibTorch (PyTorch C++) comparison tests/benchmarks and the Profiler "
-            "heavy-function PyTorch profiler (requires LibTorch in CMAKE_PREFIX_PATH)",
+            "enable LibTorch (PyTorch C++) comparison tests/benchmarks (requires LibTorch in CMAKE_PREFIX_PATH)",
         ]
 
     def __build_cmake_flag(self):
@@ -697,8 +692,6 @@ class XSigmaFlags:
             "packet_size": "VECTORIZATION_PACKET_SIZE",
             "static": "BUILD_SHARED_LIBS",
             "test": "BUILD_TESTING",
-            "logging_backend": "LOGGING_BACKEND",
-            "magic_enum": "LOGGING_ENABLE_MAGICENUM",
             "mimalloc": "MEMORY_ENABLE_MIMALLOC",
             "mimalloc_stats": "MEMORY_ENABLE_MIMALLOC_STATS",
             "external": "XSIGMA_ENABLE_EXTERNAL",
@@ -766,14 +759,12 @@ class XSigmaFlags:
                 "javasourceversion": 1.8,  # Special case: numeric value
                 "javatargetversion": 1.8,  # Special case: numeric value
                 "cxxstd": "",  # Special case: let CMake decide
-                "logging_backend": "LOGURU",  # Default logging backend
                 "cache": self.ON,  # Per-module compiler cache (CMake defaults ON)
                 "cache_type": "none",  # Default cache backend is none
                 "parallel_backend": "std",  # Default SMP backend
                 "lto": "",  # empty = not specified; CMake picks the smart default per compiler
                 "gtest": self.ON,  # *_ENABLE_GTEST CMake defaults are ON
                 "benchmark": self.OFF,  # *_ENABLE_BENCHMARK CMake defaults are ON
-                "magic_enum": self.ON,
                 "mimalloc": self.ON,
                 "icecc": self.OFF,
                 "native": self.OFF,
@@ -788,7 +779,6 @@ class XSigmaFlags:
         cpu_backend_list = ["no", "sse", "avx", "avx2", "avx512", "neon", "sve"]
         gpu_backend_list = ["none", "hip", "cuda", "metal"]
         cxx_std_list = ["cxx17", "cxx20", "cxx23"]
-        logging_backend_list = ["native", "loguru", "glog", "spdlog"]
         cache_type_list = ["none", "ccache", "sccache", "buildcache"]
         parallel_backend_list = ["std", "openmp", "tbb"]
         linker_list = ["default", "mold", "lld", "gold", "lld-link"]
@@ -868,12 +858,9 @@ class XSigmaFlags:
                 self.__value["packet_size"] = n
                 self.builder_suffix += f"_psize{n}"
                 print_status(f"Setting VECTORIZATION_PACKET_SIZE to {n}", "INFO")
-            elif arg.startswith("profiler."):
-                # Instrumentation backend (Kineto/ITT) is owned by ThirdParty/Profiler
-                # via its own PROFILER_BACKEND cache var — XSigma must not set it.
+            elif arg.startswith("profiler.") or arg.startswith("logging."):
                 print_status(
-                    f"Ignoring '{arg}': Profiler instrumentation backend is configured "
-                    "inside ThirdParty/Profiler (not an XSigma setup flag).",
+                    f"Ignoring '{arg}': not an XSigma setup flag.",
                     "WARNING",
                 )
             elif arg.startswith("project."):
@@ -901,11 +888,6 @@ class XSigmaFlags:
                     f"Limiting build to Library/{self.__value['library_project']} (and CMake deps)",
                     "INFO",
                 )
-            elif arg in logging_backend_list:
-                # Set logging backend (NATIVE, LOGURU, GLOG, or SPDLOG)
-                self.__value["logging_backend"] = arg.upper()
-                self.builder_suffix += f"_logging_{arg}"
-                print_status(f"Setting logging backend to {arg.upper()}", "INFO")
             elif arg in cache_type_list:
                 # Set cache type (none, ccache, sccache, or buildcache)
                 self.__value["cache_type"] = arg
@@ -949,7 +931,7 @@ class XSigmaFlags:
                 self.builder_suffix += f"_java{arg}"
             elif arg in self.__key:
                 # Implement inverse logic based on CMake defaults
-                if arg in ["gtest", "magic_enum", "mimalloc", "cache"]:
+                if arg in ["gtest", "mimalloc", "cache"]:
                     # These have CMake default ON, so providing the arg turns them OFF
                     self.__value[arg] = self.OFF
                 elif arg == "lto":
@@ -1106,9 +1088,7 @@ class XSigmaFlags:
             "BUILD_TESTING",
             "XSIGMA_ENABLE_EXTERNAL",
             # Logging is a dependency of scoped modules such as Memory; Parallel is
-            # pulled in by Graph. Their backend selectors stay user-facing and must
-            # reach the third-party subprojects even in --project.* scoped builds.
-            "LOGGING_BACKEND",
+            # pulled in by Graph. Parallel's backend selector stays user-facing.
             "PARALLEL_BACKEND",
             "PARALLEL_ENABLE_OPENMP",
         }
@@ -1253,8 +1233,6 @@ class XSigmaFlags:
                 key = "sse, avx, avx2, avx512, neon, or sve"
             elif key == "cxxstd":
                 key = "cxx11, cxx14, cxx17, cxx20, cxx23"
-            elif key == "logging_backend":
-                key = "NATIVE, LOGURU, GLOG, or SPDLOG"
             elif key == "cache_type":
                 key = "none, ccache, sccache, or buildcache"
             elif key == "sanitizer":
@@ -1863,35 +1841,9 @@ def parse_args(args):
                 )
                 sys.exit(1)
         # Handle individual sanitizer enable flags
-        elif arg.startswith("--logging="):
-            backend_type = arg.split("=", 1)[1].upper()
-            valid_backends = ["NATIVE", "LOGURU", "GLOG", "SPDLOG"]
-            if backend_type in valid_backends:
-                processed_args.append(backend_type.lower())
-                print_status(f"Logging backend set to {backend_type}", "INFO")
-            else:
-                print_status(
-                    f"Invalid logging backend: {backend_type}. Valid options: {', '.join(valid_backends)}",
-                    "ERROR",
-                )
-                sys.exit(1)
-        elif arg.startswith("--logging."):
-            backend_type = arg.split(".", 1)[1].upper()
-            valid_backends = ["NATIVE", "LOGURU", "GLOG", "SPDLOG"]
-            if backend_type in valid_backends:
-                processed_args.append(backend_type.lower())
-                print_status(f"Logging backend set to {backend_type}", "INFO")
-            else:
-                print_status(
-                    f"Invalid logging backend: {backend_type}. Valid options: {', '.join(valid_backends)}",
-                    "ERROR",
-                )
-                sys.exit(1)
-        elif arg.startswith("--profiler."):
-            # Accepted only so old scripts fail softly; backend is Profiler's concern.
+        elif arg.startswith("--logging=") or arg.startswith("--logging.") or arg.startswith("--profiler."):
             print_status(
-                f"Ignoring '{arg}': Profiler instrumentation backend is configured "
-                "inside ThirdParty/Profiler (not an XSigma setup flag).",
+                f"Ignoring '{arg}': not an XSigma setup flag.",
                 "WARNING",
             )
         elif arg in ("--mimalloc_stats", "--mimalloc-stats"):
@@ -2083,10 +2035,6 @@ def main():
             "  --packet-size=N    SIMD lane count (CMake VECTORIZATION_PACKET_SIZE; default 4)"
         )
         print("  psizeN             Same as --packet-size=N (e.g. psize8)")
-        print("\nLogging backend flags:")
-        print("  --logging=BACKEND  Set logging backend")
-        print("                             Options: NATIVE, LOGURU, GLOG, SPDLOG")
-        print("                             Default: LOGURU")
         print("\nSanitizer flags:")
         print("  --sanitizer.address        Enable AddressSanitizer")
         print("  --sanitizer.undefined      Enable UndefinedBehaviorSanitizer")
@@ -2097,15 +2045,6 @@ def main():
         print("  --sanitizer-type=TYPE      Specify sanitizer type")
         print("                             Options: address, undefined,")
         print("                             thread, memory, leak")
-        print("\nLogging backend examples:")
-        print("  # Use GLOG backend")
-        print("  python setup.py config.build.test.ninja.clang --logging=GLOG")
-        print("  # Use NATIVE backend")
-        print("  python setup.py config.build.test.ninja.clang --logging=NATIVE")
-        print("  # Use LOGURU backend (default, no flag needed)")
-        print("  python setup.py config.build.test.ninja.clang")
-        print("  # Use SPDLOG backend")
-        print("  python setup.py config.build.test.ninja.clang --logging=SPDLOG")
         print("\nSanitizer examples:")
         print("  python setup.py config.build.test.vs22 --sanitizer.undefined")
         print("  python setup.py config.build.test.ninja.clang --sanitizer.address")

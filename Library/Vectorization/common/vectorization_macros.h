@@ -164,8 +164,7 @@ static_assert(VECTORIZATION_PACKET_SIZE >= 1, "VECTORIZATION_PACKET_SIZE must be
 // (unique to Logging) so LOGGING_LOG is always defined. Include Logging's exception
 // header explicitly. VECTORIZATION_LOGF / VECTORIZATION_CHECK / VECTORIZATION_THROW
 // are host-only — do not use them in __device__ code.
-#include <logger/logger.h>
-#include <util/exception.h>
+#include <logging/logging.h>
 
 #define VECTORIZATION_LOGF(verbosity_name, format_string, ...) \
     LOGGING_LOG(verbosity_name, format_string, ##__VA_ARGS__)

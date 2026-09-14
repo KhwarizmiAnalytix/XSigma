@@ -332,7 +332,7 @@ endfunction()
 # Optional Parameters:
 #   SOURCE_DIR <path>           - Custom source directory path relative to ThirdParty/
 #                                 If not specified, uses the library name as the path
-#                                 Example: "kineto/libkineto" for nested structures
+#                                 Example: "googletest/googletest" for nested structures
 #   EXTERNAL_NAME <name>        - Name to use when searching for external package
 #   CONDITION <variable>        - CMake variable that must be true to add the library
 #   LIBRARY_TYPE <type>         - Type of library: STATIC, SHARED, DEFAULT, or HEADER_ONLY
@@ -374,12 +374,10 @@ endfunction()
 #       XSIGMA_TARGETS "Fmt::fmt=fmt::fmt|fmt"
 #   )
 #
-#   add_third_party_library(kineto
-#       CONDITION PROFILER_ENABLE_KINETO
+#   add_third_party_library(cpuinfo
 #       LIBRARY_TYPE STATIC
-#       SOURCE_DIR kineto/libkineto
+#       SOURCE_DIR cpuinfo
 #       DISABLE_WARNINGS
-#       EXTRA_FLAGS "-flto=thin"
 #   )
 #
 function(add_third_party_library name)
@@ -689,7 +687,7 @@ function(add_third_party_library name)
         set(lib_cmakelists_path "${lib_source_dir}/CMakeLists.txt")
 
         # If CMakeLists.txt doesn't exist at the top level, check if it's in a subdirectory
-        # This handles cases like kineto/libkineto where the actual CMakeLists.txt is nested
+        # This handles cases where CMakeLists.txt lives in an immediate subdirectory
         if(NOT EXISTS "${lib_cmakelists_path}")
             # Try to find CMakeLists.txt in immediate subdirectories
             file(GLOB subdirs LIST_DIRECTORIES true "${lib_source_dir}/*")
@@ -832,110 +830,23 @@ function(xsigma_add_googletest)
 endfunction()
 
 # =============================================================================
-# Profiler — bundled via add_third_party_library (ThirdParty/Profiler submodule)
-#
-# Profiler is a pure third-party dependency (same treatment as cpuinfo):
-# XSigma sets no PROFILER_* feature flags anywhere outside this file, never
-# fans coverage/sanitizer/clang-tidy/IWYU/spell/C++-standard into it, and
-# exposes no setup.py/Bazel switches for it. Its Kineto/ITT backends and fmt
-# live in its own nested third_party/; tests and examples build only from the
-# standalone Profiler repo. Called by consuming libraries (Memory, Parallel,
-# Vectorization) before their if(TARGET Profiler::Profiler) checks — idempotent.
+# Profiler — host overlay compiles product sources only (ThirdParty/profiler.cmake).
+# Tests and examples build from the standalone Profiler repo. Called by Memory
+# and Vectorization before if(TARGET Profiler::Profiler) — idempotent.
 # =============================================================================
 function(xsigma_add_profiler)
-    if(TARGET Profiler::Profiler)
-        return()
-    endif()
-    set(_profiler_src "${XSIGMA_THIRDPARTY_DIR}/Profiler")
-    if(NOT EXISTS "${_profiler_src}/CMakeLists.txt")
-        message(FATAL_ERROR "ThirdParty/Profiler is missing. Initialize the submodule:\n"
-                            "  git submodule update --init ThirdParty/Profiler")
-    endif()
-    # Kineto/ITT/fmt are Profiler-owned nested submodules — never XSigma's root ThirdParty.
-    set(_profiler_tp "${_profiler_src}/third_party")
-    if(NOT EXISTS "${_profiler_tp}/kineto/libkineto/CMakeLists.txt"
-       OR NOT EXISTS "${_profiler_tp}/ittapi/CMakeLists.txt")
-        message(FATAL_ERROR
-            "Profiler nested third_party (kineto/ittapi) is missing. Initialize:\n"
-            "  git submodule update --init --recursive ThirdParty/Profiler")
-    endif()
-    # Path wiring only: without this, Profiler's dependency resolver would
-    # fall back to fetching Kineto from git instead of using its nested copy.
-    set(PROFILER_THIRD_PARTY_DIR "${_profiler_tp}"
-        CACHE PATH "Profiler-owned third_party (kineto/ittapi/fmt)" FORCE)
-    set(PROFILER_ENABLE_TESTING OFF CACHE BOOL "Profiler tests build only standalone" FORCE)
-    set(PROFILER_ENABLE_EXAMPLES OFF CACHE BOOL "Profiler examples build only standalone" FORCE)
-    # Profiler's CMake inherits MEMORY_GPU_BACKEND and FORCE-sets
-    # KINETO_BACKEND=rocm for HIP. libkineto then requires ROCM_SOURCE_DIR and
-    # ROCm >= 7 (rocprofiler-sdk). Hosted HIP CI is ROCm 6.x and is testing
-    # Memory/Vectorization HIP, not Kineto GPU tracing — keep Profiler on CPU
-    # Kineto unless the consumer explicitly passed PROFILER_GPU_BACKEND.
-    set(_xsigma_gpu "")
-    if(DEFINED MEMORY_GPU_BACKEND)
-        set(_xsigma_gpu "${MEMORY_GPU_BACKEND}")
-    elseif(DEFINED VECTORIZATION_GPU_BACKEND)
-        set(_xsigma_gpu "${VECTORIZATION_GPU_BACKEND}")
-    endif()
-    if(NOT DEFINED PROFILER_GPU_BACKEND AND _xsigma_gpu STREQUAL "hip")
-        set(PROFILER_GPU_BACKEND "none" CACHE STRING
-            "Keep libkineto on CPU for HIP unless the consumer opts in")
-    endif()
-    unset(_xsigma_gpu)
-    if(NOT ROCM_SOURCE_DIR)
-        if(DEFINED ENV{ROCM_PATH} AND NOT "$ENV{ROCM_PATH}" STREQUAL "")
-            set(ROCM_SOURCE_DIR "$ENV{ROCM_PATH}" CACHE PATH "ROCm root for libkineto")
-        elseif(DEFINED ENV{HIP_PATH} AND NOT "$ENV{HIP_PATH}" STREQUAL "")
-            set(ROCM_SOURCE_DIR "$ENV{HIP_PATH}" CACHE PATH "ROCm root for libkineto")
-        elseif(EXISTS "/opt/rocm")
-            set(ROCM_SOURCE_DIR "/opt/rocm" CACHE PATH "ROCm root for libkineto")
-        endif()
-    endif()
-    add_third_party_library(
-        profiler
-        SOURCE_DIR "${_profiler_src}"
-        BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Profiler"
-        EXTERNAL_NAME Profiler
-        EXCLUDE_FROM_ALL
-        AUTO_ADD_TO_DEPENDENCIES OFF
-    )
+    include("${XSIGMA_THIRDPARTY_DIR}/profiler.cmake")
+    xsigma_add_profiler_product()
 endfunction()
 
 # =============================================================================
-# Logging — bundled via add_third_party_library (ThirdParty/Logging submodule)
-#
-# Logging is a pure third-party dependency (same treatment as Profiler):
-# XSigma sets no LOGGING_ENABLE_* feature flags anywhere outside this file,
-# never fans coverage/sanitizer/clang-tidy/IWYU/spell/C++-standard into it, and
-# exposes no setup.py --project.logging switch for it. Tests and examples build
-# only from the standalone Logging repo. The backend selector
-# (LOGGING_BACKEND) and its feature toggles remain user-facing XSigma flags —
-# they are consumed by Logging's own CMakeLists when the subproject configures.
-#
-# Logging's own CMakeLists initializes fmt from the host ThirdParty/ when
-# present (shared with Core) and loguru/glog/spdlog/magic_enum from
-# Logging's nested ThirdParty/ so XSigma does not keep duplicate copies.
-# Called by consuming libraries (Core, Memory, Vectorization) before their
-# if(TARGET Logging::Logging) checks — idempotent.
+# Logging — host overlay compiles product sources only (ThirdParty/logging.cmake).
+# Tests and examples build from the standalone Logging repo. Called by Core,
+# Memory, and Vectorization before if(TARGET Logging::Logging) — idempotent.
 # =============================================================================
 function(xsigma_add_logging)
-    if(TARGET Logging::Logging)
-        return()
-    endif()
-    set(_logging_src "${XSIGMA_THIRDPARTY_DIR}/Logging")
-    if(NOT EXISTS "${_logging_src}/CMakeLists.txt")
-        message(FATAL_ERROR "ThirdParty/Logging is missing. Initialize the submodule:\n"
-                            "  git submodule update --init --recursive ThirdParty/Logging")
-    endif()
-    set(LOGGING_ENABLE_TESTING OFF CACHE BOOL "Logging tests build only standalone" FORCE)
-    set(LOGGING_ENABLE_EXAMPLES OFF CACHE BOOL "Logging examples build only standalone" FORCE)
-    add_third_party_library(
-        logging
-        SOURCE_DIR "${_logging_src}"
-        BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Logging"
-        EXTERNAL_NAME Logging
-        EXCLUDE_FROM_ALL
-        AUTO_ADD_TO_DEPENDENCIES OFF
-    )
+    include("${XSIGMA_THIRDPARTY_DIR}/logging.cmake")
+    xsigma_add_logging_product()
 endfunction()
 
 # =============================================================================
@@ -971,6 +882,14 @@ function(xsigma_add_parallel)
         EXCLUDE_FROM_ALL
         AUTO_ADD_TO_DEPENDENCIES OFF
     )
+    # Parallel's CMake exposes the repo root (`<Parallel/parallel.h>`). Add the
+    # nested Parallel/ directory so XSigma clients can include `<parallel.h>`,
+    # matching Profiler's `<profiler.h>`. Do not edit the submodule.
+    if(TARGET Parallel)
+        target_include_directories(
+            Parallel PUBLIC $<BUILD_INTERFACE:${_parallel_src}/Parallel>
+        )
+    endif()
 endfunction()
 
 # =============================================================================
@@ -985,9 +904,8 @@ endfunction()
 #   Library/Vectorization → sleef, Profiler (via xsigma_add_profiler),
 #                        Logging (via xsigma_add_logging)
 #   Library/Graph      → Parallel (via xsigma_add_parallel)
-#   ThirdParty/Profiler → owns nested third_party/kineto and ittapi (not XSigma root)
-#   ThirdParty/Logging  → fmt from the host ThirdParty/ when present;
-#                        loguru, glog, spdlog, magic_enum from Logging's nested ThirdParty/
+#   ThirdParty/Profiler → Profiler::Profiler (host overlay, product sources)
+#   ThirdParty/Logging  → Logging::Logging (host overlay, product sources)
 #   ThirdParty/Parallel → TBB/OpenMP via its own Cmake/ finders
 #   */Testing/Cxx      → xsigma_add_googletest(), google-benchmark
 # =============================================================================

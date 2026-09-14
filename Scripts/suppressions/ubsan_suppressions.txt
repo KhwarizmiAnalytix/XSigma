@@ -15,10 +15,6 @@ alignment:*fmt*
 signed-integer-overflow:*fmt*
 unsigned-integer-overflow:*fmt*
 
-# loguru library - suppress logging-related UB
-alignment:*loguru*
-signed-integer-overflow:*loguru*
-
 # Google Test - suppress test framework UB
 alignment:*gtest*
 alignment:*testing*
@@ -55,10 +51,6 @@ alignment:*template*
 
 # Pointer arithmetic in system code
 pointer-overflow:*system*
-
-# Common patterns that may trigger false positives
-enum:*magic_enum*
-bool:*magic_enum*
 
 # Example suppressions for common patterns:
 # alignment:MyClass::problematic_function

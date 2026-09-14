@@ -3,7 +3,7 @@
 # =============================================================================
 # Config settings for conditional compilation
 # Starlark --define keys mirror CMake cache names: lowercase MODULE_* (e.g. core_enable_mkl,
-# memory_enable_cuda, parallel_backend, parallel_enable_openmp, vectorization_type, logging_backend).
+# memory_enable_cuda, parallel_backend, parallel_enable_openmp, vectorization_type).
 # =============================================================================
 
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
@@ -114,50 +114,13 @@ config_setting(
     define_values = {"memory_enable_mimalloc": "true"},
 )
 
-# Opt-out when CMake-equivalent default is ON (mimalloc, magic_enum, Sobol 1111)
+# Opt-out when CMake-equivalent default is ON (mimalloc, Sobol 1111)
 config_setting(
     name = "disable_mimalloc",
     define_values = {"memory_enable_mimalloc": "false"},
 )
 
 # =============================================================================
-# Utility Library Configuration (Core)
-# =============================================================================
-
-config_setting(
-    name = "enable_magic_enum",
-    define_values = {"core_enable_magic_enum": "true"},
-)
-
-config_setting(
-    name = "disable_magic_enum",
-    define_values = {"core_enable_magic_enum": "false"},
-)
-
-# =============================================================================
-# Logging Backend Configuration
-# =============================================================================
-
-config_setting(
-    name = "logging_glog",
-    define_values = {"logging_backend": "glog"},
-)
-
-config_setting(
-    name = "logging_loguru",
-    define_values = {"logging_backend": "loguru"},
-)
-
-config_setting(
-    name = "logging_native",
-    define_values = {"logging_backend": "native"},
-)
-
-config_setting(
-    name = "logging_spdlog",
-    define_values = {"logging_backend": "spdlog"},
-)
-
 # Logging code-generation switches. Their names mirror the corresponding
 # CMake cache variables; unset values retain CMake's defaults.
 config_setting(

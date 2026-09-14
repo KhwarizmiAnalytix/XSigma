@@ -155,10 +155,8 @@ Graph is in scope, Profiler whenever Memory or Vectorization is in scope.
 ```mermaid
 flowchart LR
   Logging --> fmt
-  Logging --> loguru_glog_spdlog["Logging/ThirdParty: loguru / glog / spdlog / magic_enum"]
   Parallel --> tbb_omp["TBB / OpenMP / Threads"]
   Profiler --> fmt
-  Profiler --> nested_backends["Profiler/third_party: kineto xor ittapi"]
   Profiler --> gpu_rt["CUDA / HIP / Metal"]
   Memory --> fmt
   Memory --> cpuinfo
@@ -244,9 +242,9 @@ Always-vendored under `ThirdParty/` — do not edit those trees.
 
 | Package | Role | Used by |
 |---|---|---|
-| Logging | Log backends (native / loguru / glog / spdlog) and magic_enum under `Logging/ThirdParty/`; `LOGGING_BACKEND`, default **LOGURU** | Memory, Vectorization, Core |
+| Logging | Public logging API (`<logging/logging.h>`) | Memory, Vectorization, Core |
 | Parallel | Thread pools / TBB / OpenMP; `PARALLEL_BACKEND`, default **std** | Graph |
-| Profiler | Native XPlane + Kineto/ITT; kineto **or** ittapi under `Profiler/third_party/` (private) | Memory, Vectorization |
+| Profiler | Public profiler API (`<profiler.h>`, `profiler::session`) | Memory, Vectorization |
 | fmt | Formatting | Logging, Profiler, Memory, Core |
 | cpuinfo | CPU feature detection | Memory, Core |
 | Others | mimalloc, SLEEF, TBB, googletest, benchmark, … | per library |
@@ -260,7 +258,8 @@ enabled).
   Profiler consumed as external repositories (`@logging//:Logging`,
   `@parallel//:Parallel`, `@profiler//:Profiler`) via overlay BUILD files
   (`ThirdParty/logging.BUILD`, `ThirdParty/parallel.BUILD`,
-  `ThirdParty/profiler.BUILD`). CMake optional edges (Profiler on
+  `ThirdParty/profiler.BUILD`). Those overlays list product sources only.
+  CMake optional edges (Profiler on
   Memory/Vectorization) are unconditional `deps` in Bazel. Logging and
   Memory are required for Vectorization in both build systems.
 - Profiler `BUILD.bazel` must **not** take `//Library/Core` or
@@ -274,5 +273,5 @@ enabled).
 - [PROJECT_FLAGS.md](PROJECT_FLAGS.md) — CMake cache flags
 - [Graph guide](graph/README.md) — DAG execution, caching contracts and pricing integration status
 - [readme/third-party-dependencies.md](readme/third-party-dependencies.md) — vendored packages
-- [profiler/profiler.md](profiler/profiler.md) — Profiler instrumentation and `HAS_PROFILER` call sites
+- [readme/logging.md](readme/logging.md) — Logging public API
 - [BAZEL_USER_GUIDE.md](BAZEL_USER_GUIDE.md) — Bazel configs and known gaps

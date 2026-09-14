@@ -38,7 +38,6 @@ default; the action controls whether tests are executed by this invocation.
 | C++ standard | `cxx17`, `cxx20`, `cxx23` | Fans `*_CXX_STANDARD` to loaded modules |
 | CPU SIMD | `no`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve` | `VECTORIZATION_CPU_BACKEND` |
 | GPU backend | `cuda`, `hip`, `metal`, or `--gpu_backend.<name>` | Matching `MEMORY_GPU_BACKEND` and `VECTORIZATION_GPU_BACKEND` |
-| Logging | `--logging=SPDLOG|LOGURU|GLOG|NATIVE` | `LOGGING_BACKEND` |
 | Parallel backend | `--parallel.std`, `--parallel.openmp`, `--parallel.tbb` | `PARALLEL_BACKEND`; TBB also enables the Memory TBB allocator |
 | LTO | `lto`, `--lto.auto`, `--lto.thin`, `--lto.full`, `--lto.ipo`, `--lto.off` | Fans `*_LTO_MODE` to loaded modules |
 | Sanitizer | `--sanitizer.address`, `.undefined`, `.thread`, `.memory`, `.leak` | Fans `*_ENABLE_SANITIZER` and `*_SANITIZER_TYPE` |
@@ -47,7 +46,7 @@ default; the action controls whether tests are executed by this invocation.
 | Compiler cache | `none`, `ccache`, `sccache`, `buildcache` | Fans `*_CACHE_BACKEND` |
 | Host CPU tuning | `native` | `USE_NATIVE_ARCH=ON` for Vectorization on Clang/GCC |
 
-`gtest`, `magic_enum`, `mimalloc`, and `cache` are inverse toggles because
+`gtest`, `mimalloc`, and `cache` are inverse toggles because
 their corresponding CMake defaults are `ON`: adding one disables the feature.
 In particular, do not add `gtest` to a normal test build. `benchmark` is not an
 inverse toggle: most modules default it to `ON` in CMake, while Graph defaults
@@ -108,13 +107,10 @@ CMake directly.
 ### Backends and analysis
 
 ```bash
-python Scripts/setup.py config.build.test.ninja.clang.release --logging=GLOG
+python Scripts/setup.py config.build.test.ninja.clang.release
 python Scripts/setup.py config.build.test.ninja.clang.debug.coverage
 python Scripts/setup.py config.build.ninja.clang.release.ccache
 ```
-
-Profiler instrumentation (Kineto/ITT) is configured inside
-`ThirdParty/Profiler`, not via XSigma setup flags.
 
 ## Direct CMake
 
@@ -124,7 +120,6 @@ module, for example:
 ```bash
 cmake -S . -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DLOGGING_BACKEND=LOGURU \
   -DVECTORIZATION_CPU_BACKEND=avx2 \
   -DMEMORY_GPU_BACKEND=none \
   -DVECTORIZATION_GPU_BACKEND=none

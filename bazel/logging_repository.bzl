@@ -1,22 +1,15 @@
 """Local checkout of ThirdParty/Logging with XSigma's overlay BUILD.
 
-new_local_repository would keep Logging/ThirdParty/BUILD.bazel as a nested
-package, which blocks the overlay from compiling nested loguru/glog/spdlog
-sources. This rule copies the tree, drops nested BUILD files, and writes
-//ThirdParty:logging.BUILD at the root so backends stay private to @logging.
+Copies first-party Logging sources, drops nested BUILD files, and writes
+//ThirdParty:logging.BUILD at the root so @xsigma//bazel flags apply.
+
+XSigma depends on @logging//:Logging only.
 """
 
 def _local_logging_repository_impl(repository_ctx):
     src = repository_ctx.path(str(repository_ctx.workspace_root) + "/" + repository_ctx.attr.path)
     if not src.exists:
         fail("Logging checkout missing at %s (git submodule update --init ThirdParty/Logging)" % src)
-
-    loguru_src = repository_ctx.path(str(src) + "/ThirdParty/loguru/loguru.cpp")
-    if not loguru_src.exists:
-        fail(
-            "Logging nested ThirdParty backends missing. Initialize:\n" +
-            "  git submodule update --init --recursive ThirdParty/Logging"
-        )
 
     python = repository_ctx.which("python3")
     if python == None:
@@ -31,6 +24,7 @@ def _local_logging_repository_impl(repository_ctx):
             "-a",
             "--copy-links",
             "--exclude", ".git",
+            "--exclude", "ThirdParty",
             str(src) + "/",
             "./",
         ])
@@ -41,9 +35,13 @@ def _local_logging_repository_impl(repository_ctx):
 import os
 import shutil
 import sys
+
 src, dst = sys.argv[1], sys.argv[2]
 for name in os.listdir(src):
-    s, d = os.path.join(src, name), os.path.join(dst, name)
+    if name in (".git", "ThirdParty"):
+        continue
+    s = os.path.join(src, name)
+    d = os.path.join(dst, name)
     if os.path.isdir(s):
         shutil.copytree(s, d, symlinks=False)
     elif not os.path.islink(s):
@@ -58,30 +56,11 @@ for name in os.listdir(src):
         "WORKSPACE.bazel",
         "Testing/BUILD.bazel",
         "Testing/Cxx/BUILD.bazel",
-        # Standalone Logging ignores nested backends because they are separate
-        # WORKSPACE repos there. This overlay compiles them in-tree, so the
-        # ignore file must not hide those sources from glob().
         ".bazelignore",
     ]:
         nested = repository_ctx.path(rel)
         if nested.exists:
             repository_ctx.delete(nested)
-
-    # Drop nested BUILD files under ThirdParty/ so loguru/glog/spdlog sources
-    # are not a separate Bazel package. Keep bazel/BUILD.bazel (config_settings).
-    strip_script = """
-import os
-import sys
-root = os.path.join(sys.argv[1], "ThirdParty")
-if os.path.isdir(root):
-    for dirpath, dirnames, filenames in os.walk(root):
-        for name in filenames:
-            if name in ("BUILD", "BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel"):
-                os.remove(os.path.join(dirpath, name))
-"""
-    strip = repository_ctx.execute([python, "-c", strip_script, "."])
-    if strip.return_code != 0:
-        fail("Failed to strip nested BUILD files: %s%s" % (strip.stdout, strip.stderr))
 
     repository_ctx.file(
         "WORKSPACE",

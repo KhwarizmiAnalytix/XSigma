@@ -169,8 +169,8 @@ build:linux --linkopt=-lrt
 # Windows specific settings (MSVC) — mirrors compiler_checks.cmake.
 # Per-module MSVC flags (/std:c++XX, /Zc:__cplusplus, /bigobj, /utf-8, /wd*, /EHsc) are set
 # per-target via xsigma_copts() in bazel/xsigma.bzl so Library targets are self-contained.
-# ThirdParty/external targets need a C++20 baseline on MSVC: libkineto uses
-# std::string::ends_with (C++20). Use --per_file_copt so the baseline applies
+# ThirdParty/external targets need a C++20 baseline on MSVC.
+# Use --per_file_copt so the baseline applies
 # only to those paths, not to Library (which already gets /std:c++20 via xsigma_copts).
 build:windows --per_file_copt=external/.*@/std:c++20
 build:windows --per_file_copt=ThirdParty/.*@/std:c++20
@@ -271,9 +271,6 @@ build:memkind --define=memory_enable_memkind=true
 # Enable mimalloc
 build:mimalloc --define=memory_enable_mimalloc=true
 
-# Enable magic_enum
-build:magic_enum --define=core_enable_magic_enum=true
-
 # Enable LU pivoting
 build:lu_pivoting --define=core_lu_pivoting=true
 
@@ -304,7 +301,7 @@ build:enzyme --define=core_enable_enzyme=true
 # Testing Configuration
 # =============================================================================
 # Only //Library/... tests are invoked by Scripts/setup_bazel.py. Vendored
-# ThirdParty/ sources are built as dependencies (@fmt, @glog, @kineto, …)
+# ThirdParty/ sources are built as dependencies (@fmt, …)
 # and must not be selected as test targets.
 test --test_output=errors
 test --test_summary=detailed
@@ -330,12 +327,8 @@ coverage --instrument_test_targets
 build:llvm_coverage --experimental_use_llvm_covmap
 
 # =============================================================================
-# Logging Backend Selection
+# Logging code-generation switches
 # =============================================================================
-build:logging_glog --define=logging_backend=glog
-build:logging_loguru --define=logging_backend=loguru
-build:logging_native --define=logging_backend=native
-build:logging_spdlog --define=logging_backend=spdlog
 build:logging_portable_float_format --define=logging_enable_portable_float_format=true
 build:logging_std_format --define=logging_format_use_std=true
 build:logging_default_log_fatal --define=logging_default_exception_mode=log_fatal
@@ -356,7 +349,7 @@ build:logging_no_cxa_demangle --define=logging_enable_cxa_demangle=false
 # *ENABLE_BENCHMARK=ON (Core/Memory/Parallel/Logging/Profiler/Vectorization + umbrella enable_benchmark).
 build --define=parallel_backend=std --define=memory_enable_mimalloc=true --define=core_enable_benchmark=true --define=memory_enable_benchmark=true --define=parallel_enable_benchmark=true --define=logging_enable_benchmark=true --define=profiler_enable_benchmark=true --define=vectorization_enable_benchmark=true --define=enable_benchmark=true
 #
-# Feature defaults (mimalloc, magic_enum, KINETO profiler, SPDLOG, Sobol 1111, POOL_ASYNC GPU
+# Feature defaults (mimalloc, Sobol 1111, POOL_ASYNC GPU
 # alloc) are applied in //bazel:*.bzl — plain `bazel build //Library/...` matches root CMakeLists.txt
 # without extra --define. Opt out with e.g. --define=memory_enable_mimalloc=false / disable_sobol_1111.
 #

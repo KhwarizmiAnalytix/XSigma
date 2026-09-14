@@ -46,14 +46,6 @@ foreach(_test_source IN ITEMS ${test_sources})
     endif()
   endif()
 
-  # When Kineto is disabled, exclude Kineto-specific tests
-  if(NOT PROFILER_ENABLE_KINETO)
-    if(file_name MATCHES "TestKineto")
-      message(STATUS "Excluding Kineto test (Kineto disabled): ${file_name}")
-      continue()
-    endif()
-  endif()
-
   # When Enzyme is disabled, exclude Enzyme-specific tests
   if(NOT CORE_ENABLE_ENZYME)
     if(file_name MATCHES "TestEnzyme")
@@ -90,11 +82,6 @@ endif()
 # Link libraries Core library is linked which transitively brings in Core-local dependencies via
 # CORE_DEPENDENCY_LIBS
 target_link_libraries(CoreCxxTests PRIVATE Gtest::gtest Gtest::gtest_main Core::Core)
-
-xsigma_add_profiler()
-if(TARGET Profiler::Profiler)
-  target_include_directories(CoreCxxTests PRIVATE "${XSIGMA_THIRDPARTY_DIR}/Profiler")
-endif()
 
 # Set target properties
 set_target_properties(

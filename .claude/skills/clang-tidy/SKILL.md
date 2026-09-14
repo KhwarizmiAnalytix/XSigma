@@ -102,9 +102,6 @@ editing the root config:
 - `Library/Memory/gpu/.clang-tidy` — disables `modernize-macro-to-enum`
   only in that directory, because it crashes clang-tidy on
   `gpu_allocator_tracking.cpp`.
-- `ThirdParty/Profiler/bespoke/kineto/.clang-tidy` — disables all
-  `bugprone-*` only in that directory, because clang-tidy 21.1.0 crashes
-  analyzing the vendored-fork `fmt` usage there at `-O3`.
 
 Both start with `InheritParentConfig: true` (or equivalent) so they narrow
 rather than replace the root ruleset. If you hit a real crash or an

@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <util/exception.h>
+#include <logging/util/exception.h>
 
 #include "common/macros.h"
 

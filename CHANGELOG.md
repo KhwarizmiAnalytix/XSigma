@@ -11,19 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lintrunner adapters moved to the `lint-tool` PyPI package
   (https://github.com/KhwarizmiAnalytix/lint-tool). Host policy stays in
   `.lintrunner.toml`; the in-tree `Tools/linter` tree is gone.
-- Logging backends (glog, loguru, spdlog) and magic_enum come from
-  `ThirdParty/Logging/ThirdParty/` instead of duplicate XSigma root
-  submodules. fmt stays at the XSigma root so Core can share it.
-- Dropped leftover XSigma-level Bazel overlays (`kineto.BUILD`,
-  `ittapi.BUILD`, `loguru.BUILD`, `spdlog.BUILD`, `glog.BUILD`,
-  `magic_enum.BUILD`). Kineto is compiled from `profiler.BUILD`;
-  loguru/glog/spdlog/magic_enum from `logging.BUILD`.
+- Logging public headers moved to `<logging/logging.h>` /
+  `<logging/logger/logger.h>` / `<logging/util/exception.h>`. Profiler
+  clients include `<profiler.h>` and use `profiler::session`; Parallel
+  clients include `<parallel.h>`.
+- XSigma host CMake and Bazel compile Logging and Profiler product sources
+  only. Nested trees inside those products are not configured, compiled, or
+  named as XSigma packages.
 
 ### Added
 - Lintrunner `TPINCLUDE` rule: third-party C++ headers must use `#include <>`,
   not quotes. Logging, Parallel, and Profiler public headers are in scope
-  (`<logger/...>`, `<util/exception.h>`, `<native/...>`, `<bespoke/...>`,
-  `<tools/threaded_callback_queue.h>`).
+  (`<logging/...>`, `<profiler.h>`, `<parallel.h>`).
 
 ## [1.0.0] - 2025-11-02
 
@@ -58,11 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Performance benchmarking with Google Benchmark
 - Link Time Optimization (LTO) support
 - Intel Threading Building Blocks (TBB) integration
-- Logging backends (Loguru, spdlog)
+- Logging support
 - Compression support (zlib, zstd)
 - NUMA awareness for optimized memory allocation
 - Intel MKL integration for optimized linear algebra
-- Profiling support with Intel ITT API and Kineto
+- Profiling support
 - Python bindings infrastructure
 - Flexible setup.py build system with 50+ configuration variants
 

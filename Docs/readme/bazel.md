@@ -16,9 +16,6 @@ Use Bazelisk. The pinned version is `8.4.2` in `.bazelversion`.
 
 ## Current defaults
 
-- Logging: LOGURU.
-- Profiler instrumentation: Kineto; the native TraceMe/XPlane pipeline is
-  always built.
 - C++ standard: C++20.
 - Parallel backend: standard threads.
 - mimalloc, GoogleTest, and Google Benchmark defines: enabled by the helper.
@@ -31,9 +28,6 @@ run the test suite.
 ```bash
 # AddressSanitizer.
 python Scripts/setup_bazel.py build.test.debug.asan
-
-# Logging backend.
-python Scripts/setup_bazel.py build.test.release --logging.glog
 
 # Parallel backend.
 python Scripts/setup_bazel.py build.test.release --parallel.tbb

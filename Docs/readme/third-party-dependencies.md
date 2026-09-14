@@ -5,18 +5,13 @@ discoverable system packages where a module supports them. Initialise submodules
 before configuring:
 
 ```bash
-git submodule sync --recursive
-git submodule update --init --recursive
+git submodule sync
+git submodule update --init
 ```
-
-`--recursive` is required so Logging and Profiler can initialize their *private*
-nested backends. Those nested trees are not XSigma host packages.
 
 ## Host submodules (`ThirdParty/` on XSigma)
 
 These are the only third-party checkouts registered in XSigma's `.gitmodules`.
-There is no host `ThirdParty/loguru`, `spdlog`, `glog`, `magic_enum`, `kineto`,
-or `ittapi`.
 
 | Path | Role |
 |---|---|
@@ -33,15 +28,7 @@ or `ittapi`.
 `ThirdParty/svml` is vendored binaries, not a git submodule. TBB is fetched by
 the build (CMake/Bazel), not stored as an XSigma submodule.
 
-## Nested backends (not XSigma packages)
-
-| Lives under | Private copies |
-|---|---|
-| `ThirdParty/Logging/ThirdParty/` | loguru, glog, spdlog, magic_enum (and a fmt copy unused when host fmt is present) |
-| `ThirdParty/Profiler/third_party/` | kineto, ittapi |
-
-`LOGGING_BACKEND=LOGURU|GLOG|SPDLOG|NATIVE` still selects Logging's backend;
-it does not add a host submodule.
+XSigma host overlays compile Logging and Profiler product sources only.
 
 ## Dependency selection
 
@@ -51,8 +38,6 @@ Dependency policy is owned by the consuming library, not by a generic
 | Dependency or area | Current option |
 |---|---|
 | External package preference | `XSIGMA_ENABLE_EXTERNAL=ON|OFF` |
-| Logging backend | `LOGGING_BACKEND=SPDLOG|LOGURU|GLOG|NATIVE` |
-| Enum reflection | `LOGGING_ENABLE_MAGICENUM=ON|OFF` |
 | CPU allocator | `MEMORY_ENABLE_MIMALLOC=ON|OFF` |
 | TBB Memory allocator | `MEMORY_ENABLE_TBB=ON|OFF` |
 | OpenMP execution | `PARALLEL_BACKEND=openmp` |
@@ -81,11 +66,6 @@ substitution exists.
 ## Direct CMake examples
 
 ```bash
-# Lightweight logging and no magic_enum.
-cmake -S . -B build-minimal -G Ninja \
-  -DLOGGING_BACKEND=NATIVE \
-  -DLOGGING_ENABLE_MAGICENUM=OFF
-
 # TBB parallel execution and Memory allocator.
 cmake -S . -B build-tbb -G Ninja \
   -DPARALLEL_BACKEND=tbb \
@@ -105,7 +85,7 @@ files consume only their module-prefixed forms.
 ## CMake targets
 
 Library target names and third-party aliases are defined by the checked-out
-CMake files and can vary with backend selection. Prefer linking XSigma's public
+CMake files and can vary with Parallel backend selection. Prefer linking XSigma's public
 library targets (for example `Logging::Logging`, `Memory::Memory`, or
 `Vectorization::Vectorization`) rather than depending directly on an internal
 third-party target.
