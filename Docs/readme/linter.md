@@ -12,13 +12,11 @@ would otherwise require bespoke shell scripting.
 | Path | Description |
 | --- | --- |
 | `Tools/linter/__init__.py` | Marks the package as importable so adapters can share helpers. |
-| `Tools/linter/README.md` | High-level documentation (this file). |
+| `Docs/readme/linter.md` | High-level documentation (this file). |
 | `Scripts/suppressions/spell_suppressions.txt` | Shared codespell ignore-words list; keep it sorted and deduplicated. |
 | `Tools/linter/adapters/` | Individual adapter entrypoints plus the shared `_linter` framework. |
 | `Tools/linter/adapters/_linter/` | Tokeniser, parser, and CLI scaffolding for Python-focused adapters. |
 | `Tools/linter/adapters/README.md` | Adapter authoring checklist (protocol, dry-run behaviour, etc.). |
-| `Tools/linter/clang_tidy/` | Support code for the clang-tidy adapter (compile database generation). |
-| `Tools/linter/clang_tidy/__init__.py` | Package marker for clang-tidy helpers. |
 
 The adapter directory contains one script per lint code (for example
 `clangformat_linter.py`, `mypy_linter.py`) plus project-specific data such as
@@ -29,17 +27,14 @@ The adapter directory contains one script per lint code (for example
   Python, C++, and CMake sources consistent and typo-free.
 - **Static analysis**: `mypy_linter`, `pyrefly_linter`, `ruff_linter`, and
   `clangtidy_linter` provide type checking, linting, and C++ diagnostics.
-- **Build and dependency hygiene**: `cmake_linter`, `cmake_format`, `cmake_minimum_required_linter`,
-  `bazel_linter`, and `nativefunctions_linter` validate build scripts and
-  generated metadata.
-- **Workflow safety**: `actionlint_linter`, `gha_linter`, `workflow_consistency_linter`,
-  and `no_workflows_on_fork` harden GitHub Actions configuration.
-- **Repository policy**: `set_linter`, `docstring_linter`, `header_only_linter`,
-  `testowners_linter`, `test_device_bias_linter`, and `test_has_main_linter`
-  encode XSigma-specific conventions.
-- **Infrastructure helpers**: `pip_init.py`, `s3_init.py`, `update_s3.py`, and
-  `clang_tidy/generate_build_files.py` provision third-party binaries and prepare
-  compilation databases.
+- **Build and dependency hygiene**: `cmake_linter`, `cmake_format`,
+  `cmake_minimum_required_linter`, and `bazel_linter` validate build scripts.
+- **Workflow safety**: `actionlint_linter` and `gha_linter` harden GitHub Actions
+  configuration.
+- **Repository policy**: `docstring_linter` and `import_linter` encode project
+  conventions for Scripts.
+- **Infrastructure helpers**: `pip_init.py`, `s3_init.py`, and `update_s3.py`
+  provision third-party binaries.
 
 All adapters emit the JSON protocol expected by `lintrunner`, so they can run
 either individually or behind the aggregated developer workflow.
@@ -87,34 +82,20 @@ positional file paths at the end.
 | DOCSTRING | `adapters/docstring_linter.py` | Requires docstrings on large classes/functions. | Shared `FileLinter` flags; plus `--grandfather PATH`; `--grandfather-tolerance PERCENT`; `--lint-init`; `--lint-local`; `--lint-protected`; `--max-class N`; `--max-def N`; `--min-docstring N`; `--no-grandfather`; `--report`; `--write-grandfather`. |
 | EXEC | `adapters/exec_linter.py` | Checks that source files are non-executable. | `--verbose`; `filenames...` |
 | FLAKE8 | `adapters/flake8_linter.py` | Wraps `flake8` and plugin set. | `--flake8-plugins-path DIR`; `--severity CODE:LEVEL` (repeatable); `--retries N`; `--verbose`; `filenames...` |
-| GB_REGISTRY | `adapters/gb_registry_linter.py` | Synchronises dynamo graph-break registry entries. | `--dynamo-dir PATH`; `--registry-path PATH` |
 | GHA | `adapters/gha_linter.py` | Verifies `secrets: inherit` in workflow jobs. | `filenames...` |
 | GREP | `adapters/grep_linter.py` | Generic pattern matcher with optional sed fixes. | `--pattern REGEX` (required); `--allowlist-pattern REGEX`; `--linter-name CODE`; `--match-first-only`; `--error-name TEXT`; `--error-description TEXT`; `--replace-pattern SED_EXPR`; `--verbose`; `filenames...` |
-| HEADER_ONLY_LINTER | `adapters/header_only_linter.py` | Validates header-only API smoke tests. | (No additional options; uses repo defaults.) |
 | IMPORT | `adapters/import_linter.py` | Blocks disallowed third-party imports. | `filepaths...` (positional only) |
 | LINTRUNNER_VERSION | `adapters/lintrunner_version_linter.py` | Confirms the local `lintrunner` is up to date. | No CLI options; run the script directly. |
 | MYPY | `adapters/mypy_linter.py` | Wraps `dmypy`/`mypy` type checking. | `--retries N`; `--config PATH` (required); `--code CODE`; `--verbose`; `filenames...` |
-| NATIVEFUNCTIONS | `adapters/nativefunctions_linter.py` | Round-trips `native_functions.yaml` with `ruamel`. | `--native-functions-yml PATH` (required) |
 | NEWLINE | `adapters/newlines_linter.py` | Enforces POSIX newlines and bans CRLF. | `--verbose`; `filenames...` |
-| MERGE_CONFLICTLESS_CSV | `adapters/no_merge_conflict_csv_linter.py` | Pads CSV rows to avoid merge conflicts. | `--verbose`; `filenames...` |
-| NO_WORKFLOWS_ON_FORK | `adapters/no_workflows_on_fork.py` | Adds fork guards to workflow jobs. | `filenames...` |
 | PIP INIT | `adapters/pip_init.py` | Installs pinned Python packages for linting. | `packages...` (required); `--verbose`; `--dry-run 1` |
 | PYFMT | `adapters/pyfmt_linter.py` | Formats Python with `isort`, `usort`, and `ruff format`. | `--verbose`; `filenames...` |
 | PYPROJECT | `adapters/pyproject_linter.py` | Checks `pyproject.toml` metadata consistency. | `--verbose`; `filenames...` |
 | PYREFLY | `adapters/pyrefly_linter.py` | Runs the `pyrefly` analyser. | `--code CODE`; `--verbose`; `--config PATH` (required) |
 | RUFF | `adapters/ruff_linter.py` | Wraps `ruff check` with optional autofix follow-up. | `--config PATH`; `--explain`; `--show-disable`; `--timeout SEC`; `--severity CODE:LEVEL` (repeatable); `--no-fix`; plus default `--retries`, `--verbose`, and `filenames...` from `add_default_options`. |
 | S3 INIT | `adapters/s3_init.py` | Downloads prebuilt binaries referenced by adapters. | `--config-json PATH` (required); `--linter NAME` (required); `--output-dir DIR`; `--output-name NAME`; `--dry-run {0,1}` |
-| SET_LINTER | `adapters/set_linter.py` | Rewrites raw `set` usage to `OrderedSet`. | Shared `FileLinter` flags (`--fix`, `--lintrunner`, `--verbose`, `files...`). |
 | SHELLCHECK | `adapters/shellcheck_linter.py` | Calls `shellcheck` with JSON output. | `filenames...` |
-| TESTOWNERS | `adapters/testowners_linter.py` | Ensures test files declare valid owners. | `filenames...` |
-| TEST_DEVICE_BIAS | `adapters/test_device_bias_linter.py` | Flags CUDA-specific assumptions in tests. | `filenames...` |
-| TEST_HAS_MAIN | `adapters/test_has_main_linter.py` | Requires a `__main__` guard that runs the test suite. | `filenames...` |
 | UPDATE_S3 | `adapters/update_s3.py` | Uploads refreshed binaries and updates hashes. | `--config-json PATH` (required); `--linter NAME` (required); `--platform NAME`; `--file PATH` (required); `--dry-run` |
-| WORKFLOWSYNC | `adapters/workflow_consistency_linter.py` | Checks that jobs with the same `sync-tag` match. | `filenames...` |
-
-The helper `clang_tidy/generate_build_files.py` uses no CLI options: it updates
-submodules, rebuilds `setup.py`, and reruns code generation before
-`clangtidy_linter.py` executes.
 
 ## Requirements
 - **Python runtime**: adapters target the repository's supported Python version
@@ -123,11 +104,10 @@ submodules, rebuilds `setup.py`, and reruns code generation before
   `usort`, `ruff`, `cmakelang`, `codespell_lib`, `packaging`, `boto3`, and other packages
   pinned by `pip_init.py`.
 - **Native tooling**: `clang-format`, `clang-tidy`, `cmakelint`, `cmake-format`, `shellcheck`,
-  `actionlint`, `bazel`, `grep`, `sed`, and any binaries referenced in
+  `actionlint`, `grep`, `sed`, and any binaries referenced in
   `s3_init_config.json`. `lintrunner init` installs the correct versions.
-- **Repository build prerequisites**: the clang-tidy adapter expects generated
-  code (`torchgen`) and `compile_commands.json`; the helper script in
-  `clang_tidy/` produces both.
+- **Repository build prerequisites**: the clang-tidy adapter expects a CMake
+  build directory with `compile_commands.json` (produced by `setup.py config`).
 
 ## Installation
 
@@ -180,11 +160,6 @@ vcpkg install cmake:x64-windows clang-tools:x64-windows
    lintrunner -V
    ```
    Should output the version number (e.g., `lintrunner 0.12.7`)
-
-4. **Optional: Prepare clang-tidy build artifacts** (only if using CLANGTIDY linter):
-   ```bash
-   python Tools/linter/clang_tidy/generate_build_files.py
-   ```
 
 ### Manual Installation (Alternative)
 
@@ -310,9 +285,9 @@ git diff --name-only | xargs lintrunner
 ```
 
 ## Exit Codes
-- Adapters based on `_linter.FileLinter.run()` (`docstring_linter`, `set_linter`,
-  and similar) exit with `0` when all files pass or suggested edits are applied,
-  and `1` when lint errors remain.
+- Adapters based on `_linter.FileLinter.run()` (`docstring_linter` and similar)
+  exit with `0` when all files pass or suggested edits are applied, and `1` when
+  lint errors remain.
 - Wrapper adapters typically return `0` on success, `1` when lint findings are
   emitted, and another non-zero code if the underlying command fails (for
   example, a timeout in `clangformat_linter.py` or a missing binary in
@@ -485,7 +460,7 @@ lintrunner --take FLAKE8 --take RUFF
 
 - **Enable verbose logging**: Use `--verbose` flag for detailed output
 
-- **Check project documentation**: See `Tools/linter/README.md` for adapter-specific details
+- **Check project documentation**: See `Docs/readme/linter.md` for adapter-specific details
 
 ## Cross-Platform Compatibility
 
