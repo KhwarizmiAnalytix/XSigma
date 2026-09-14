@@ -35,14 +35,15 @@
 #include <unordered_set>
 #include <vector>
 
-#include "bespoke/common/record_function.h"
-#include "bespoke/kineto/hotspot_report.h"
-#include "bespoke/kineto/profiler_kineto.h"
-#include "native/exporters/xplane/tf_xplane_visitor.h"
-#include "native/exporters/xplane/xplane.h"
-#include "native/exporters/xplane/xplane_schema.h"
-#include "native/exporters/xplane/xplane_utils.h"
-#include "native/session/profiler.h"
+#include <bespoke/common/record_function.h>
+#include <bespoke/kineto/hotspot_report.h>
+#include <bespoke/kineto/profiler_kineto.h>
+#include <native/exporters/xplane/tf_xplane_visitor.h>
+#include <native/exporters/xplane/xplane.h>
+#include <native/exporters/xplane/xplane_schema.h>
+#include <native/exporters/xplane/xplane_utils.h>
+#include <native/session/profiler.h>
+
 #include "terminals/tensor.h"
 
 extern "C" int xsigma_metal_device_count();

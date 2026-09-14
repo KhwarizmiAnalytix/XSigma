@@ -4,8 +4,9 @@
 #include <type_traits>
 #include <utility>
 
+#include <util/exception.h>
+
 #include "common/macros.h"
-#include "util/exception.h"
 
 namespace xsigma
 {

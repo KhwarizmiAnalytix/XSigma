@@ -178,7 +178,8 @@ File location: `Core/xxx/yyy/a.h`
 #include <memory>
 #include <string>
 
-#include "third_party/fmt/format.h"
+#include <fmt/format.h>
+#include <logger/logger.h>
 
 #include "xxx/yyy/a.h"
 #include "xxx/zzz/b.h"

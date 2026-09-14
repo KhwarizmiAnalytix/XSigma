@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lintrunner adapters moved to the `lint-tool` PyPI package
   (https://github.com/KhwarizmiAnalytix/lint-tool). Host policy stays in
   `.lintrunner.toml`; the in-tree `Tools/linter` tree is gone.
+- Logging backends (glog, loguru, spdlog) come from
+  `ThirdParty/Logging/ThirdParty/` instead of duplicate XSigma root
+  submodules. fmt and magic_enum stay at the XSigma root so Core can
+  share them.
+
+### Added
+- Lintrunner `TPINCLUDE` rule: third-party C++ headers must use `#include <>`,
+  not quotes. Logging, Parallel, and Profiler public headers are in scope
+  (`<logger/...>`, `<util/exception.h>`, `<native/...>`, `<bespoke/...>`,
+  `<tools/threaded_callback_queue.h>`).
 
 ## [1.0.0] - 2025-11-02
 

@@ -137,6 +137,12 @@ above — skip it deliberately for trivial edits, don't skip it by default.
 - Include paths start from the library subfolder, not the repo root or
   `Core/` — e.g. `#include "xxx/yyy/a.h"`, never
   `#include "Core/xxx/yyy/a.h"` or an absolute path.
+- Third-party headers use angle brackets (`#include <fmt/format.h>`),
+  never quotes. Quotes are for project headers only. This includes
+  Logging (`<logger/logger.h>`, `<util/exception.h>`), Parallel
+  (`<tools/threaded_callback_queue.h>`), and Profiler (`<native/...>`,
+  `<bespoke/...>`). `"profiler/"` is first-party Memory
+  (`Library/Memory/profiler/`), not ThirdParty/Profiler.
 - Order: standard library → third-party → project headers, each group
   separated by a blank line.
 

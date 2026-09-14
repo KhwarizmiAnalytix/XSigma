@@ -43,7 +43,7 @@
 // of each one repeating this block. BenchmarkTensorGpu.cpp doesn't use
 // VectorizationTest.h (it's Google Benchmark, not GTest), so it still
 // includes this header directly.
-#include "fmt/format.h"
+#include <fmt/format.h>
 
 namespace fmt
 {

@@ -5,9 +5,10 @@
 #include <memory>
 #include <type_traits>
 
+#include <util/exception.h>
+
 #include "common/export.h"
 #include "common/maybe_owned.h"
-#include "util/exception.h"
 
 namespace pybind11
 {

@@ -30,10 +30,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include <tools/threaded_callback_queue.h>
+
 #include "common/graph_export.h"
 #include "dependency_graph.h"
 #include "graph_types.h"
-#include "tools/threaded_callback_queue.h"
 
 namespace graph
 {

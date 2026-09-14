@@ -1,0 +1,39 @@
+---
+description: Third-party C++ headers use angle brackets, not quotes
+globs: "**/*.{h,hxx,hpp,hh,cpp,cxx,cc,cu,cuh,mm,inl}"
+alwaysApply: false
+---
+
+# Third-party includes
+
+Vendored and external library headers use **angle brackets**. Quotes are for **project** headers only (paths from the library subfolder, never `Core/` or the repo root).
+
+This includes the standalone products under `ThirdParty/` — **Logging**, **Parallel**, and **Profiler** — as well as fmt, gtest, benchmark, and the rest.
+
+```cpp
+// BAD — third-party with quotes
+#include "fmt/format.h"
+#include "gtest/gtest.h"
+#include "logger/logger.h"
+#include "native/session/profiler.h"
+#include "tools/threaded_callback_queue.h"
+
+// GOOD — third-party with <>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
+#include <logger/logger.h>
+#include <native/session/profiler.h>
+#include <bespoke/kineto/profiler_kineto.h>
+#include <tools/threaded_callback_queue.h>
+#include <util/exception.h>
+
+// GOOD — project headers stay quoted
+#include "common/macros.h"
+#include "memory/helper/memory_allocator.h"
+#include "profiler/gpu_memory_snapshot.h"
+```
+
+Do not write `#include "third_party/..."`. Use the installed/public header, e.g. `#include <fmt/format.h>`.
+Never edit files under `ThirdParty/` to satisfy this; fix the include site instead.
+
+Do **not** treat `"profiler/"` as Profiler. That prefix is first-party `Library/Memory/profiler/`. Profiler public headers are `<native/...>` and `<bespoke/...>`. Do **not** treat generic `"util/"` or `"tools/"` as third-party — only Logging's `<util/exception.h>` and Parallel's `<tools/threaded_callback_queue.h>`.

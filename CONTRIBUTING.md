@@ -448,14 +448,22 @@ python setup.py config.build.ninja.clang.iwyu
 
 - Include paths must start from the project subfolder, not the repository root
 - Do **not** use absolute paths or paths starting with `Core/`
+- Third-party headers use `#include <...>` (never quotes), including
+  Logging, Parallel, and Profiler public headers
 
 **Example**: For file `Core/xxx/yyy/a.h`:
 ```cpp
 // ❌ Incorrect
 #include "Core/xxx/yyy/a.h"
+#include "fmt/format.h"
+#include "logger/logger.h"
 
 // ✅ Correct
 #include "xxx/yyy/a.h"
+#include <fmt/format.h>
+#include <logger/logger.h>
+#include <native/session/profiler.h>
+#include <tools/threaded_callback_queue.h>
 ```
 
 ### DLL Export Macros

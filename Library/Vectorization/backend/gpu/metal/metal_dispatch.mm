@@ -31,16 +31,16 @@
 #include <unordered_map>
 #include <utility>
 
+#if VECTORIZATION_HAS_PROFILER
+#include <native/gpu/gpu_tracer.h>
+#endif
+
 #include "allocator.h"
 #include "backend/gpu/metal/metal_kernels_source.h"
 #include "common/device.h"
 #include "common/vectorization_macros.h"
 #include "expressions/reduce_op.h"
 #include "gpu/metal/metal_buffer_allocator.h"
-
-#if VECTORIZATION_HAS_PROFILER
-#include "native/gpu/gpu_tracer.h"
-#endif
 
 namespace vectorization::metal_backend
 {

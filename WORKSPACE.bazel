@@ -103,31 +103,29 @@ local_repository(
 )
 
 # -----------------------------------------------------------------------------
-# Google Logging (glog) - Logging library (from local ThirdParty directory)
+# Google Logging (glog) — Logging backend (nested under ThirdParty/Logging)
 # -----------------------------------------------------------------------------
 local_repository(
     name = "glog",
-    path = "ThirdParty/glog",
+    path = "ThirdParty/Logging/ThirdParty/glog",
 )
 
 # -----------------------------------------------------------------------------
-# Loguru - Lightweight C++ logging library (using custom BUILD file)
+# Loguru — Logging backend (nested under ThirdParty/Logging)
 # -----------------------------------------------------------------------------
-# Note: Loguru is a git submodule in ThirdParty/loguru
-# We use new_local_repository to provide our own BUILD file without modifying
-# the third-party submodule (as per .augment/rules/ThirdParty.md)
+# Overlay BUILD so we do not edit the vendored loguru tree.
 new_local_repository(
     name = "loguru",
-    path = "ThirdParty/loguru",
+    path = "ThirdParty/Logging/ThirdParty/loguru",
     build_file = "//ThirdParty:loguru.BUILD",
 )
 
 # -----------------------------------------------------------------------------
-# spdlog — fast header-only logging (git submodule ThirdParty/spdlog)
+# spdlog — Logging backend (nested under ThirdParty/Logging)
 # -----------------------------------------------------------------------------
 new_local_repository(
     name = "spdlog",
-    path = "ThirdParty/spdlog",
+    path = "ThirdParty/Logging/ThirdParty/spdlog",
     build_file = "//ThirdParty:spdlog.BUILD",
 )
 
@@ -161,8 +159,9 @@ local_profiler_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Logging. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
-# Logging's own deps (fmt/loguru/glog/spdlog/magic_enum) come from XSigma's
-# WORKSPACE repos above — its nested ThirdParty/ submodules are standalone-only.
+# Logging's backends (loguru / glog / spdlog) come from its nested
+# ThirdParty/ tree. fmt / magic_enum stay as XSigma root repos so Core
+# can share them.
 new_local_repository(
     name = "logging",
     build_file = "//ThirdParty:logging.BUILD",

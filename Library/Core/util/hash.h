@@ -12,7 +12,7 @@
 #include <vector>
 
 //#include "util/array_ref.h"
-#include "util/exception.h"
+#include <util/exception.h>
 //#include "util/complex.h"
 
 namespace xsigma

@@ -911,9 +911,9 @@ endfunction()
 # (LOGGING_BACKEND) and its feature toggles remain user-facing XSigma flags —
 # they are consumed by Logging's own CMakeLists when the subproject configures.
 #
-# Logging's own CMakeLists still initializes fmt/loguru/glog/spdlog/magic_enum
-# from ${CMAKE_SOURCE_DIR}/ThirdParty (XSigma's vendored copies) exactly as it
-# did in Library/Logging — Core/Memory keep working unchanged.
+# Logging's own CMakeLists initializes fmt/magic_enum from the host
+# ThirdParty/ when present (shared with Core) and loguru/glog/spdlog from
+# Logging's nested ThirdParty/ so XSigma does not keep duplicate copies.
 # Called by consuming libraries (Core, Memory, Vectorization) before their
 # if(TARGET Logging::Logging) checks — idempotent.
 # =============================================================================
@@ -924,7 +924,7 @@ function(xsigma_add_logging)
     set(_logging_src "${XSIGMA_THIRDPARTY_DIR}/Logging")
     if(NOT EXISTS "${_logging_src}/CMakeLists.txt")
         message(FATAL_ERROR "ThirdParty/Logging is missing. Initialize the submodule:\n"
-                            "  git submodule update --init ThirdParty/Logging")
+                            "  git submodule update --init --recursive ThirdParty/Logging")
     endif()
     set(LOGGING_ENABLE_TESTING OFF CACHE BOOL "Logging tests build only standalone" FORCE)
     set(LOGGING_ENABLE_EXAMPLES OFF CACHE BOOL "Logging examples build only standalone" FORCE)
@@ -986,8 +986,8 @@ endfunction()
 #                        Logging (via xsigma_add_logging)
 #   Library/Graph      → Parallel (via xsigma_add_parallel)
 #   ThirdParty/Profiler → owns nested third_party/kineto and ittapi (not XSigma root)
-#   ThirdParty/Logging  → fmt, loguru, glog, spdlog, magic_enum (wired by its own
-#                        CMakeLists from XSigma's root ThirdParty/ when embedded)
+#   ThirdParty/Logging  → fmt/magic_enum from the host ThirdParty/ when present;
+#                        loguru, glog, spdlog from Logging's nested ThirdParty/
 #   ThirdParty/Parallel → TBB/OpenMP via its own Cmake/ finders
 #   */Testing/Cxx      → xsigma_add_googletest(), google-benchmark
 # =============================================================================
