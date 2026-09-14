@@ -74,7 +74,7 @@ cc_library(
     defines = vectorization_defines(),
     includes = ["."],
     deps = [
-        "//Library/Logging:Logging",
+        "@logging//:Logging",
         "//Library/Memory:Memory",
         "@profiler//:Profiler",
     ],
@@ -274,7 +274,7 @@ cc_library(
         "//conditions:default": True,
     }),
     deps = [
-        "//Library/Logging:Logging",
+        "@logging//:Logging",
         "//Library/Memory:Memory",
         "@profiler//:Profiler",
     ] + vectorization_svml_deps() + vectorization_sleef_deps() + vectorization_gpu_deps() + select({

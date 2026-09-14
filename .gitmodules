@@ -1,34 +1,40 @@
 [submodule "ThirdParty/fmt"]
-	path = ThirdParty/fmt
-	url = https://github.com/fmtlib/fmt.git
+  path = ThirdParty/fmt
+  url = https://github.com/fmtlib/fmt.git
 [submodule "ThirdParty/cpuinfo"]
-	path = ThirdParty/cpuinfo
-	url = https://github.com/pytorch/cpuinfo.git
+  path = ThirdParty/cpuinfo
+  url = https://github.com/pytorch/cpuinfo.git
 [submodule "ThirdParty/magic_enum"]
-	path = ThirdParty/magic_enum
-	url = https://github.com/Neargye/magic_enum.git
+  path = ThirdParty/magic_enum
+  url = https://github.com/Neargye/magic_enum.git
 [submodule "ThirdParty/loguru"]
-	path = ThirdParty/loguru
-	url = https://github.com/emilk/loguru.git
+  path = ThirdParty/loguru
+  url = https://github.com/emilk/loguru.git
 [submodule "ThirdParty/glog"]
-	path = ThirdParty/glog
-	url = https://github.com/google/glog.git
+  path = ThirdParty/glog
+  url = https://github.com/google/glog.git
 [submodule "ThirdParty/googletest"]
-	path = ThirdParty/googletest
-	url = https://github.com/google/googletest.git
+  path = ThirdParty/googletest
+  url = https://github.com/google/googletest.git
 [submodule "ThirdParty/mimalloc"]
-	path = ThirdParty/mimalloc
-	url = https://github.com/microsoft/mimalloc.git
+  path = ThirdParty/mimalloc
+  url = https://github.com/microsoft/mimalloc.git
 
 [submodule "ThirdParty/benchmark"]
-	path = ThirdParty/benchmark
-	url = https://github.com/google/benchmark.git
+  path = ThirdParty/benchmark
+  url = https://github.com/google/benchmark.git
 [submodule "ThirdParty/spdlog"]
-	path = ThirdParty/spdlog
-	url = https://github.com/gabime/spdlog.git
+  path = ThirdParty/spdlog
+  url = https://github.com/gabime/spdlog.git
 [submodule "ThirdParty/sleef"]
-	path = ThirdParty/sleef
-	url = https://github.com/shibatch/sleef.git
+  path = ThirdParty/sleef
+  url = https://github.com/shibatch/sleef.git
 [submodule "ThirdParty/Profiler"]
-	path = ThirdParty/Profiler
-	url = https://github.com/KhwarizmiAnalytix/Profiler.git
+  path = ThirdParty/Profiler
+  url = https://github.com/KhwarizmiAnalytix/Profiler.git
+[submodule "ThirdParty/Logging"]
+  path = ThirdParty/Logging
+  url = https://github.com/KhwarizmiAnalytix/Logging.git
+[submodule "ThirdParty/Parallel"]
+  path = ThirdParty/Parallel
+  url = https://github.com/KhwarizmiAnalytix/Parallel.git

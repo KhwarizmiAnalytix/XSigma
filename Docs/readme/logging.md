@@ -2,9 +2,12 @@
 
 ## Overview
 
-`Library/Logging` is a compile-time pluggable logging facade. The public
-C++ namespace is `logging`. Include paths are relative to `Library/Logging`
-(`logger/logger.h`, `util/exception.h`).
+Logging is a compile-time pluggable logging facade, consumed as a pure
+third-party dependency: the `ThirdParty/Logging` submodule from
+[KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging)
+(CMake target `Logging::Logging`, Bazel `@logging//:Logging`). The public
+C++ namespace is `logging`. Include paths are relative to the Logging repo
+root (`logger/logger.h`, `util/exception.h`).
 
 Select a backend at configure time with `setup.py --logging=SPDLOG|LOGURU|GLOG|NATIVE`
 (default **LOGURU**). Application source does not change when you switch backends.
@@ -36,14 +39,17 @@ python3 setup.py config.build.ninja.clang --logging=NATIVE
 ## Performance comparison
 
 Backends are exclusive at compile time, so the comparison is four Release
-binaries of the same `benchmark_logging_logger` target. Source:
-`Library/Logging/Testing/Cxx/BenchmarkLogger.cpp`.
+binaries of the same `benchmark_logging_logger` target. Logging's tests and
+benchmarks build in the standalone repo, not in XSigma — source:
+`Testing/Cxx/BenchmarkLogger.cpp` in
+[KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging).
 
 ```bash
-cd Scripts
-python3 setup.py config.build.ninja.clang.release.benchmark --project.logging
-# binary: build_ninja_project_logging_logging_loguru/bin/benchmark_logging_logger
-# then reconfigure with --logging=SPDLOG|GLOG|NATIVE (separate build dirs)
+git clone https://github.com/KhwarizmiAnalytix/Logging.git
+cd Logging && cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target benchmark_logging_logger
+# binary: build/bin/benchmark_logging_logger
+# then reconfigure with -DLOGGING_BACKEND=SPDLOG|GLOG|NATIVE (separate build dirs)
 ```
 
 Run the binary **without** `--benchmark_min_time=0.01s` (that filter is only
@@ -155,6 +161,6 @@ does not log; the catcher decides whether to print `e.what()`.
 
 ## Related documentation
 
-- [Library/Logging/README.md](../../Library/Logging/README.md) — CMake/Bazel flags
+- [KhwarizmiAnalytix/Logging README](https://github.com/KhwarizmiAnalytix/Logging#readme) — CMake/Bazel flags
 - [Setup Guide](setup.md) — configuring the backend during build
 - [PROJECT_DEPENDENCIES.md](../PROJECT_DEPENDENCIES.md) — who links Logging

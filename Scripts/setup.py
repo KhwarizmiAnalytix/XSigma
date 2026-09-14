@@ -885,12 +885,13 @@ class XSigmaFlags:
                 )
             elif arg.startswith("project."):
                 proj_key = arg.split(".", 1)[1].lower()
+                # Logging/Parallel are pure third-party dependencies (ThirdParty/
+                # submodules), not Library/* projects — like Profiler, they have no
+                # --project.* scope of their own.
                 valid_projects = (
-                    "logging",
                     "memory",
                     "vectorization",
                     "core",
-                    "parallel",
                     "models",
                     "graph",
                 )
@@ -1081,15 +1082,14 @@ class XSigmaFlags:
         # --project.NAME is set, only that module's CMakeLists.txt is loaded, so
         # fanning CORE_*/MEMORY_*/… flags would produce CMake unused-variable
         # warnings.
-        # NOTE: PROFILER is deliberately absent — ThirdParty/Profiler is consumed as a
-        # pure third-party dependency (like fmt/googletest): XSigma feature flags must
-        # not fan into it. It builds with its own defaults (C++20, KINETO backend,
-        # tests/examples disabled — see xsigma_add_profiler() in ThirdParty/CMakeLists.txt).
+        # NOTE: PROFILER, LOGGING, and PARALLEL are deliberately absent — they are
+        # consumed as pure third-party dependencies (ThirdParty/ submodules, like
+        # fmt/googletest): XSigma feature flags must not fan into them. They build
+        # with their own defaults (tests/examples disabled — see xsigma_add_profiler()/
+        # xsigma_add_logging()/xsigma_add_parallel() in ThirdParty/CMakeLists.txt).
         ALL_MODULES = [
             "CORE",
-            "LOGGING",
             "MEMORY",
-            "PARALLEL",
             "VECTORIZATION",
             "MODELS",
             "GRAPH",
@@ -1101,8 +1101,12 @@ class XSigmaFlags:
             "BUILD_SHARED_LIBS",
             "BUILD_TESTING",
             "XSIGMA_ENABLE_EXTERNAL",
-            # Logging is a dependency of scoped modules such as Memory.
+            # Logging is a dependency of scoped modules such as Memory; Parallel is
+            # pulled in by Graph. Their backend selectors stay user-facing and must
+            # reach the third-party subprojects even in --project.* scoped builds.
             "LOGGING_BACKEND",
+            "PARALLEL_BACKEND",
+            "PARALLEL_ENABLE_OPENMP",
         }
 
         def _cmake_flag_in_scope(flag_name):
@@ -1187,10 +1191,10 @@ class XSigmaFlags:
                 cmake_cmd_flags.append(f"-D{mod}_ENABLE_CACHE={cv}")
 
         # When the TBB parallel backend is selected, the Memory TBB allocator must
-        # also be enabled: both PARALLEL_ENABLE_TBB and MEMORY_ENABLE_TBB must be ON.
+        # also be enabled. PARALLEL_ENABLE_TBB itself is derived from PARALLEL_BACKEND
+        # by ThirdParty/Parallel's own Cmake/parallel_backend.cmake — XSigma only
+        # passes PARALLEL_BACKEND (a global flag) and never sets PARALLEL_* directly.
         if self.__value.get("parallel_backend") == "tbb":
-            if not _lp_mod or _lp_mod == "PARALLEL":
-                cmake_cmd_flags.append("-DPARALLEL_ENABLE_TBB=ON")
             if not _lp_mod or _lp_mod == "MEMORY":
                 cmake_cmd_flags.append("-DMEMORY_ENABLE_TBB=ON")
 
@@ -1219,7 +1223,7 @@ class XSigmaFlags:
         if gpu_val and gpu_val != "":
             # Vectorization Metal kernels bind MTLBuffers via Memory's metal
             # caching allocator, so MEMORY_GPU_BACKEND must match.
-            if not _lp_mod or _lp_mod in ("MEMORY", "PROFILER", "VECTORIZATION"):
+            if not _lp_mod or _lp_mod in ("MEMORY", "VECTORIZATION"):
                 cmake_cmd_flags.append(f"-DMEMORY_GPU_BACKEND={gpu_val}")
             if not _lp_mod or _lp_mod == "VECTORIZATION":
                 cmake_cmd_flags.append(f"-DVECTORIZATION_GPU_BACKEND={gpu_val}")
@@ -1900,12 +1904,12 @@ def parse_args(args):
             print_status(f"Packet size set to {size_part}", "INFO")
         elif arg.startswith("--project."):
             proj = arg.split(".", 1)[1].lower()
+            # Logging/Parallel are pure third-party dependencies (ThirdParty/
+            # submodules), not Library/* projects — no --project.* scope.
             valid_projects = (
-                "logging",
                 "memory",
                 "vectorization",
                 "core",
-                "parallel",
                 "models",
                 "graph",
             )

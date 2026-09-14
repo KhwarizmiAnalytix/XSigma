@@ -53,7 +53,8 @@ In particular, do not add `gtest` to a normal test build. `benchmark` is not an
 inverse toggle: most modules default it to `ON` in CMake, while Graph defaults
 to `OFF`. `setup.py` sets it `OFF` unless the `benchmark` token is supplied.
 
-For `--project.graph`, CMake configures Profiler, Parallel and Graph. See the
+For `--project.graph`, CMake configures Graph plus the third-party Parallel
+submodule (via `xsigma_add_parallel()`). See the
 [Graph guide](../graph/README.md) for execution APIs, build targets and current
 limitations.
 
@@ -132,7 +133,10 @@ ctest --test-dir build --output-on-failure
 ```
 
 For a single module, use `-DXSIGMA_LIBRARY_PROJECT=Memory` (or `Core`,
-`Logging`, `Parallel`, `Profiler`, `Vectorization`, `Models`, or `Graph`).
+`Vectorization`, `Models`, or `Graph`). `Logging`, `Parallel`, and `Profiler`
+are pure third-party submodules (`ThirdParty/`) and have no
+`XSIGMA_LIBRARY_PROJECT` scope — they are configured on demand by the modules
+that consume them.
 
 The option families are deliberately module-scoped:
 

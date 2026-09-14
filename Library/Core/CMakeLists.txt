@@ -287,6 +287,11 @@ compile_definition(CORE_COMPILE_DEFINITIONS CORE_ENABLE_MAGICENUM)
 # =============================================================================
 set(_tpdir "${CMAKE_SOURCE_DIR}/ThirdParty")
 
+# Logging — pure third-party (ThirdParty/CMakeLists.txt), added on demand. Core links
+# Logging::Logging publicly; Logging's own build also initializes fmt (the identical
+# add_third_party_library(fmt ...) call below is then a no-op via the processed flag).
+xsigma_add_logging()
+
 set(BUILD_TESTING OFF CACHE BOOL "Disable testing for third-party libraries" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Disable examples for third-party libraries" FORCE)
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Disable benchmarks for third-party libraries" FORCE)

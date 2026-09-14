@@ -6,6 +6,8 @@ exports_files([
     "kineto.BUILD",
     "ittapi.BUILD",
     "profiler.BUILD",
+    "logging.BUILD",
+    "parallel.BUILD",
     "loguru.BUILD",
     "spdlog.BUILD",
     "magic_enum.BUILD",

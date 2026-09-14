@@ -7,9 +7,9 @@ def logging_copts():
     return xsigma_copts(cxx_std = LOGGING_CXX_STD)
 
 def logging_defines():
-    """Returns compile definitions for Library/Logging.
+    """Returns compile definitions for the Logging library (@logging).
 
-    Mirrors Library/Logging/CMakeLists.txt: backend and feature flags.
+    Mirrors ThirdParty/Logging/CMakeLists.txt: backend and feature flags.
     Project-wide PROJECT_HAS_* flags are included via xsigma_defines().
     """
     defines = xsigma_defines()

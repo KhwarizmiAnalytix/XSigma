@@ -104,14 +104,16 @@ xsigma_target_optional_icecc(Graph GRAPH_ENABLE_ICECC)
 
 # Graph always links Parallel::Parallel: graph_executor is built on
 # threaded_callback_queue's push_dependent() continuation-chaining rather
-# than a bespoke thread pool. Parallel itself has no XSigma-library
-# dependency of its own (see Library/Parallel/Testing/ParallelTest.h.in),
+# than a bespoke thread pool. Parallel is pure third-party
+# (ThirdParty/CMakeLists.txt) with no XSigma-library dependency of its own,
 # so this keeps Graph's dependency footprint minimal.
+xsigma_add_parallel()
 set(GRAPH_DEPENDENCY_LIBS "")
 if(NOT TARGET Parallel::Parallel)
   message(
-    FATAL_ERROR "Graph requires Parallel::Parallel. Configure Parallel in this tree (full build or "
-                "--project.graph, which enables Parallel)."
+    FATAL_ERROR
+      "Graph requires Parallel::Parallel. xsigma_add_parallel() should have provided it — "
+      "is ThirdParty/Parallel initialized?"
   )
 endif()
 list(APPEND GRAPH_DEPENDENCY_LIBS Parallel::Parallel)

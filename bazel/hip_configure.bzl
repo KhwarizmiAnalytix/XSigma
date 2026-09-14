@@ -1,5 +1,5 @@
 """HIP/ROCm external repository for WORKSPACE — resolves install path on Linux
-(mirrors CMake's find_package(hip), Library/Parallel/Cmake/hip.cmake... actually
+(mirrors CMake's find_package(hip), ThirdParty/Parallel/Cmake/hip.cmake... actually
 Library/Memory/Cmake/hip.cmake).
 
 HIP/ROCm is Unix-only in this project (hip.cmake fails fast on WIN32) -- this

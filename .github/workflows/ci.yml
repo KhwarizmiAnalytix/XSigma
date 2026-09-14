@@ -435,7 +435,7 @@ jobs:
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} \
           -DLOGGING_BACKEND=${{ matrix.logging_backend }} \
           -DBUILD_TESTING=ON \
-          -DPARALLEL_ENABLE_TBB=${{ matrix.tbb_enabled }} \
+          -DPARALLEL_BACKEND=${{ matrix.tbb_enabled == 'ON' && 'tbb' || 'std' }} \
           -DMEMORY_ENABLE_TBB=${{ matrix.tbb_enabled }} \
           -DMEMORY_GPU_BACKEND=${{ matrix.cuda_enabled == 'ON' && 'cuda' || 'none' }}
 
@@ -476,7 +476,7 @@ jobs:
           -DCMAKE_CXX_STANDARD=${{ matrix.cxx_std }} `
           -DLOGGING_BACKEND=${{ matrix.logging_backend }} `
           -DBUILD_TESTING=ON `
-          -DPARALLEL_ENABLE_TBB=${{ matrix.tbb_enabled }} `
+          -DPARALLEL_BACKEND=${{ matrix.tbb_enabled == 'ON' && 'tbb' || 'std' }} `
           -DMEMORY_ENABLE_TBB=${{ matrix.tbb_enabled }} `
           -DMEMORY_GPU_BACKEND=${{ matrix.cuda_enabled == 'ON' && 'cuda' || 'none' }}
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -667,10 +667,8 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON \
           -DMEMORY_GPU_BACKEND=none
 
@@ -835,18 +833,14 @@ jobs:
           -DCORE_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DMEMORY_ENABLE_SANITIZER=ON \
           -DMEMORY_SANITIZER_TYPE=${{ matrix.sanitizer }} \
-          -DLOGGING_ENABLE_SANITIZER=ON \
-          -DLOGGING_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DVECTORIZATION_ENABLE_SANITIZER=ON \
           -DVECTORIZATION_SANITIZER_TYPE=${{ matrix.sanitizer }} \
-          -DPARALLEL_ENABLE_SANITIZER=ON \
-          -DPARALLEL_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DMODELS_ENABLE_SANITIZER=ON \
           -DMODELS_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DGRAPH_ENABLE_SANITIZER=ON \
           -DGRAPH_SANITIZER_TYPE=${{ matrix.sanitizer }} \
           -DBUILD_TESTING=ON \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON \
           -DMEMORY_GPU_BACKEND=none
 
@@ -1011,10 +1005,8 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON \
           -DMEMORY_GPU_BACKEND=none \
           ${{ matrix.extra_cmake_flags }}
@@ -1102,10 +1094,8 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON \
           -DMEMORY_GPU_BACKEND=none
 
@@ -1266,10 +1256,8 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_LTO=${{ matrix.lto_enabled }} \
           -DMEMORY_ENABLE_LTO=${{ matrix.lto_enabled }} \
-          -DLOGGING_ENABLE_LTO=${{ matrix.lto_enabled }} \
           -DVECTORIZATION_ENABLE_LTO=${{ matrix.lto_enabled }} \
-          -DPARALLEL_ENABLE_LTO=${{ matrix.lto_enabled }} \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON
 
     - name: Build
@@ -1331,15 +1319,11 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=ON \
           -DMEMORY_ENABLE_BENCHMARK=ON \
-          -DLOGGING_ENABLE_BENCHMARK=ON \
           -DVECTORIZATION_ENABLE_BENCHMARK=ON \
-          -DPARALLEL_ENABLE_BENCHMARK=ON \
           -DCORE_ENABLE_LTO=ON \
           -DMEMORY_ENABLE_LTO=ON \
-          -DLOGGING_ENABLE_LTO=ON \
           -DVECTORIZATION_ENABLE_LTO=ON \
-          -DPARALLEL_ENABLE_LTO=ON \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON
 
     - name: Build
@@ -1444,9 +1428,7 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
-          -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF
+          -DVECTORIZATION_ENABLE_BENCHMARK=OFF
 
     # ===== Build and Test (Baseline - No Sccache) =====
     - name: Record build start time (Baseline)
@@ -1602,9 +1584,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
           -DBUILD_TESTING=ON
 
     - name: Configure CMake (Windows - With Sccache)
@@ -1624,9 +1604,7 @@ jobs:
           -DBUILD_TESTING=ON `
           -DCORE_ENABLE_BENCHMARK=OFF `
           -DMEMORY_ENABLE_BENCHMARK=OFF `
-          -DLOGGING_ENABLE_BENCHMARK=OFF `
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF `
-          -DPARALLEL_ENABLE_BENCHMARK=OFF `
           -DMEMORY_GPU_BACKEND=${{ matrix.cuda_enabled == 'ON' && 'cuda' || 'none' }}
 
     # ===== Build and Test (With Sccache) =====
@@ -1737,9 +1715,7 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_COVERAGE=ON \
           -DMEMORY_ENABLE_COVERAGE=ON \
-          -DLOGGING_ENABLE_COVERAGE=ON \
           -DVECTORIZATION_ENABLE_COVERAGE=ON \
-          -DPARALLEL_ENABLE_COVERAGE=ON \
           -DMEMORY_GPU_BACKEND=none
 
         # Build
@@ -2238,9 +2214,9 @@ jobs:
       run: |
         # TBB is tested separately on Windows (see build-matrix); this job's
         # Windows install step doesn't provision it.
-        tbb_flags="-DPARALLEL_ENABLE_TBB=ON -DMEMORY_ENABLE_TBB=ON"
+        tbb_flags="-DPARALLEL_BACKEND=tbb -DMEMORY_ENABLE_TBB=ON"
         if [ "${{ runner.os }}" = "Windows" ]; then
-          tbb_flags="-DPARALLEL_ENABLE_TBB=OFF -DMEMORY_ENABLE_TBB=OFF"
+          tbb_flags="-DPARALLEL_BACKEND=std -DMEMORY_ENABLE_TBB=OFF"
         fi
         cmake -B build \
           -C .github/cmake/configure_cache.cmake \
@@ -2254,9 +2230,7 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=${{ runner.os == 'Windows' && matrix.backend == 'cuda' && 'ON' || 'OFF' }} \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
           $tbb_flags \
           ${{ matrix.extra_cmake }}
 
@@ -2440,7 +2414,7 @@ jobs:
             extra_deps: ""
           - name: "examples"
             os: ubuntu-latest
-            extra_cmake: "-DCORE_ENABLE_EXAMPLES=ON -DMEMORY_ENABLE_EXAMPLES=ON -DLOGGING_ENABLE_EXAMPLES=ON -DVECTORIZATION_ENABLE_EXAMPLES=ON -DPARALLEL_ENABLE_EXAMPLES=ON -DMODELS_ENABLE_EXAMPLES=ON"
+            extra_cmake: "-DCORE_ENABLE_EXAMPLES=ON -DMEMORY_ENABLE_EXAMPLES=ON -DVECTORIZATION_ENABLE_EXAMPLES=ON -DMODELS_ENABLE_EXAMPLES=ON"
             extra_deps: ""
           - name: "packet-size-8"
             os: ubuntu-latest
@@ -2456,19 +2430,19 @@ jobs:
             extra_deps: ""
           - name: "lto-thin"
             os: ubuntu-latest
-            extra_cmake: "-DCORE_LTO_MODE=thin -DMEMORY_LTO_MODE=thin -DLOGGING_LTO_MODE=thin -DVECTORIZATION_LTO_MODE=thin -DPARALLEL_LTO_MODE=thin"
+            extra_cmake: "-DCORE_LTO_MODE=thin -DMEMORY_LTO_MODE=thin -DVECTORIZATION_LTO_MODE=thin"
             extra_deps: ""
           - name: "lto-full"
             os: ubuntu-latest
-            extra_cmake: "-DCORE_LTO_MODE=full -DMEMORY_LTO_MODE=full -DLOGGING_LTO_MODE=full -DVECTORIZATION_LTO_MODE=full -DPARALLEL_LTO_MODE=full"
+            extra_cmake: "-DCORE_LTO_MODE=full -DMEMORY_LTO_MODE=full -DVECTORIZATION_LTO_MODE=full"
             extra_deps: ""
           - name: "ccache"
             os: ubuntu-latest
-            extra_cmake: "-DCORE_CACHE_BACKEND=ccache -DMEMORY_CACHE_BACKEND=ccache -DLOGGING_CACHE_BACKEND=ccache -DVECTORIZATION_CACHE_BACKEND=ccache -DPARALLEL_CACHE_BACKEND=ccache"
+            extra_cmake: "-DCORE_CACHE_BACKEND=ccache -DMEMORY_CACHE_BACKEND=ccache -DVECTORIZATION_CACHE_BACKEND=ccache"
             extra_deps: ""
           - name: "linker-lld"
             os: ubuntu-latest
-            extra_cmake: "-DCORE_LINKER_CHOICE=lld -DMEMORY_LINKER_CHOICE=lld -DLOGGING_LINKER_CHOICE=lld -DVECTORIZATION_LINKER_CHOICE=lld -DPARALLEL_LINKER_CHOICE=lld"
+            extra_cmake: "-DCORE_LINKER_CHOICE=lld -DMEMORY_LINKER_CHOICE=lld -DVECTORIZATION_LINKER_CHOICE=lld"
             extra_deps: ""
           - name: "memory-profiler-off"
             os: ubuntu-latest
@@ -2515,10 +2489,8 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
           -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_TBB=ON \
+          -DPARALLEL_BACKEND=tbb \
           -DMEMORY_ENABLE_TBB=ON \
           ${{ matrix.extra_cmake }}
 
@@ -2574,13 +2546,11 @@ jobs:
             -DCMAKE_CXX_STANDARD=17 `
             -DLOGGING_BACKEND=NATIVE `
             -DBUILD_TESTING=ON `
-            -DPARALLEL_ENABLE_TBB=OFF `
+            -DPARALLEL_BACKEND=std `
             -DMEMORY_ENABLE_TBB=OFF `
             -DCORE_ENABLE_BENCHMARK=OFF `
             -DMEMORY_ENABLE_BENCHMARK=OFF `
-            -DLOGGING_ENABLE_BENCHMARK=OFF `
             -DVECTORIZATION_ENABLE_BENCHMARK=OFF `
-            -DPARALLEL_ENABLE_BENCHMARK=OFF
         } else {
           # windows-latest now ships VS 18 Enterprise; CMake's "Visual Studio 17 2022"
           # generator cannot target it. Ninja + the MSVC env from msvc-dev-cmd covers
@@ -2591,14 +2561,12 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_CXX_STANDARD=17 `
             -DLOGGING_BACKEND=NATIVE `
-            -DBUILD_TESTING=ON `
-            -DPARALLEL_ENABLE_TBB=OFF `
+            -DBUILD_TESTING=ON
+            -DPARALLEL_BACKEND=std `
             -DMEMORY_ENABLE_TBB=OFF `
             -DCORE_ENABLE_BENCHMARK=OFF `
             -DMEMORY_ENABLE_BENCHMARK=OFF `
-            -DLOGGING_ENABLE_BENCHMARK=OFF `
             -DVECTORIZATION_ENABLE_BENCHMARK=OFF `
-            -DPARALLEL_ENABLE_BENCHMARK=OFF
         }
 
     - name: Build
@@ -2673,15 +2641,11 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCORE_ENABLE_CLANGTIDY=ON \
           -DMEMORY_ENABLE_CLANGTIDY=ON \
-          -DLOGGING_ENABLE_CLANGTIDY=ON \
           -DVECTORIZATION_ENABLE_CLANGTIDY=ON \
-          -DPARALLEL_ENABLE_CLANGTIDY=ON \
           -DMODELS_ENABLE_CLANGTIDY=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
-          -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF
+          -DVECTORIZATION_ENABLE_BENCHMARK=OFF
 
     - name: Build (clang-tidy runs as part of compile)
       run: cmake --build build -j 2
@@ -2717,15 +2681,11 @@ jobs:
           -DMEMORY_ENABLE_MIMALLOC=OFF \
           -DCORE_ENABLE_VALGRIND=ON \
           -DMEMORY_ENABLE_VALGRIND=ON \
-          -DLOGGING_ENABLE_VALGRIND=ON \
           -DVECTORIZATION_ENABLE_VALGRIND=ON \
-          -DPARALLEL_ENABLE_VALGRIND=ON \
           -DMODELS_ENABLE_VALGRIND=ON \
           -DCORE_ENABLE_BENCHMARK=OFF \
           -DMEMORY_ENABLE_BENCHMARK=OFF \
-          -DLOGGING_ENABLE_BENCHMARK=OFF \
-          -DVECTORIZATION_ENABLE_BENCHMARK=OFF \
-          -DPARALLEL_ENABLE_BENCHMARK=OFF
+          -DVECTORIZATION_ENABLE_BENCHMARK=OFF
 
     - name: Build
       run: cmake --build build -j 2

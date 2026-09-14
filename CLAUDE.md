@@ -1,14 +1,18 @@
 # XSigma
 
-A cross-platform C++17/20 computational library (Core, Logging, Memory,
-Vectorization, Parallel, Profiler) built with CMake via `Scripts/setup.py`,
-with an alternate Bazel build. GPU support: CUDA, HIP, Metal.
+A cross-platform C++17/20 computational library (Core, Memory, Vectorization,
+Models, Graph) built with CMake via `Scripts/setup.py`, with an alternate
+Bazel build. GPU support: CUDA, HIP, Metal. Logging, Parallel, and Profiler
+are pure third-party dependencies, vendored as the `ThirdParty/Logging`,
+`ThirdParty/Parallel`, and `ThirdParty/Profiler` submodules from their own
+repositories (KhwarizmiAnalytix/{Logging,Parallel,Profiler}).
 
 **Naming note:** each library has its own C++ namespace matching its name
 (`memory`, `vectorization`, `profiler`, `logging`, `parallel`, ...) and its
 own family of `<LIB>_*`-prefixed macros for API export, visibility, and
 unused-parameter suppression (e.g. `MEMORY_API`/`MEMORY_VISIBILITY`, each
-generated into `Library/<Lib>/common/<lib>_export.h`). `Library/Core` is the
+generated into `Library/<Lib>/common/<lib>_export.h`; Logging/Parallel
+generate theirs under `ThirdParty/<Lib>/common/`). `Library/Core` is the
 one exception — it predates the per-library split and still uses the project
 prefix (`XSIGMA_API`, `XSIGMA_VISIBILITY`, `XSIGMA_UNUSED`, … in
 `Library/Core/common/macros.h` / `export.h`) instead of a `CORE_*` one.
@@ -117,10 +121,11 @@ above — skip it deliberately for trivial edits, don't skip it by default.
 - Default policy for new application code: **no `try`/`catch`/`throw`**.
   Communicate failure via return values (`bool`, `std::optional<T>`, result
   structs/enums) and handle it with ordinary control flow.
-- **Exception:** boundary/interop code that wraps a third-party API which
-  itself throws is allowed to keep `try`/`catch` — e.g. the GPU allocator
-  code in `Library/Memory/gpu/`, the `ThirdParty/Profiler/bespoke/` kineto
-  fork, `Library/Logging/util/exception.cpp`, and the test-assertion macros
+- **Exception:**  boundary/interop code that wraps a third-party API which
+ itself throws is allowed to keep `try`/`catch` — e.g. the GPU allocator
+ code in `Library/Memory/gpu/`, the `ThirdParty/Profiler/bespoke/` kineto
+ fork, `ThirdParty/Logging/util/exception.cpp` (in the standalone Logging
+ repo), and the test-assertion macros
   in `Library/*/Testing/**/baseTest.h`-style headers (whose `ASSERT_*`
   macros throw internally in non-gtest builds so failures abort the test).
   Don't treat existing `try`/`catch` in those areas as a bug to clean up,
@@ -174,9 +179,11 @@ library the file lives in, never another library's:
   Test — `TEST(suite, name)` / `TEST_F(fixture, name)`.** Actual usage:
   `TEST(`/`TEST_F(` outnumber Core's legacy test macro roughly 14:1
   project-wide, and that legacy macro is used *only* inside `Library/Core`
-  (and even there it's a minority next to plain `TEST`). Logging, Memory,
-  Parallel, Profiler, and Vectorization use `TEST`/`TEST_F` exclusively and
-  don't include the header the legacy macro is defined in at all.
+  (and even there it's a minority next to plain `TEST`). Memory, Graph, and
+  Vectorization use `TEST`/`TEST_F` exclusively and don't include the header
+  the legacy macro is defined in at all. (Logging/Parallel/Profiler tests
+  live in their standalone repos — `ThirdParty/Logging` etc. build with
+  tests disabled when embedded in XSigma.)
   - Writing a new test in Core: either convention already exists there —
     check neighboring files in `Library/Core/Testing/Cxx/` and match
     whichever one the class you're testing is closer to; don't introduce a

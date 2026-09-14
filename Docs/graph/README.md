@@ -24,7 +24,7 @@ domain adapters and a persistent evaluation layer.
 | [keyed_graph_builder.h](../../Library/Graph/keyed_graph_builder.h) | Recursive key resolution, memoization and iterative dependency discovery |
 | [graph_executor.h](../../Library/Graph/graph_executor.h), [implementation](../../Library/Graph/graph_executor.cpp) | Persistent worker pool, scheduling, results, failures and cancellation |
 | [graph_passes.h](../../Library/Graph/graph_passes.h), [implementation](../../Library/Graph/graph_passes.cpp) | Ancestor selection, consumer counts and graph pruning |
-| [threaded_callback_queue.h](../../Library/Parallel/tools/threaded_callback_queue.h) | Underlying worker queue from Parallel |
+| [threaded_callback_queue.h](../../ThirdParty/Parallel/tools/threaded_callback_queue.h) | Underlying worker queue from Parallel (third-party submodule) |
 | [Testing/Cxx](../../Library/Graph/Testing/Cxx) | Unit tests, synthetic benchmarks and toy market-data examples |
 
 **Build and test**
@@ -43,9 +43,9 @@ tokens. For example, the configuration used for the review is rebuilt with:
 python3 setup.py build.test.ninja.clangtidy --project.graph
 ```
 
-`--project.graph` configures Profiler, Parallel and Graph, in that order.
-Graph directly links `Parallel::Parallel`; Parallel links Profiler when its
-target exists. Graph's workers use the standard-thread callback queue even
+`--project.graph` configures Parallel and Graph, in that order.
+Graph directly links `Parallel::Parallel`; Parallel has no Profiler
+dependency. Graph's workers use the standard-thread callback queue even
 when another Parallel backend is selected. Graph does not directly depend on
 Models, Core, Memory or Vectorization.
 

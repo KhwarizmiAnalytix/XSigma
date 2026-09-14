@@ -57,7 +57,16 @@ new_local_repository(
 # -----------------------------------------------------------------------------
 # cpuinfo - CPU feature detection library (using local copy)
 # -----------------------------------------------------------------------------
-# Note: Using local ThirdParty/cpuinfo instead of downloading
+# Note: Using local ThirdParty/cpuinfo instead of downloading.
+# Consumed via the XSigma-owned overlay ThirdParty/cpuinfo.BUILD as @cpuinfo —
+# the submodule's own in-tree BUILD.bazel assumes an @cpuinfo external-repo
+# layout (-Iexternal/cpuinfo/include) and picks up system cpuinfo headers when
+# built in-tree, so //ThirdParty/cpuinfo must not be used directly.
+new_local_repository(
+    name = "cpuinfo",
+    build_file = "//ThirdParty:cpuinfo.BUILD",
+    path = "ThirdParty/cpuinfo",
+)
 
 # -----------------------------------------------------------------------------
 # magic_enum - Static reflection for enums (vendored ThirdParty/magic_enum)
@@ -145,6 +154,31 @@ local_profiler_repository(
     build_file = "//ThirdParty:profiler.BUILD",
     kineto_build_file = "//ThirdParty:kineto.BUILD",
     ittapi_build_file = "//ThirdParty:ittapi.BUILD",
+)
+
+# -----------------------------------------------------------------------------
+# Logging — standalone product (https://github.com/KhwarizmiAnalytix/Logging)
+# -----------------------------------------------------------------------------
+# Git submodule ThirdParty/Logging. Overlay BUILD so we do not edit the
+# vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
+# Logging's own deps (fmt/loguru/glog/spdlog/magic_enum) come from XSigma's
+# WORKSPACE repos above — its nested ThirdParty/ submodules are standalone-only.
+new_local_repository(
+    name = "logging",
+    build_file = "//ThirdParty:logging.BUILD",
+    path = "ThirdParty/Logging",
+)
+
+# -----------------------------------------------------------------------------
+# Parallel — standalone product (https://github.com/KhwarizmiAnalytix/Parallel)
+# -----------------------------------------------------------------------------
+# Git submodule ThirdParty/Parallel. Overlay BUILD so we do not edit the
+# vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
+# TBB/OpenMP come from XSigma's @tbb / @parallel_openmp workspace repos.
+new_local_repository(
+    name = "parallel",
+    build_file = "//ThirdParty:parallel.BUILD",
+    path = "ThirdParty/Parallel",
 )
 
 # -----------------------------------------------------------------------------

@@ -876,16 +876,93 @@ function(xsigma_add_profiler)
 endfunction()
 
 # =============================================================================
+# Logging — bundled via add_third_party_library (ThirdParty/Logging submodule)
+#
+# Logging is a pure third-party dependency (same treatment as Profiler):
+# XSigma sets no LOGGING_ENABLE_* feature flags anywhere outside this file,
+# never fans coverage/sanitizer/clang-tidy/IWYU/spell/C++-standard into it, and
+# exposes no setup.py --project.logging switch for it. Tests and examples build
+# only from the standalone Logging repo. The backend selector
+# (LOGGING_BACKEND) and its feature toggles remain user-facing XSigma flags —
+# they are consumed by Logging's own CMakeLists when the subproject configures.
+#
+# Logging's own CMakeLists still initializes fmt/loguru/glog/spdlog/magic_enum
+# from ${CMAKE_SOURCE_DIR}/ThirdParty (XSigma's vendored copies) exactly as it
+# did in Library/Logging — Core/Memory keep working unchanged.
+# Called by consuming libraries (Core, Memory, Vectorization) before their
+# if(TARGET Logging::Logging) checks — idempotent.
+# =============================================================================
+function(xsigma_add_logging)
+    if(TARGET Logging::Logging)
+        return()
+    endif()
+    set(_logging_src "${XSIGMA_THIRDPARTY_DIR}/Logging")
+    if(NOT EXISTS "${_logging_src}/CMakeLists.txt")
+        message(FATAL_ERROR "ThirdParty/Logging is missing. Initialize the submodule:\n"
+                            "  git submodule update --init ThirdParty/Logging")
+    endif()
+    set(LOGGING_ENABLE_TESTING OFF CACHE BOOL "Logging tests build only standalone" FORCE)
+    set(LOGGING_ENABLE_EXAMPLES OFF CACHE BOOL "Logging examples build only standalone" FORCE)
+    add_third_party_library(
+        logging
+        SOURCE_DIR "${_logging_src}"
+        BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Logging"
+        EXTERNAL_NAME Logging
+        EXCLUDE_FROM_ALL
+        AUTO_ADD_TO_DEPENDENCIES OFF
+    )
+endfunction()
+
+# =============================================================================
+# Parallel — bundled via add_third_party_library (ThirdParty/Parallel submodule)
+#
+# Parallel is a pure third-party dependency (same treatment as Profiler):
+# XSigma sets no PARALLEL_ENABLE_* feature flags anywhere outside this file,
+# never fans coverage/sanitizer/clang-tidy/IWYU/spell/C++-standard into it, and
+# exposes no setup.py --project.parallel switch for it. Tests and examples
+# build only from the standalone Parallel repo. The backend selector
+# (PARALLEL_BACKEND) remains a user-facing XSigma flag — consumed by
+# Parallel's own CMakeLists when the subproject configures. TBB/OpenMP are
+# resolved by Parallel's own finder modules (Cmake/ inside the submodule).
+# Called by consuming libraries (Graph) before their
+# if(TARGET Parallel::Parallel) checks — idempotent.
+# =============================================================================
+function(xsigma_add_parallel)
+    if(TARGET Parallel::Parallel)
+        return()
+    endif()
+    set(_parallel_src "${XSIGMA_THIRDPARTY_DIR}/Parallel")
+    if(NOT EXISTS "${_parallel_src}/CMakeLists.txt")
+        message(FATAL_ERROR "ThirdParty/Parallel is missing. Initialize the submodule:\n"
+                            "  git submodule update --init ThirdParty/Parallel")
+    endif()
+    set(PARALLEL_ENABLE_TESTING OFF CACHE BOOL "Parallel tests build only standalone" FORCE)
+    set(PARALLEL_ENABLE_EXAMPLES OFF CACHE BOOL "Parallel examples build only standalone" FORCE)
+    add_third_party_library(
+        parallel
+        SOURCE_DIR "${_parallel_src}"
+        BINARY_DIR "${CMAKE_BINARY_DIR}/ThirdParty/Parallel"
+        EXTERNAL_NAME Parallel
+        EXCLUDE_FROM_ALL
+        AUTO_ADD_TO_DEPENDENCIES OFF
+    )
+endfunction()
+
+# =============================================================================
 # NOTE: All per-project third-party declarations have been moved to each
 # project's own CMakeLists.txt (and Testing/Cxx/CMakeLists.txt for testing
 # frameworks).  This file only defines helper functions and global options.
 #
 # Project → third-party mapping:
 #   Library/Core       → fmt, cpuinfo, magic_enum
-#   Library/Logging    → fmt, loguru, glog, spdlog
-#   Library/Memory     → mimalloc, Profiler (via xsigma_add_profiler)
-#   Library/Parallel   → Profiler (via xsigma_add_profiler)
-#   Library/Vectorization → sleef, Profiler (via xsigma_add_profiler)
+#   Library/Memory     → mimalloc, Profiler (via xsigma_add_profiler),
+#                        Logging (via xsigma_add_logging)
+#   Library/Vectorization → sleef, Profiler (via xsigma_add_profiler),
+#                        Logging (via xsigma_add_logging)
+#   Library/Graph      → Parallel (via xsigma_add_parallel)
 #   ThirdParty/Profiler → owns nested third_party/kineto and ittapi (not XSigma root)
+#   ThirdParty/Logging  → fmt, loguru, glog, spdlog, magic_enum (wired by its own
+#                        CMakeLists from XSigma's root ThirdParty/ when embedded)
+#   ThirdParty/Parallel → TBB/OpenMP via its own Cmake/ finders
 #   */Testing/Cxx      → xsigma_add_googletest(), google-benchmark
 # =============================================================================

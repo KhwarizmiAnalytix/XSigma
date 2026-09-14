@@ -122,11 +122,13 @@ option(VECTORIZATION_ENABLE_LIBTORCH
        "Enable LibTorch (PyTorch C++) comparison tests and benchmarks" OFF
 )
 
-# Logging is required — Vectorization log/check/throw macros go through Library/Logging.
+# Logging is required — Vectorization log/check/throw macros go through the Logging
+# library. Logging is pure third-party (ThirdParty/CMakeLists.txt); added on demand.
+xsigma_add_logging()
 if(NOT TARGET Logging::Logging)
   message(
     FATAL_ERROR
-      "Vectorization requires Logging::Logging. Configure Logging in this tree (full build or --project.vectorization, which now enables Logging)."
+      "Vectorization requires Logging::Logging. xsigma_add_logging() should have provided it — is ThirdParty/Logging initialized?"
   )
 endif()
 

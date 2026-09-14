@@ -1,5 +1,5 @@
 # =============================================================================
-# OpenMP autodetect — mirrors Library/Parallel/Cmake/openmp.cmake's find_package(OpenMP).
+# OpenMP autodetect — mirrors ThirdParty/Parallel/Cmake/openmp.cmake's find_package(OpenMP).
 #
 # CMake's OpenMP::OpenMP_CXX imported target transparently supplies whatever
 # compile/link flags the platform's OpenMP runtime needs. Bazel has no
@@ -109,7 +109,7 @@ _SETUP_HINT_UNIX = (
     "OpenMP (--define parallel_backend=openmp / --config=openmp) needs a working " +
     "OpenMP toolchain. On Linux: install libomp-dev (Clang) or use GCC (OpenMP " +
     "built in). On macOS: `brew install libomp` (Apple Clang has no built-in " +
-    "OpenMP runtime) — see Library/Parallel/Cmake/openmp.cmake for the same " +
+    "OpenMP runtime) — see ThirdParty/Parallel/Cmake/openmp.cmake for the same " +
     "guidance CMake gives. Re-run the Bazel build afterwards."
 )
 

@@ -67,6 +67,14 @@ cc_library(
             "libkineto/src/CuptiRangeProfilerApi.cpp",
             "libkineto/src/CuptiRangeProfilerConfig.cpp",
             "libkineto/src/CuptiNvPerfMetric.cpp",
+            "libkineto/src/CuptiTimestamp.cpp",
+            # PM sampling sources include <cupti_pmsampling.h> unconditionally and are
+            # not part of get_libkineto_cupti_srcs() (separate
+            # get_libkineto_cupti_pm_sampling_srcs()) — kineto's own CMake never
+            # compiles them, so exclude them in both CUDA and non-CUDA builds.
+            "libkineto/src/CuptiPMSamplingApi.cpp",
+            "libkineto/src/CuptiPMSamplingController.cpp",
+            "libkineto/src/CuptiPMSamplingProfiler.cpp",
             "libkineto/src/EventProfiler.cpp",
             "libkineto/src/EventProfilerController.cpp",
             "libkineto/src/KernelRegistry.cpp",
@@ -93,6 +101,7 @@ cc_library(
             "libkineto/src/CuptiRangeProfilerApi.cpp",
             "libkineto/src/CuptiRangeProfilerConfig.cpp",
             "libkineto/src/CuptiNvPerfMetric.cpp",
+            "libkineto/src/CuptiTimestamp.cpp",
             "libkineto/src/EventProfiler.cpp",
             "libkineto/src/EventProfilerController.cpp",
             "libkineto/src/KernelRegistry.cpp",

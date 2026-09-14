@@ -1,7 +1,7 @@
 # =============================================================================
 # XSigma Core Library — utilities, intrusive_ptr, compression.
-# Memory is //Library/Memory; Logging is //Library/Logging (standalone macro headers per module).
-# Parallel is //Library/Parallel; Profiler is @profiler.
+# Memory is //Library/Memory; Logging is @logging (ThirdParty/Logging submodule,
+# standalone macro headers per module). Parallel is @parallel; Profiler is @profiler.
 # =============================================================================
 
 load("//bazel:core.bzl", "core_copts", "core_defines", "core_enzyme_copts", "core_enzyme_linkopts", "core_linkopts")
@@ -45,7 +45,12 @@ cc_library(
         "//bazel:compression_snappy": glob(["compression/snappy.h"], allow_empty = True),
         "//conditions:default": [],
     }),
-    copts = core_copts() + core_enzyme_copts(),
+    copts = core_copts() + core_enzyme_copts() + [
+        # -I (not the -isystem that @cpuinfo's `includes` generates): Apple clang's
+        # driver injects /usr/local/include ahead of -isystem paths, and a stale
+        # system cpuinfo.h there would shadow the vendored one (see cpuinfo.BUILD).
+        "-Iexternal/cpuinfo/include",
+    ],
     defines = core_defines() + select({
         "//bazel:shared_libs": ["XSIGMA_SHARED_DEFINE", "XSIGMA_BUILDING_DLL"],
         "//conditions:default": ["XSIGMA_STATIC_DEFINE"],
@@ -65,9 +70,9 @@ cc_library(
     }),
     deps = [
         "@fmt//:fmt",
-        "//Library/Logging:logging_lib",
+        "@logging//:Logging",
         "//Library/Memory:memory_lib",
-        "//ThirdParty/cpuinfo:cpuinfo",
+        "@cpuinfo//:cpuinfo",
     ] + select({
         "//bazel:disable_magic_enum": [],
         "//conditions:default": ["@magic_enum//:magic_enum"],

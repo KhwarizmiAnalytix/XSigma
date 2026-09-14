@@ -178,24 +178,22 @@ _CMAKE_SAN_TO_BAZEL = {
 }
 
 # Library/* scope for --project.NAME / dotted project.NAME (matches CMake XSIGMA_LIBRARY_PROJECT)
-# Profiler is deliberately absent: it is a pure third-party dependency (@profiler),
-# not an XSigma library project.
+# Profiler, Logging, and Parallel are deliberately absent: they are pure third-party
+# dependencies (@profiler, @logging, @parallel), not XSigma library projects.
 _BAZEL_LIBRARY_PROJECTS = (
-    "logging",
     "memory",
     "vectorization",
     "core",
-    "parallel",
     "models",
+    "graph",
 )
 
 _BAZEL_LIBRARY_PACKAGE_DIR = {
-    "logging": "Logging",
     "memory": "Memory",
     "vectorization": "Vectorization",
     "core": "Core",
-    "parallel": "Parallel",
     "models": "Models",
+    "graph": "Graph",
 }
 
 
@@ -1021,7 +1019,9 @@ class BazelConfiguration:
             print("  Vectorization:     None")
 
         if self.library_project:
-            print(f"  Library scope:     {_bazel_project_pattern(self.library_project)}")
+            print(
+                f"  Library scope:     {_bazel_project_pattern(self.library_project)}"
+            )
 
         # Feature flags — computed from the same state as per-module summaries
         mimalloc_on = True  # Bazel default ON (see .bazelrc memory_enable_mimalloc)
@@ -1332,7 +1332,7 @@ class BazelConfiguration:
                     # `query` doesn't inherit .bazelrc's "build --enable_workspace" the
                     # way build/test/coverage do. This repo has one WORKSPACE-registered
                     # repository rule (parallel_openmp, via openmp_configure() in
-                    # WORKSPACE.bazel) -- loading //Library/Parallel/... without this flag
+                    # WORKSPACE.bazel) -- loading @parallel//... without this flag
                     # fails with "unknown repo 'parallel_openmp'", which a full-tree
                     # query would also hit.
                     "--enable_workspace",

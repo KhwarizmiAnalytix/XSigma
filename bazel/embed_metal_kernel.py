@@ -20,11 +20,10 @@ def main(argv: list[str]) -> int:
     template = template_path.read_text(encoding="utf-8")
     source = source_path.read_text(encoding="utf-8")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        template.replace(_PLACEHOLDER, source),
-        encoding="utf-8",
-        newline="\n",
-    )
+    # open(newline="\n") keeps LF on every platform; Path.write_text only grew the
+    # newline parameter in Python 3.10 and Bazel may run an older interpreter.
+    with output_path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(template.replace(_PLACEHOLDER, source))
     return 0
 
 

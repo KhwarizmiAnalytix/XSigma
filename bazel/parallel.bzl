@@ -8,7 +8,7 @@ PARALLEL_CXX_STD = "c++20"
 def parallel_copts():
     # OPENMP_COPTS (from //bazel:openmp_configure.bzl's host probe) only applied when the
     # openmp backend is actually selected -- an empty list otherwise, or when OpenMP wasn't
-    # found (in which case //Library/Parallel:BUILD.bazel's :openmp_check dep fails the
+    # found (in which case the parallel overlay's :openmp_check dep fails the
     # build with an actionable message instead of silently compiling without OpenMP).
     return xsigma_copts(cxx_std = PARALLEL_CXX_STD) + selects.with_or({
         (
@@ -19,15 +19,15 @@ def parallel_copts():
     })
 
 def parallel_defines():
-    """Returns compile definitions for Library/Parallel.
+    """Returns compile definitions for the Parallel library (@parallel).
 
-    Mirrors Library/Parallel/CMakeLists.txt: PARALLEL_HAS_* flags.
+    Mirrors ThirdParty/Parallel/CMakeLists.txt: PARALLEL_HAS_* flags.
     Project-wide PROJECT_HAS_* flags are included via xsigma_defines().
     """
     defines = xsigma_defines()
 
     # Threading — PARALLEL_HAS_PTHREADS / PARALLEL_HAS_WIN32_THREADS
-    # These mirror the values set by Library/Parallel/Cmake/threads.cmake and are
+    # These mirror the values set by ThirdParty/Parallel/Cmake/threads.cmake and are
     # the sole guards used by multi_threader.h / multi_threader.cpp.
     defines += select({
         "@platforms//os:windows": [
@@ -57,10 +57,6 @@ def parallel_defines():
         ): ["PARALLEL_HAS_OPENMP=1"],
         "//conditions:default": ["PARALLEL_HAS_OPENMP=0"],
     })
-
-    # Profiler — always linked in Bazel (see Library/Parallel/BUILD.bazel's deps),
-    # so this is unconditionally 1, mirroring CMake's PARALLEL_HAS_PROFILER.
-    defines += ["PARALLEL_HAS_PROFILER=1"]
 
     return defines
 

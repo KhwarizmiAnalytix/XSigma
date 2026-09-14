@@ -16,7 +16,7 @@ project because it fans supported choices out to the loaded modules. See
 |---|---:|---|
 | `BUILD_SHARED_LIBS` | `ON` | Build shared libraries. The `static` helper token toggles this to `OFF`. |
 | `XSIGMA_ENABLE_EXTERNAL` | `ON` | Prefer discoverable external third-party packages when supported. |
-| `XSIGMA_LIBRARY_PROJECT` | empty | Build one library module and the dependencies selected by the root CMake file. Valid names: `Logging`, `Memory`, `Vectorization`, `Core`, `Parallel`, `Profiler`, `Models`, `Graph`. |
+| `XSIGMA_LIBRARY_PROJECT` | empty | Build one library module and the dependencies selected by the root CMake file. Valid names: `Logging`, `Memory`, `Vectorization`, `Core`, `Parallel`, `Models`, `Graph`. |
 
 CTest is always enabled by the root configuration. XSigma disables tests and
 examples owned by third-party projects, while library test subtrees are
@@ -60,12 +60,22 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 
 | Variable | Default | Supported values |
 |---|---|---|
-| `LOGGING_BACKEND` | `LOGURU` | `NATIVE`, `LOGURU`, `GLOG`, `SPDLOG`. |
+| `LOGGING_BACKEND` | `LOGURU` | `NATIVE`, `LOGURU`, `GLOG`, `SPDLOG`. Consumed by the third-party `ThirdParty/Logging` build. |
 | `MEMORY_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Metal requires Apple platforms. HIP is not supported on Windows in this project. |
 | `VECTORIZATION_GPU_BACKEND` | `none` | `none`, `cuda`, `hip`, `metal`. Keep it equal to `MEMORY_GPU_BACKEND` for GPU Vectorization. |
 | `VECTORIZATION_CPU_BACKEND` | host-dependent | `no`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve`. Defaults to AVX2 on recognised x86, NEON on AArch64, otherwise `no`. |
 | `VECTORIZATION_PACKET_SIZE` | `4` | Positive SIMD lane count selected by the expression layer. |
-| `PARALLEL_BACKEND` | `std` | `std`, `openmp`, `tbb`; the modes are exclusive. |
+| `PARALLEL_BACKEND` | `std` | `std`, `openmp`, `tbb`; the modes are exclusive. Consumed by the third-party `ThirdParty/Parallel` build. |
+
+> Logging, Parallel, and Profiler are pure third-party dependencies
+> (`ThirdParty/Logging`, `ThirdParty/Parallel`, `ThirdParty/Profiler`
+> submodules). XSigma per-module fan-out flags do not reach them: the only
+> selectors that cross the boundary are `LOGGING_BACKEND`, `PARALLEL_BACKEND`,
+> and the global `BUILD_SHARED_LIBS` / `BUILD_TESTING` /
+> `XSIGMA_ENABLE_EXTERNAL`. Flags such as `LOGGING_ENABLE_SANITIZER`,
+> `PARALLEL_ENABLE_TBB`, or `LOGGING_ENABLE_BENCHMARK` are no longer consumed
+> by the XSigma build (TBB selection is `PARALLEL_BACKEND=tbb`, which also
+> turns on `PARALLEL_ENABLE_TBB` inside the Parallel subproject).
 
 ## Optional feature selectors
 
@@ -77,7 +87,7 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 | `MEMORY_ENABLE_TBB` | `OFF` | Use the TBB memory allocator. This is separate from the Parallel TBB backend. |
 | `MEMORY_ENABLE_NUMA` | `OFF` | Enable NUMA support where available. |
 | `MEMORY_ENABLE_MEMKIND` | `OFF` | Enable memkind; the CMake implementation limits it to Linux. |
-| `PARALLEL_ENABLE_OPENMP` | `OFF` | Enable OpenMP support. Prefer `PARALLEL_BACKEND=openmp` to select the complete backend. |
+| `PARALLEL_ENABLE_OPENMP` | `OFF` | Enable OpenMP in the third-party Parallel build. Prefer `PARALLEL_BACKEND=openmp` to select the complete backend. |
 | `CORE_ENABLE_MKL` | `OFF` | Enable Core MKL integration. |
 | `VECTORIZATION_ENABLE_MKL` | `OFF` | Enable Vectorization MKL VML support. |
 | `VECTORIZATION_ENABLE_SLEEF` | `OFF` | Enable SLEEF SIMD math. |
@@ -102,12 +112,11 @@ cmake -S . -B build-cuda -G Ninja \
   -DMEMORY_GPU_BACKEND=cuda \
   -DVECTORIZATION_GPU_BACKEND=cuda
 
-# AddressSanitizer for all loaded modules.
+# AddressSanitizer for all loaded modules (Logging/Parallel are third-party
+# and build with their own defaults — sanitizers do not fan into them).
 cmake -S . -B build-asan -G Ninja \
   -DCORE_ENABLE_SANITIZER=ON -DCORE_SANITIZER_TYPE=address \
-  -DLOGGING_ENABLE_SANITIZER=ON -DLOGGING_SANITIZER_TYPE=address \
   -DMEMORY_ENABLE_SANITIZER=ON -DMEMORY_SANITIZER_TYPE=address \
-  -DPARALLEL_ENABLE_SANITIZER=ON -DPARALLEL_SANITIZER_TYPE=address \
   -DVECTORIZATION_ENABLE_SANITIZER=ON -DVECTORIZATION_SANITIZER_TYPE=address \
   -DMODELS_ENABLE_SANITIZER=ON -DMODELS_SANITIZER_TYPE=address \
   -DGRAPH_ENABLE_SANITIZER=ON -DGRAPH_SANITIZER_TYPE=address

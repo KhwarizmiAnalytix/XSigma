@@ -112,13 +112,13 @@ configurations and known limitations.
 | Library | Purpose |
 |---|---|
 | `Library/Core` | Core utilities, algorithms, and optional MKL/Enzyme integrations. |
-| `Library/Logging` | Logging facade with Loguru, spdlog, glog, and native backends. |
 | `Library/Memory` | CPU allocators plus CUDA/HIP/Metal caching allocators. |
-| `Library/Parallel` | Standard-thread, OpenMP, and TBB execution backends. |
-| `ThirdParty/Profiler` | [KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler) third-party submodule. CMake `Profiler::Profiler`, Bazel `@profiler//:Profiler`. |
 | `Library/Vectorization` | CPU SIMD expressions and CUDA/HIP/Metal evaluators. |
 | `Library/Models` | SABR/ZABR smile routines, calibration, and MLP inference. |
 | `Library/Graph` | Dependency DAG construction, parallel execution, target pruning, and caller-managed incremental caching. |
+| `ThirdParty/Logging` | [KhwarizmiAnalytix/Logging](https://github.com/KhwarizmiAnalytix/Logging) third-party submodule. CMake `Logging::Logging`, Bazel `@logging//:Logging`. |
+| `ThirdParty/Parallel` | [KhwarizmiAnalytix/Parallel](https://github.com/KhwarizmiAnalytix/Parallel) third-party submodule. CMake `Parallel::Parallel`, Bazel `@parallel//:Parallel`. |
+| `ThirdParty/Profiler` | [KhwarizmiAnalytix/Profiler](https://github.com/KhwarizmiAnalytix/Profiler) third-party submodule. CMake `Profiler::Profiler`, Bazel `@profiler//:Profiler`. |
 
 ## Documentation
 

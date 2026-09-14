@@ -2,14 +2,14 @@
 # Parallel Parallel Library BUILD Configuration
 # =============================================================================
 # Standalone parallel computing library. No dependency on //Library/Core.
-# Include root is Library/Parallel so that:
-#   "common/parallel_export.h"              -> Library/Parallel/common/parallel_export.h
-#   "tools/parallel_tools.h"                -> Library/Parallel/tools/parallel_tools.h
-#   "common/parallel_tools_api.h"           -> Library/Parallel/common/...
+# Include root is the repo root (ThirdParty/Parallel) so that:
+#   "common/parallel_export.h"              -> ThirdParty/Parallel/common/parallel_export.h
+#   "tools/parallel_tools.h"                -> ThirdParty/Parallel/tools/parallel_tools.h
+#   "common/parallel_tools_api.h"           -> ThirdParty/Parallel/common/...
 # =============================================================================
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("//bazel:parallel.bzl", "parallel_copts", "parallel_defines", "parallel_linkopts")
+load("@xsigma//bazel:parallel.bzl", "parallel_copts", "parallel_defines", "parallel_linkopts")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -54,12 +54,12 @@ cc_library(
         ":parallel_srcs",
     ] + selects.with_or({
         (
-            "//bazel:parallel_backend_tbb",
-            "//bazel:parallel_enable_tbb",
+            "@xsigma//bazel:parallel_backend_tbb",
+            "@xsigma//bazel:parallel_enable_tbb",
         ): glob(["tbb/*.cpp"], allow_empty = True),
         (
-            "//bazel:parallel_backend_openmp",
-            "//bazel:enable_openmp",
+            "@xsigma//bazel:parallel_backend_openmp",
+            "@xsigma//bazel:enable_openmp",
         ): glob(["openmp/*.cpp"], allow_empty = True),
         "//conditions:default": glob(["std_thread/*.cpp"], allow_empty = True),
     }),
@@ -67,22 +67,22 @@ cc_library(
         ":parallel_hdrs",
     ] + selects.with_or({
         (
-            "//bazel:parallel_backend_tbb",
-            "//bazel:parallel_enable_tbb",
+            "@xsigma//bazel:parallel_backend_tbb",
+            "@xsigma//bazel:parallel_enable_tbb",
         ): glob(["tbb/*.h", "tbb/*.hxx"], allow_empty = True),
         (
-            "//bazel:parallel_backend_openmp",
-            "//bazel:enable_openmp",
+            "@xsigma//bazel:parallel_backend_openmp",
+            "@xsigma//bazel:enable_openmp",
         ): glob(["openmp/*.h", "openmp/*.hxx"], allow_empty = True),
         "//conditions:default": glob(["std_thread/*.h", "std_thread/*.hxx"], allow_empty = True),
     }),
     copts = parallel_copts(),
     defines = parallel_defines() + select({
-        "//bazel:shared_libs": ["PARALLEL_SHARED_DEFINE"],
+        "@xsigma//bazel:shared_libs": ["PARALLEL_SHARED_DEFINE"],
         "//conditions:default": ["PARALLEL_STATIC_DEFINE"],
     }),
     local_defines = select({
-        "//bazel:shared_libs": ["PARALLEL_BUILDING_DLL"],
+        "@xsigma//bazel:shared_libs": ["PARALLEL_BUILDING_DLL"],
         "//conditions:default": [],
     }),
     includes = [
@@ -91,13 +91,13 @@ cc_library(
     ],
     linkopts = parallel_linkopts(),
     linkstatic = select({
-        "//bazel:shared_libs": False,
+        "@xsigma//bazel:shared_libs": False,
         "//conditions:default": True,
     }),
     deps = selects.with_or({
         (
-            "//bazel:parallel_backend_tbb",
-            "//bazel:parallel_enable_tbb",
+            "@xsigma//bazel:parallel_backend_tbb",
+            "@xsigma//bazel:parallel_enable_tbb",
         ): [
             "@tbb//:tbb",
             "@tbb//:tbbmalloc",
@@ -105,15 +105,12 @@ cc_library(
         "//conditions:default": [],
     }) + selects.with_or({
         (
-            "//bazel:parallel_backend_openmp",
-            "//bazel:enable_openmp",
+            "@xsigma//bazel:parallel_backend_openmp",
+            "@xsigma//bazel:enable_openmp",
         ): ["@parallel_openmp//:openmp_check"],
         "//conditions:default": [],
-    }) + ["@profiler//:Profiler"],
+    }),
     alwayslink = False,
-    visibility = [
-        "//Library/Parallel:__pkg__",
-    ],
 )
 
 # =============================================================================

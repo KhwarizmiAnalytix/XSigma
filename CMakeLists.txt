@@ -17,8 +17,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Cmake/flags")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Cmake/packages")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Library/Core/Cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Library/Vectorization/Cmake")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Library/Logging/Cmake")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Library/Parallel/Cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Library/Memory/Cmake")
 include(xcode_toolchain)
 
@@ -59,14 +57,8 @@ endif()
 # include valgrind (when enabled) BEFORE we include CTest.
 if(DEFINED CORE_ENABLE_VALGRIND
    AND CORE_ENABLE_VALGRIND
-   OR DEFINED LOGGING_ENABLE_VALGRIND
-   AND LOGGING_ENABLE_VALGRIND
    OR DEFINED MEMORY_ENABLE_VALGRIND
    AND MEMORY_ENABLE_VALGRIND
-   OR DEFINED PARALLEL_ENABLE_VALGRIND
-   AND PARALLEL_ENABLE_VALGRIND
-   OR DEFINED PROFILER_ENABLE_VALGRIND
-   AND PROFILER_ENABLE_VALGRIND
    OR DEFINED VECTORIZATION_ENABLE_VALGRIND
    AND VECTORIZATION_ENABLE_VALGRIND
    OR DEFINED MODELS_ENABLE_VALGRIND
@@ -143,55 +135,40 @@ set(XSIGMA_LIBRARY_PROJECT
     ""
     CACHE
       STRING
-      "If non-empty: only this Library module and deps (Logging|Memory|Vectorization|Core|Parallel|Models|Graph). Empty: all Library/* (default)."
+      "If non-empty: only this Library module and deps (Memory|Vectorization|Core|Models|Graph). Empty: all Library/* (default)."
 )
 
 string(TOLOWER "${XSIGMA_LIBRARY_PROJECT}" _xsigma_libproj_lc)
 
-# Profiler is not in this list: it is a pure third-party dependency
-# (ThirdParty/Profiler), added via xsigma_add_profiler() by the libraries that
-# consume it — same treatment as cpuinfo or fmt.
-set(_xsigma_lib_order
-    Logging
-    Memory
-    Vectorization
-    Core
-    Parallel
-    Models
-    # Graph links Parallel::Parallel (threaded_callback_queue), so it must come
-    # after Parallel in this list.
-    Graph
-)
+# Logging, Parallel, and Profiler are not in this list: they are pure third-party
+# dependencies (ThirdParty/Logging, ThirdParty/Parallel, ThirdParty/Profiler),
+# added via xsigma_add_logging() / xsigma_add_parallel() / xsigma_add_profiler()
+# by the libraries that consume them — same treatment as cpuinfo or fmt.
+set(_xsigma_lib_order Memory Vectorization Core Models Graph)
 
 if(_xsigma_libproj_lc STREQUAL "")
   foreach(_lib IN LISTS _xsigma_lib_order)
     add_subdirectory(Library/${_lib})
   endforeach()
 else()
-  if(_xsigma_libproj_lc STREQUAL "logging")
-    set(_xsigma_lib_enabled Logging)
-  elseif(_xsigma_libproj_lc STREQUAL "memory")
-    # Memory always links Logging::Logging.
-    set(_xsigma_lib_enabled Logging Memory)
+  if(_xsigma_libproj_lc STREQUAL "memory")
+    set(_xsigma_lib_enabled Memory)
   elseif(_xsigma_libproj_lc STREQUAL "vectorization")
     set(MEMORY_ENABLE_TESTING OFF CACHE BOOL "Skip Memory tests when building Vectorization" FORCE)
     set(MEMORY_ENABLE_BENCHMARK OFF CACHE BOOL "Skip Memory benchmarks when building Vectorization"
                                           FORCE
     )
-    set(_xsigma_lib_enabled Logging Memory Vectorization)
+    set(_xsigma_lib_enabled Memory Vectorization)
   elseif(_xsigma_libproj_lc STREQUAL "core")
-    set(_xsigma_lib_enabled Parallel Logging Memory Vectorization Core)
-  elseif(_xsigma_libproj_lc STREQUAL "parallel")
-    set(_xsigma_lib_enabled Parallel)
+    set(_xsigma_lib_enabled Memory Vectorization Core)
   elseif(_xsigma_libproj_lc STREQUAL "models")
     set(_xsigma_lib_enabled Models)
   elseif(_xsigma_libproj_lc STREQUAL "graph")
-    set(_xsigma_lib_enabled Parallel Graph)
+    set(_xsigma_lib_enabled Graph)
   else()
     message(
-      FATAL_ERROR
-        "XSIGMA_LIBRARY_PROJECT='${XSIGMA_LIBRARY_PROJECT}' is invalid. "
-        "Use one of: Logging, Memory, Vectorization, Core, Parallel, Models, Graph, or leave empty for all."
+      FATAL_ERROR "XSIGMA_LIBRARY_PROJECT='${XSIGMA_LIBRARY_PROJECT}' is invalid. "
+                  "Use one of: Memory, Vectorization, Core, Models, Graph, or leave empty for all."
     )
   endif()
 
