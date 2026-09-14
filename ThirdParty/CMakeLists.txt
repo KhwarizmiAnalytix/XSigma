@@ -889,6 +889,9 @@ function(xsigma_add_parallel)
         target_include_directories(
             Parallel PUBLIC $<BUILD_INTERFACE:${_parallel_src}/Parallel>
         )
+        if(WIN32)
+            target_compile_definitions(Parallel PUBLIC NOMINMAX)
+        endif()
     endif()
 endfunction()
 

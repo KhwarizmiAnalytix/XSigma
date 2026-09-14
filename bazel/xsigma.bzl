@@ -60,6 +60,7 @@ def xsigma_defines():
             "_CRT_SECURE_NO_WARNINGS",
             "_SCL_SECURE_NO_DEPRECATE",
             "_SCL_SECURE_NO_WARNINGS",
+            "NOMINMAX",
         ],
         "//conditions:default": [],
     })

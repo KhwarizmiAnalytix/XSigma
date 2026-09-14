@@ -30,6 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <parallel.h>
 
 #include "common/graph_export.h"

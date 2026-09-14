@@ -125,6 +125,14 @@ function(xsigma_add_profiler_product)
         PUBLIC $<BUILD_INTERFACE:${_profiler_root}>
     )
 
+    # session.h names a getter memory_tracker() next to class memory_tracker.
+    # GCC 13+ rejects that as -Wchanges-meaning; do not edit the vendored header.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(
+            Profiler PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-Wno-changes-meaning>
+        )
+    endif()
+
     if(TARGET Fmt::fmt)
         target_link_libraries(Profiler PUBLIC Fmt::fmt)
     endif()

@@ -51,7 +51,13 @@ _X86_LINUX_SRCS = glob(["src/x86/linux/*.c"])
 
 # Android properties.c needs <sys/system_properties.h>; do not compile it on
 # linux_arm64 (ubuntu-24.04-arm). Upstream lists ANDROID_ARM_SRCS separately.
-_ARM_LINUX_SRCS = glob(["src/arm/linux/*.c"])
+# aarch32-isa.c is 32-bit ARM only (uses CPUINFO_ARM_LINUX_FEATURE2_* and
+# armv5e/neon fields that the aarch64 cpuinfo_arm_isa does not have). Upstream
+# BUILD.bazel splits LINUX_ARM32_SRCS vs LINUX_ARM64_SRCS the same way.
+_ARM_LINUX_SRCS = glob(
+    ["src/arm/linux/*.c"],
+    exclude = ["src/arm/linux/aarch32-isa.c"],
+)
 
 _RISCV_LINUX_SRCS = glob(["src/riscv/linux/*.c"])
 

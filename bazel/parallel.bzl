@@ -33,6 +33,7 @@ def parallel_defines():
         "@platforms//os:windows": [
             "PARALLEL_HAS_WIN32_THREADS=1",
             "PARALLEL_HAS_PTHREADS=0",
+            "NOMINMAX",
         ],
         "//conditions:default": [
             "PARALLEL_HAS_PTHREADS=1",

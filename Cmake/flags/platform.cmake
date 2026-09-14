@@ -213,6 +213,12 @@ if(MSVC)
   string(APPEND CMAKE_C_FLAGS " /EHsc")
 endif()
 
+# windows.h (and CUDA's rpcndr.h pull-in) define min/max macros that break
+# std::min/std::max in TBB headers. Must apply to MSVC and clang++ on Windows.
+if(WIN32)
+  add_definitions(-DNOMINMAX)
+endif()
+
 if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   message(STATUS "Clang on Windows: applying Clang-specific flags")
 
