@@ -21,10 +21,13 @@ package(default_visibility = ["//visibility:public"])
 _COMMON_SRCS = glob(["src/*.c"])
 
 # Architecture-specific sources (platform subdirectories excluded by glob depth).
-_X86_SRCS = glob([
-    "src/x86/*.c",
-    "src/x86/cache/*.c",
-])
+_X86_SRCS = glob(
+    [
+        "src/x86/*.c",
+        "src/x86/cache/*.c",
+    ],
+    exclude = ["src/x86/mockcpuid.c"],
+)
 
 # src/arm/tlb.c is a source fragment (starts mid-function with `switch (uarch)`)
 # that upstream never lists as a compiled source — exclude it.
@@ -35,8 +38,11 @@ _ARM_SRCS = glob(
 
 _RISCV_SRCS = glob(["src/riscv/*.c"])
 
-# Platform-specific sources.
-_LINUX_SRCS = glob(["src/linux/*.c"])
+# Platform-specific sources. mockfile.c is test-only (needs cpuinfo-mock.h).
+_LINUX_SRCS = glob(
+    ["src/linux/*.c"],
+    exclude = ["src/linux/mockfile.c"],
+)
 
 _MACH_SRCS = ["src/mach/topology.c"]
 
@@ -140,7 +146,11 @@ cc_library(
     ),
     copts = select({
         "@platforms//os:windows": [],
-        "//conditions:default": ["-w"],  # Suppress warnings for third-party code
+        "//conditions:default": [
+            "-w",  # Suppress warnings for third-party code
+            # sched.h's CPU_SETSIZE is GNU; src/linux/processors.c needs it.
+            "-D_GNU_SOURCE=1",
+        ],
     }) + [
         # Force -I (not -isystem) for our own headers: Apple clang's driver injects
         # /usr/local/include AHEAD of command-line -isystem paths, and this machine

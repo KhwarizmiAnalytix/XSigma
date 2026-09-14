@@ -910,45 +910,46 @@ jobs:
             backend_label: default
             extra_cmake_flags: ""
 
-          - project: Logging
+          # Logging/Parallel are ThirdParty submodules, not XSIGMA_LIBRARY_PROJECT
+          # values. Exercise their backends on the in-tree consumers (Core, Graph).
+          - project: Core
             external: "ON"
             backend_label: LOGURU
             extra_cmake_flags: "-DLOGGING_BACKEND=LOGURU"
-          - project: Logging
+          - project: Core
             external: "OFF"
             backend_label: NATIVE
             extra_cmake_flags: "-DLOGGING_BACKEND=NATIVE"
-          - project: Logging
+          - project: Core
             external: "ON"
             backend_label: GLOG
             extra_cmake_flags: "-DLOGGING_BACKEND=GLOG"
-
-          - project: Memory
-            external: "ON"
-            backend_label: default
-            extra_cmake_flags: ""
-          - project: Memory
-            external: "OFF"
-            backend_label: default
-            extra_cmake_flags: ""
-
-          - project: Parallel
-            external: "ON"
-            backend_label: std
-            extra_cmake_flags: "-DPARALLEL_BACKEND=std"
-          - project: Parallel
-            external: "OFF"
-            backend_label: openmp
-            extra_cmake_flags: "-DPARALLEL_BACKEND=openmp"
-          - project: Parallel
-            external: "ON"
-            backend_label: tbb
-            extra_cmake_flags: "-DPARALLEL_BACKEND=tbb"
-
-          - project: Logging
+          - project: Core
             external: "ON"
             backend_label: SPDLOG
             extra_cmake_flags: "-DLOGGING_BACKEND=SPDLOG"
+
+          - project: Memory
+            external: "ON"
+            backend_label: default
+            extra_cmake_flags: ""
+          - project: Memory
+            external: "OFF"
+            backend_label: default
+            extra_cmake_flags: ""
+
+          - project: Graph
+            external: "ON"
+            backend_label: std
+            extra_cmake_flags: "-DPARALLEL_BACKEND=std"
+          - project: Graph
+            external: "OFF"
+            backend_label: openmp
+            extra_cmake_flags: "-DPARALLEL_BACKEND=openmp"
+          - project: Graph
+            external: "ON"
+            backend_label: tbb
+            extra_cmake_flags: "-DPARALLEL_BACKEND=tbb"
 
           - project: Vectorization
             external: "ON"
@@ -1907,10 +1908,11 @@ jobs:
   # ============================================================================
   # Bazel Project + Backend Matrix
   # Mirrors the CMake project-flag-backend-tests job's project/backend coverage via
-  # Scripts/setup_bazel.py --project.NAME. XSIGMA_ENABLE_EXTERNAL has no Bazel
-  # equivalent (setup_bazel.py warns and no-ops on the "external" token -- see
-  # Docs/BAZEL_USER_GUIDE.md), so each project/backend combination appears once
-  # here instead of twice.
+  # Scripts/setup_bazel.py --project.NAME. Logging/Parallel/Profiler backends are
+  # applied to in-tree consumers (core, graph), matching CMake. XSIGMA_ENABLE_EXTERNAL
+  # has no Bazel equivalent (setup_bazel.py warns and no-ops on the "external"
+  # token -- see Docs/BAZEL_USER_GUIDE.md), so each project/backend combination
+  # appears once here instead of twice.
   # ============================================================================
   bazel-project-flag-backend-tests:
     name: "Bazel Project Matrix - ${{ matrix.project }} - ${{ matrix.backend_label }}"
@@ -1926,33 +1928,29 @@ jobs:
           - project: memory
             backend_label: default
             extra_config: ""
-          - project: logging
+          # Logging/Parallel/Profiler are @logging/@parallel/@profiler, not
+          # --project.NAME libraries. Exercise backends on in-tree consumers.
+          - project: core
             backend_label: LOGURU
             extra_config: logging_loguru
-          - project: logging
+          - project: core
             backend_label: NATIVE
             extra_config: logging_native
-          - project: logging
+          - project: core
             backend_label: GLOG
             extra_config: logging_glog
-          - project: parallel
-            backend_label: std
-            extra_config: parallel.std
-          - project: parallel
-            backend_label: openmp
-            extra_config: parallel.openmp
-          - project: parallel
-            backend_label: tbb
-            extra_config: parallel.tbb
-          - project: profiler
-            backend_label: ITT
-            extra_config: profiler_itt
-          - project: profiler
-            backend_label: KINETO
-            extra_config: profiler_kineto
-          - project: logging
+          - project: core
             backend_label: SPDLOG
             extra_config: logging_spdlog
+          - project: graph
+            backend_label: std
+            extra_config: parallel.std
+          - project: graph
+            backend_label: openmp
+            extra_config: parallel.openmp
+          - project: graph
+            backend_label: tbb
+            extra_config: parallel.tbb
           - project: vectorization
             backend_label: default
             extra_config: ""
@@ -2556,12 +2554,12 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_CXX_STANDARD=17 `
             -DLOGGING_BACKEND=NATIVE `
-            -DBUILD_TESTING=ON
+            -DBUILD_TESTING=ON `
             -DPARALLEL_BACKEND=std `
             -DMEMORY_ENABLE_TBB=OFF `
             -DCORE_ENABLE_BENCHMARK=OFF `
             -DMEMORY_ENABLE_BENCHMARK=OFF `
-            -DVECTORIZATION_ENABLE_BENCHMARK=OFF `
+            -DVECTORIZATION_ENABLE_BENCHMARK=OFF
         }
 
     - name: Build

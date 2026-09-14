@@ -169,10 +169,11 @@ build:linux --linkopt=-lrt
 # Windows specific settings (MSVC) — mirrors compiler_checks.cmake.
 # Per-module MSVC flags (/std:c++XX, /Zc:__cplusplus, /bigobj, /utf-8, /wd*, /EHsc) are set
 # per-target via xsigma_copts() in bazel/xsigma.bzl so Library targets are self-contained.
-# ThirdParty/external targets need a C++17 baseline so they compile on MSVC (e.g. kineto).
-# Use --per_file_copt to apply the baseline only to those paths, not to Library.
-build:windows --per_file_copt=external/.*@/std:c++17
-build:windows --per_file_copt=ThirdParty/.*@/std:c++17
+# ThirdParty/external targets need a C++20 baseline on MSVC: libkineto uses
+# std::string::ends_with (C++20). Use --per_file_copt so the baseline applies
+# only to those paths, not to Library (which already gets /std:c++20 via xsigma_copts).
+build:windows --per_file_copt=external/.*@/std:c++20
+build:windows --per_file_copt=ThirdParty/.*@/std:c++20
 build:windows --define=_WIN32_WINNT=0x0A00
 build:windows --shell_executable=cmd.exe
 # Bazel's Windows toolchain unconditionally implies `generate_pdb_file` which injects

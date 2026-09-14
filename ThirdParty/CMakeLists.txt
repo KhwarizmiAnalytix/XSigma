@@ -865,6 +865,31 @@ function(xsigma_add_profiler)
         CACHE PATH "Profiler-owned third_party (kineto/ittapi/fmt)" FORCE)
     set(PROFILER_ENABLE_TESTING OFF CACHE BOOL "Profiler tests build only standalone" FORCE)
     set(PROFILER_ENABLE_EXAMPLES OFF CACHE BOOL "Profiler examples build only standalone" FORCE)
+    # Profiler's CMake inherits MEMORY_GPU_BACKEND and FORCE-sets
+    # KINETO_BACKEND=rocm for HIP. libkineto then requires ROCM_SOURCE_DIR and
+    # ROCm >= 7 (rocprofiler-sdk). Hosted HIP CI is ROCm 6.x and is testing
+    # Memory/Vectorization HIP, not Kineto GPU tracing — keep Profiler on CPU
+    # Kineto unless the consumer explicitly passed PROFILER_GPU_BACKEND.
+    set(_xsigma_gpu "")
+    if(DEFINED MEMORY_GPU_BACKEND)
+        set(_xsigma_gpu "${MEMORY_GPU_BACKEND}")
+    elseif(DEFINED VECTORIZATION_GPU_BACKEND)
+        set(_xsigma_gpu "${VECTORIZATION_GPU_BACKEND}")
+    endif()
+    if(NOT DEFINED PROFILER_GPU_BACKEND AND _xsigma_gpu STREQUAL "hip")
+        set(PROFILER_GPU_BACKEND "none" CACHE STRING
+            "Keep libkineto on CPU for HIP unless the consumer opts in")
+    endif()
+    unset(_xsigma_gpu)
+    if(NOT ROCM_SOURCE_DIR)
+        if(DEFINED ENV{ROCM_PATH} AND NOT "$ENV{ROCM_PATH}" STREQUAL "")
+            set(ROCM_SOURCE_DIR "$ENV{ROCM_PATH}" CACHE PATH "ROCm root for libkineto")
+        elseif(DEFINED ENV{HIP_PATH} AND NOT "$ENV{HIP_PATH}" STREQUAL "")
+            set(ROCM_SOURCE_DIR "$ENV{HIP_PATH}" CACHE PATH "ROCm root for libkineto")
+        elseif(EXISTS "/opt/rocm")
+            set(ROCM_SOURCE_DIR "/opt/rocm" CACHE PATH "ROCm root for libkineto")
+        endif()
+    endif()
     add_third_party_library(
         profiler
         SOURCE_DIR "${_profiler_src}"
