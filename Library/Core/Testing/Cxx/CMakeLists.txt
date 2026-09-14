@@ -116,7 +116,7 @@ add_test(NAME CoreCxxTests COMMAND CoreCxxTests
 set_tests_properties(CoreCxxTests PROPERTIES TIMEOUT 120 LABELS "Core;Unit")
 
 # Set coverage environment variable if enabled
-if(PARALLEL_ENABLE_COVERAGE AND DEFINED PROJECT_LLVM_PROFILE_FILE)
+if(CORE_ENABLE_COVERAGE AND DEFINED PROJECT_LLVM_PROFILE_FILE)
   set_tests_properties(
     CoreCxxTests PROPERTIES ENVIRONMENT "LLVM_PROFILE_FILE=${PROJECT_LLVM_PROFILE_FILE}"
   )

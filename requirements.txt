@@ -2,3 +2,4 @@ colorama
 psutil
 cmake-format
 numpy
+coverage-tool

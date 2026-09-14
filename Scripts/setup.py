@@ -997,6 +997,17 @@ class XSigmaFlags:
             )
             self.__value["test"] = self.ON
 
+        if self.__value.get("coverage") == self.ON:
+            try:
+                import coverage_tool  # noqa: F401
+            except ImportError:
+                print_status(
+                    "coverage-tool is not installed. The in-tree Tools/coverage "
+                    "package was moved to PyPI. Install with: pip install coverage-tool",
+                    "ERROR",
+                )
+                sys.exit(1)
+
         if self.__value.get("spell") == self.ON:
             print_status(
                 "SPELL CHECKING ENABLED: Automatic spelling corrections will be applied during build!",
@@ -1674,7 +1685,7 @@ class XSigmaConfiguration:
         except ImportError:
             print_status(
                 "coverage-tool is not installed. Install with: "
-                "pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git",
+                "pip install coverage-tool",
                 "ERROR",
             )
             return 1

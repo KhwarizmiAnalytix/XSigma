@@ -1,5 +1,5 @@
 # Host config for coverage-tool (https://github.com/KhwarizmiAnalytix/coverage-tool).
-# pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git
+# pip install coverage-tool
 # coverage-tool --build=<build-dir>
 
 

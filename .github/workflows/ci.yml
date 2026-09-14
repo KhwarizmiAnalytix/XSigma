@@ -1694,7 +1694,7 @@ jobs:
     - name: Install coverage tool
       shell: bash
       run: |
-        pip install "git+https://github.com/KhwarizmiAnalytix/coverage-tool.git"
+        pip install coverage-tool
 
     - name: Run coverage build
       shell: bash

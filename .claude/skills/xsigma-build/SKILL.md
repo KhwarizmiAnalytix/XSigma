@@ -74,7 +74,7 @@ python3 setup.py analyze.v
 Report parsing is the `coverage-tool` PyPI package
 (https://github.com/KhwarizmiAnalytix/coverage-tool); CI does not
 currently hard-gate on a specific coverage percentage. Install with
-`pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git`.
+`pip install coverage-tool`.
 
 ## Static analysis (clang-tidy)
 
