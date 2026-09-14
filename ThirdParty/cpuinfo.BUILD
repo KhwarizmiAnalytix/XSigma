@@ -49,10 +49,9 @@ _MACH_SRCS = ["src/mach/topology.c"]
 # Platform + architecture sources.
 _X86_LINUX_SRCS = glob(["src/x86/linux/*.c"])
 
-_ARM_LINUX_SRCS = glob([
-    "src/arm/linux/*.c",
-    "src/arm/android/*.c",
-])
+# Android properties.c needs <sys/system_properties.h>; do not compile it on
+# linux_arm64 (ubuntu-24.04-arm). Upstream lists ANDROID_ARM_SRCS separately.
+_ARM_LINUX_SRCS = glob(["src/arm/linux/*.c"])
 
 _RISCV_LINUX_SRCS = glob(["src/riscv/linux/*.c"])
 

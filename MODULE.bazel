@@ -39,8 +39,9 @@ bazel_dep(name = "googletest", version = "1.15.2")
 # Abseil - C++ common libraries
 bazel_dep(name = "abseil-cpp", version = "20240722.0", repo_name = "abseil")
 
-# Google Flags - command-line flags library
-bazel_dep(name = "gflags", version = "2.2.2")
+# Google Flags - command-line flags library. Repo name must match what
+# ThirdParty/glog's BUILD.bazel loads (@com_github_gflags_gflags).
+bazel_dep(name = "gflags", version = "2.2.2", repo_name = "com_github_gflags_gflags")
 
 # RE2 - regular expression library
 bazel_dep(name = "re2", version = "2024-07-02")

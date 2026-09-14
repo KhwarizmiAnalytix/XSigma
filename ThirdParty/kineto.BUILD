@@ -86,24 +86,15 @@ cc_library(
         allow_empty = True,
     ) + select({
         "@xsigma//bazel:enable_cuda": [
-            # Include CUPTI-specific files when CUDA is enabled. This list mirrors
-            # get_libkineto_cupti_srcs() in libkineto/libkineto_defs.bzl exactly (minus
-            # Demangle.cpp, always included via the base glob above).
-            # Note: CuptiActivity.cpp is included as a header (see hdrs below) because
-            # it's meant to be #included by CuptiActivityProfiler.cpp.
+            # CUPTI-only TUs from get_libkineto_cupti_srcs() in the vendored
+            # libkineto/libkineto_defs.bzl, minus CPU-only atoms already in the
+            # base glob. EventProfiler*, CuptiEventApi, CuptiMetricApi, and the
+            # CuptiRangeProfiler/NvPerf files are not in this kineto tree.
             "libkineto/src/CuptiActivityApi.cpp",
             "libkineto/src/CuptiActivityProfiler.cpp",
             "libkineto/src/CuptiCallbackApi.cpp",
             "libkineto/src/CuptiCbidRegistry.cpp",
-            "libkineto/src/CuptiEventApi.cpp",
-            "libkineto/src/CuptiMetricApi.cpp",
-            "libkineto/src/CuptiRangeProfiler.cpp",
-            "libkineto/src/CuptiRangeProfilerApi.cpp",
-            "libkineto/src/CuptiRangeProfilerConfig.cpp",
-            "libkineto/src/CuptiNvPerfMetric.cpp",
             "libkineto/src/CuptiTimestamp.cpp",
-            "libkineto/src/EventProfiler.cpp",
-            "libkineto/src/EventProfilerController.cpp",
             "libkineto/src/KernelRegistry.cpp",
             "libkineto/src/WeakSymbols.cpp",
             "libkineto/src/cupti_strings.cpp",
