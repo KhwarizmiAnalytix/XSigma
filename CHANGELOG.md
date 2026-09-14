@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lintrunner adapters moved to the `lint-tool` PyPI package
   (https://github.com/KhwarizmiAnalytix/lint-tool). Host policy stays in
   `.lintrunner.toml`; the in-tree `Tools/linter` tree is gone.
-- Logging backends (glog, loguru, spdlog) come from
+- Logging backends (glog, loguru, spdlog) and magic_enum come from
   `ThirdParty/Logging/ThirdParty/` instead of duplicate XSigma root
-  submodules. fmt and magic_enum stay at the XSigma root so Core can
-  share them.
+  submodules. fmt stays at the XSigma root so Core can share it.
+- Dropped leftover XSigma-level Bazel overlays (`kineto.BUILD`,
+  `ittapi.BUILD`, `loguru.BUILD`, `spdlog.BUILD`, `glog.BUILD`,
+  `magic_enum.BUILD`). Kineto is compiled from `profiler.BUILD`;
+  loguru/glog/spdlog/magic_enum from `logging.BUILD`.
 
 ### Added
 - Lintrunner `TPINCLUDE` rule: third-party C++ headers must use `#include <>`,

@@ -911,8 +911,8 @@ endfunction()
 # (LOGGING_BACKEND) and its feature toggles remain user-facing XSigma flags —
 # they are consumed by Logging's own CMakeLists when the subproject configures.
 #
-# Logging's own CMakeLists initializes fmt/magic_enum from the host
-# ThirdParty/ when present (shared with Core) and loguru/glog/spdlog from
+# Logging's own CMakeLists initializes fmt from the host ThirdParty/ when
+# present (shared with Core) and loguru/glog/spdlog/magic_enum from
 # Logging's nested ThirdParty/ so XSigma does not keep duplicate copies.
 # Called by consuming libraries (Core, Memory, Vectorization) before their
 # if(TARGET Logging::Logging) checks — idempotent.
@@ -979,15 +979,15 @@ endfunction()
 # frameworks).  This file only defines helper functions and global options.
 #
 # Project → third-party mapping:
-#   Library/Core       → fmt, cpuinfo, magic_enum
+#   Library/Core       → fmt, cpuinfo
 #   Library/Memory     → mimalloc, Profiler (via xsigma_add_profiler),
 #                        Logging (via xsigma_add_logging)
 #   Library/Vectorization → sleef, Profiler (via xsigma_add_profiler),
 #                        Logging (via xsigma_add_logging)
 #   Library/Graph      → Parallel (via xsigma_add_parallel)
 #   ThirdParty/Profiler → owns nested third_party/kineto and ittapi (not XSigma root)
-#   ThirdParty/Logging  → fmt/magic_enum from the host ThirdParty/ when present;
-#                        loguru, glog, spdlog from Logging's nested ThirdParty/
+#   ThirdParty/Logging  → fmt from the host ThirdParty/ when present;
+#                        loguru, glog, spdlog, magic_enum from Logging's nested ThirdParty/
 #   ThirdParty/Parallel → TBB/OpenMP via its own Cmake/ finders
 #   */Testing/Cxx      → xsigma_add_googletest(), google-benchmark
 # =============================================================================

@@ -155,7 +155,7 @@ Graph is in scope, Profiler whenever Memory or Vectorization is in scope.
 ```mermaid
 flowchart LR
   Logging --> fmt
-  Logging --> loguru_glog_spdlog["Logging/ThirdParty: loguru / glog / spdlog"]
+  Logging --> loguru_glog_spdlog["Logging/ThirdParty: loguru / glog / spdlog / magic_enum"]
   Parallel --> tbb_omp["TBB / OpenMP / Threads"]
   Profiler --> fmt
   Profiler --> nested_backends["Profiler/third_party: kineto xor ittapi"]
@@ -167,7 +167,6 @@ flowchart LR
   Vectorization --> sleef_svml_mkl["SLEEF / SVML / MKL"]
   Core --> fmt
   Core --> cpuinfo
-  Core --> magic_enum
 ```
 
 Vendored trees live under `ThirdParty/` — do not edit them. See
@@ -245,12 +244,12 @@ Always-vendored under `ThirdParty/` — do not edit those trees.
 
 | Package | Role | Used by |
 |---|---|---|
-| Logging | Log backends (native / loguru / glog / spdlog) vendored under `Logging/ThirdParty/`; `LOGGING_BACKEND`, default **LOGURU** | Memory, Vectorization, Core |
+| Logging | Log backends (native / loguru / glog / spdlog) and magic_enum under `Logging/ThirdParty/`; `LOGGING_BACKEND`, default **LOGURU** | Memory, Vectorization, Core |
 | Parallel | Thread pools / TBB / OpenMP; `PARALLEL_BACKEND`, default **std** | Graph |
 | Profiler | Native XPlane + Kineto/ITT; kineto **or** ittapi under `Profiler/third_party/` (private) | Memory, Vectorization |
 | fmt | Formatting | Logging, Profiler, Memory, Core |
 | cpuinfo | CPU feature detection | Memory, Core |
-| Others | mimalloc, SLEEF, TBB, magic_enum, googletest, benchmark, … | per library |
+| Others | mimalloc, SLEEF, TBB, googletest, benchmark, … | per library |
 
 Test binaries additionally link Google Test (and Google Benchmark when
 enabled).

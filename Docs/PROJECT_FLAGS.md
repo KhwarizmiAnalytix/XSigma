@@ -81,7 +81,7 @@ the obsolete aggregate names `PROJECT_ENABLE_LTO`, `PROJECT_ENABLE_COVERAGE`,
 
 | Variable | Default | Description |
 |---|---:|---|
-| `CORE_ENABLE_MAGICENUM` | `ON` | Enable `magic_enum` in Core. |
+| `LOGGING_ENABLE_MAGICENUM` | `ON` | Enable `magic_enum` inside Logging. |
 | `MEMORY_ENABLE_MIMALLOC` | `ON` | Use mimalloc for the Memory CPU allocator. |
 | `MEMORY_ENABLE_MIMALLOC_STATS` | `OFF` | Build mimalloc statistics support. |
 | `MEMORY_ENABLE_TBB` | `OFF` | Use the TBB memory allocator. This is separate from the Parallel TBB backend. |

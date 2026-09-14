@@ -59,12 +59,6 @@ def core_defines():
         "//conditions:default": ["CORE_HAS_EXPERIMENTAL=0"],
     })
 
-    # magic_enum static reflection — CORE_HAS_MAGICENUM (default ON)
-    defines += select({
-        "//bazel:disable_magic_enum": ["CORE_HAS_MAGICENUM=0"],
-        "//conditions:default": ["CORE_HAS_MAGICENUM=1"],
-    })
-
     # Google Test availability — CORE_HAS_GTEST (CMake CORE_ENABLE_GTEST default ON)
     defines += select({
         "//bazel:disable_gtest": ["CORE_HAS_GTEST=0"],

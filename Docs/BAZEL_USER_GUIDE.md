@@ -46,7 +46,7 @@ The helper adds these configurations unless a different one is selected:
 | Build type | `debug` when no build-type token is supplied |
 | C++ standard | C++20 through platform and library settings |
 | Logging backend | `LOGURU` (`--config=logging_loguru`) |
-| Profiler instrumentation | `KINETO` (`--config=kineto`) |
+| Profiler instrumentation | Kineto (compiled from `@profiler`; not a host `--config`) |
 | Native profiler pipeline | Always compiled; not a selectable backend |
 | Parallel backend | `std` |
 | mimalloc | Enabled through root `.bazelrc` and `memory.bzl` |
@@ -66,7 +66,7 @@ The `gtest` helper token is an inverse toggle: it emits
 | SIMD | `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve` | `vectorization_type` define |
 | LTO | `lto`, `--lto.thin`, `--lto.full`, `--lto.ipo` | `--config=lto` (ThinLTO flags) |
 | Logging | `--logging.spdlog`, `.glog`, `.loguru`, `.native` | `--config=logging_*` |
-| Profiler | `--profiler.kineto`, `--profiler.itt` | `--config=kineto` or `--config=itt` |
+| Profiler | `--profiler.kineto` / `--profiler.itt` (legacy, ignored) | Kineto is always built from `profiler.BUILD` |
 | Sanitizer | `asan`, `tsan`, `ubsan`, `msan`, `lsan`; `--sanitizer.address` etc. | Matching sanitizer `--config` |
 | Parallel | `--parallel.std`, `.openmp`, `.tbb` | `parallel_backend` define; OpenMP/TBB config as needed |
 | Memory and optional features | `mimalloc`, `magic_enum`, `numa`, `memkind`, `enzyme`, `sleef` | Matching `.bazelrc` config or define |
@@ -77,14 +77,13 @@ Examples:
 ```bash
 python Scripts/setup_bazel.py build.test.debug.asan
 python Scripts/setup_bazel.py build.test.release.avx2 --logging.glog
-python Scripts/setup_bazel.py build.test.release --profiler.itt
 python Scripts/setup_bazel.py build.test.release --parallel.tbb
 python Scripts/setup_bazel.py build.test.release --project.vectorization
 ```
 
-Only one profiler instrumentation backend and one parallel backend should be
-selected. Xcode changes the helper's profiler selection to ITT because Kineto
-is not supported there.
+Only one parallel backend should be selected. Profiler instrumentation is
+Kineto from `ThirdParty/Profiler`; XSigma no longer switches ITT via host
+`--config`.
 
 ## Raw Bazel commands
 
@@ -98,8 +97,8 @@ bazel build --config=clang --config=release --config=cxx20 --config=avx2 //...
 bazel test --config=release --test_output=all \
   //Library/Vectorization/Testing/Cxx:VectorizationCxxTests
 
-# Alternative logging and profiler backends.
-bazel test --config=release --config=logging_glog --config=itt //...
+# Alternative logging backend (Profiler stays on Kineto).
+bazel test --config=release --config=logging_glog //...
 
 # Sanitizer configurations.
 bazel test --config=debug --config=asan //...
@@ -108,7 +107,7 @@ bazel test --config=debug --config=asan //...
 Current named configurations include `debug`, `release`, `relwithdebinfo`,
 `cxx17`, `cxx20`, `cxx23`, `sse`, `avx`, `avx2`, `avx512`, `neon`, `sve`,
 `lto`, `asan`, `tsan`, `ubsan`, `msan`, `lsan`, `openmp`, `tbb`, `numa`,
-`memkind`, `mimalloc`, `magic_enum`, `kineto`, `itt`, `gtest`, `benchmark`,
+`memkind`, `mimalloc`, `magic_enum`, `gtest`, `benchmark`,
 and `logging_{spdlog,glog,loguru,native}`.
 
 ## GPU status

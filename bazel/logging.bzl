@@ -14,27 +14,28 @@ def logging_defines():
     """
     defines = xsigma_defines()
 
-    # Logging backend — mutually exclusive; default LOGURU (matches CMake LOGGING_BACKEND default)
+    # Select keys must be @xsigma//bazel:* — this macro is expanded from
+    # @logging's overlay BUILD, where //bazel would be @@logging//bazel.
     defines += select({
-        "//bazel:logging_glog": [
+        "@xsigma//bazel:logging_glog": [
             "LOGGING_HAS_LOGURU=0",
             "LOGGING_HAS_GLOG=1",
             "LOGGING_HAS_NATIVE=0",
             "LOGGING_HAS_SPDLOG=0",
         ],
-        "//bazel:logging_native": [
+        "@xsigma//bazel:logging_native": [
             "LOGGING_HAS_LOGURU=0",
             "LOGGING_HAS_GLOG=0",
             "LOGGING_HAS_NATIVE=1",
             "LOGGING_HAS_SPDLOG=0",
         ],
-        "//bazel:logging_loguru": [
+        "@xsigma//bazel:logging_loguru": [
             "LOGGING_HAS_LOGURU=1",
             "LOGGING_HAS_GLOG=0",
             "LOGGING_HAS_NATIVE=0",
             "LOGGING_HAS_SPDLOG=0",
         ],
-        "//bazel:logging_spdlog": [
+        "@xsigma//bazel:logging_spdlog": [
             "LOGGING_HAS_LOGURU=0",
             "LOGGING_HAS_GLOG=0",
             "LOGGING_HAS_NATIVE=0",
@@ -50,7 +51,7 @@ def logging_defines():
     })
 
     defines += select({
-        "//bazel:disable_magic_enum": ["LOGGING_HAS_MAGICENUM=0"],
+        "@xsigma//bazel:disable_magic_enum": ["LOGGING_HAS_MAGICENUM=0"],
         "//conditions:default": ["LOGGING_HAS_MAGICENUM=1"],
     })
 
@@ -58,20 +59,20 @@ def logging_defines():
     # Non-Windows toolchains retain the historical compiler-detected default,
     # with an explicit opt-out for targets that lack the Itanium ABI.
     defines += select({
-        "//bazel:disable_logging_cxa_demangle": ["LOGGING_HAS_CXA_DEMANGLE=0"],
+        "@xsigma//bazel:disable_logging_cxa_demangle": ["LOGGING_HAS_CXA_DEMANGLE=0"],
         "@platforms//os:windows": ["LOGGING_HAS_CXA_DEMANGLE=0"],
         "//conditions:default": ["LOGGING_HAS_CXA_DEMANGLE=1"],
     })
     defines += select({
-        "//bazel:logging_portable_float_format": ["LOGGING_PORTABLE_FLOAT_FORMAT=1"],
+        "@xsigma//bazel:logging_portable_float_format": ["LOGGING_PORTABLE_FLOAT_FORMAT=1"],
         "//conditions:default": ["LOGGING_PORTABLE_FLOAT_FORMAT=0"],
     })
     defines += select({
-        "//bazel:logging_std_format": ["LOGGING_FORMAT_USE_STD=1"],
+        "@xsigma//bazel:logging_std_format": ["LOGGING_FORMAT_USE_STD=1"],
         "//conditions:default": ["LOGGING_FORMAT_USE_STD=0"],
     })
     defines += select({
-        "//bazel:logging_default_log_fatal": ["LOGGING_DEFAULT_EXCEPTION_MODE_LOG_FATAL=1"],
+        "@xsigma//bazel:logging_default_log_fatal": ["LOGGING_DEFAULT_EXCEPTION_MODE_LOG_FATAL=1"],
         "//conditions:default": ["LOGGING_DEFAULT_EXCEPTION_MODE_LOG_FATAL=0"],
     })
 

@@ -1,6 +1,6 @@
 # Core (`Library/Core`)
 
-Shared **Core** library: utilities, ownership helpers, compile-time traits, numeric algorithms, **Snappy** compression wrappers, and optional **Intel MKL**, **ROCm**, **magic_enum**, **Enzyme** AD, and **experimental** APIs.
+Shared **Core** library: utilities, ownership helpers, compile-time traits, numeric algorithms, **Snappy** compression wrappers, and optional **Intel MKL**, **ROCm**, **Enzyme** AD, and **experimental** APIs.
 
 ## Layout
 
@@ -26,7 +26,6 @@ Shared **Core** library: utilities, ownership helpers, compile-time traits, nume
 | `CORE_ENABLE_MKL` | OFF | Intel MKL |
 | `CORE_ENABLE_ROCM` | OFF | AMD ROCm |
 | `CORE_ENABLE_EXPERIMENTAL` | OFF | Experimental API (advanced) |
-| `CORE_ENABLE_MAGICENUM` | ON | magic_enum (also declared at project root for ThirdParty) |
 | `CORE_ENABLE_ENZYME` | — | Declared in `Cmake/tools/enzyme.cmake` (root includes before Core) |
 | `CORE_ENABLE_ICECC` / `CORE_ENABLE_CACHE` / `CORE_ENABLE_CLANGTIDY` / `CORE_ENABLE_FIX` / `CORE_ENABLE_IWYU` / `CORE_ENABLE_SANITIZER` / `CORE_ENABLE_SPELL` / `CORE_ENABLE_VALGRIND` | mostly OFF / cache ON | Tooling; see `CMakeLists.txt` |
 
@@ -63,14 +62,11 @@ Starlark helpers: [`bazel/core.bzl`](../../bazel/core.bzl). `config_setting` nam
 | `core_enable_mkl` | `//bazel:enable_mkl` | `CORE_HAS_MKL=1` |
 | `core_enable_rocm` | `//bazel:enable_rocm` | `CORE_HAS_ROCM=1` |
 | `core_enable_experimental` | `//bazel:enable_experimental` | `CORE_HAS_EXPERIMENTAL=1` |
-| `core_enable_magic_enum` | default ON; **`core_enable_magic_enum=false`** → `//bazel:disable_magic_enum` | `CORE_HAS_MAGICENUM=0` when disabled |
 | `enable_gtest` | default ON; **`enable_gtest=false`** → `//bazel:disable_gtest` | `CORE_HAS_GTEST=0` when disabled |
 | `core_lu_pivoting` | `//bazel:lu_pivoting` (`=true`) | `CORE_LU_PIVOTING=1` |
 | `core_sobol_1111` | default effective ON; **`core_sobol_1111=false`** → `//bazel:disable_sobol_1111` | Omits `CORE_SOBOL_1111` when disabled |
 | `core_enable_enzyme` | `//bazel:enable_enzyme` | `CORE_HAS_ENZYME=1` |
 | `core_enable_compression` + `core_compression_type` | `//bazel:enable_compression_snappy` or `enable_compression` | `CORE_HAS_COMPRESSION`, `CORE_COMPRESSION_TYPE_SNAPPY` — see `core.bzl` |
-
-**Note:** `//bazel:disable_magic_enum` matches `core_enable_magic_enum=false` (see `bazel/BUILD.bazel`).
 
 ### Convenience configs (`.bazelrc`)
 

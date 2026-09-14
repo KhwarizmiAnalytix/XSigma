@@ -11,6 +11,8 @@
  * - Best practices for profiling instrumentation
  */
 
+#include <native/session/profiler.h>
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -18,18 +20,16 @@
 #include <random>
 #include <vector>
 
-#include "native/session/profiler.h"
-
 #if PROFILER_HAS_KINETO
+#include <bespoke/common/record_function.h>
+#include <bespoke/kineto/profiler_kineto.h>
+
 #include <set>
 #include <unordered_set>
-
-#include "bespoke/common/record_function.h"
-#include "bespoke/kineto/profiler_kineto.h"
 #endif
 
 #if PROFILER_HAS_ITT
-#include "bespoke/itt/itt_wrapper.h"
+#include <bespoke/itt/itt_wrapper.h>
 #endif
 
 namespace xsigma::examples::profiling

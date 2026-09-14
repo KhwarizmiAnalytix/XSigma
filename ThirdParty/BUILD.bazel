@@ -1,16 +1,11 @@
-# Third-party BUILD overlay templates for external / nested dependencies.
-# kineto.BUILD and ittapi.BUILD are staged into @profiler by
-# //bazel:profiler_repository.bzl — not registered as top-level WORKSPACE repos.
+# Overlay BUILD files for products XSigma consumes directly.
 exports_files([
     "fmt.BUILD",
-    "kineto.BUILD",
-    "ittapi.BUILD",
+    "cpuinfo.BUILD",
     "profiler.BUILD",
     "logging.BUILD",
     "parallel.BUILD",
-    "loguru.BUILD",
-    "spdlog.BUILD",
-    "magic_enum.BUILD",
     "mimalloc.BUILD",
+    "svml.BUILD",
     "tbb.BUILD",
 ])

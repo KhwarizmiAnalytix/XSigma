@@ -892,8 +892,8 @@ command = [
     'python3',
     '-m',
     'lint_tool.adapters.grep_linter',
-    '''--pattern=#include[[:space:]]+"(fmt/|gtest/|gmock/|benchmark/|glog/|spdlog/|loguru|mimalloc|cpuinfo\.h|sleef\.h|magic_enum|nlohmann/|Eigen/|tbb/|TBB/|oneapi/tbb|pybind11/|absl/|gflags/|ittnotify|libkineto|kineto/|third_party/|logger/|native/|bespoke/|tools/threaded_callback|util/exception\.h)''',
-    '''--replace-pattern=s/#include([[:blank:]]+)"((fmt|gtest|gmock|benchmark|glog|spdlog|nlohmann|Eigen|pybind11|absl|gflags|libkineto|kineto|third_party|tbb|TBB|oneapi\/tbb|logger|native|bespoke)\/[^"]+|loguru\.hpp|mimalloc\.h|cpuinfo\.h|sleef\.h|magic_enum\.hpp|ittnotify\.h|tools\/threaded_callback_queue\.h|util\/exception\.h)"/#include\1<\2>/''',
+    '''--pattern=#include[[:space:]]+"(fmt/|gtest/|gmock/|benchmark/|glog/|spdlog/|loguru|mimalloc|cpuinfo\.h|sleef\.h|magic_enum|tbb/|TBB/|oneapi/tbb|ittnotify|libkineto|kineto/|third_party/|logger/|native/|bespoke/|tools/threaded_callback|util/exception\.h)''',
+    '''--replace-pattern=s/#include([[:blank:]]+)"((fmt|gtest|gmock|benchmark|glog|spdlog|tbb|TBB|oneapi\/tbb|libkineto|kineto|third_party|logger|native|bespoke)\/[^"]+|loguru\.hpp|mimalloc\.h|cpuinfo\.h|sleef\.h|magic_enum\.hpp|ittnotify\.h|tools\/threaded_callback_queue\.h|util\/exception\.h)"/#include\1<\2>/''',
     '--linter-name=TPINCLUDE',
     '--error-name=quoted third-party include',
     """--error-description=\

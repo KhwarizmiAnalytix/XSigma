@@ -1032,7 +1032,7 @@ class BazelConfiguration:
         print(f"\n{COLOR_CYAN}Feature Flags:{COLOR_RESET}")
         flags: list[tuple[str, bool | str]] = [
             ("MEMORY_ENABLE_MIMALLOC", mimalloc_on),
-            ("CORE_HAS_MAGICENUM", True),
+            ("LOGGING_HAS_MAGICENUM", True),
             ("PARALLEL/MEMORY_HAS_TBB", "tbb" in self.configs),
             ("PARALLEL_HAS_OPENMP", "openmp" in self.configs),
             ("MEMORY_HAS_CUDA", "cuda" in self.configs),
@@ -1796,7 +1796,7 @@ def print_help() -> None:
     print("  --lto.auto    - Auto-select mode (same as bare 'lto')")
     print("  --lto.off     - Explicitly disable LTO")
     print("  mimalloc      - Microsoft mimalloc allocator")
-    print("  magic_enum    - Magic enum library")
+    print("  magic_enum    - magic_enum in Logging")
     print("  tbb           - Intel TBB")
     print("  openmp        - OpenMP support")
     print("  enzyme        - Enzyme AD defines (see .bazelrc build:enzyme)")

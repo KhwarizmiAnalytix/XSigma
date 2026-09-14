@@ -11,8 +11,7 @@
 # SIMD instructions available CORE_AVX512=1/0              — AVX-512 SIMD instructions available
 # CORE_HAS_MKL=1/0             — Intel MKL math library linked CORE_HAS_ROCM=1/0            — AMD ROCm GPU support compiled
 # in CORE_HAS_GTEST=1/0           — Google Test available to Core tests CORE_HAS_EXPERIMENTAL=1/0 —
-# Experimental features enabled (use with caution) CORE_HAS_MAGICENUM=1/0       — magic_enum static
-# enum-reflection active CORE_HAS_ENZYME=1/0          — Enzyme automatic-differentiation plugin
+# Experimental features enabled (use with caution) CORE_HAS_ENZYME=1/0          — Enzyme automatic-differentiation plugin
 # loaded CORE_HAS_COMPRESSION=1/0     — Compression wrappers compiled in
 # =============================================================================
 cmake_minimum_required(VERSION 3.16)
@@ -66,14 +65,6 @@ option(CORE_ENABLE_ROCM "Enable AMD ROCm GPU support" OFF)
 # ABI without notice.
 option(CORE_ENABLE_EXPERIMENTAL "Enable experimental Core features (use with caution)" OFF)
 mark_as_advanced(CORE_ENABLE_EXPERIMENTAL)
-
-# magic_enum — zero-overhead compile-time enum ↔ string / iteration. NOTE: CORE_ENABLE_MAGICENUM is
-# declared in the root CMakeLists.txt (before add_subdirectory) because ThirdParty/CMakeLists.txt
-# needs it to conditionally build the magic_enum target.  Declaring it again here would be a no-op;
-# see root CMakeLists.txt for the canonical declaration.
-
-option(CORE_ENABLE_MAGICENUM "Enable magic_enum static reflection for enums." ON)
-mark_as_advanced(CORE_ENABLE_MAGICENUM)
 
 # Icecream distributed compilation launcher (rarely needed; hidden by default).
 option(CORE_ENABLE_ICECC "Use Icecream (icecc) distributed compiler for Core" OFF)
@@ -278,9 +269,6 @@ compile_definition(CORE_COMPILE_DEFINITIONS CORE_ENABLE_GTEST)
 # Experimental API gate.
 compile_definition(CORE_COMPILE_DEFINITIONS CORE_ENABLE_EXPERIMENTAL)
 
-# magic_enum static reflection.
-compile_definition(CORE_COMPILE_DEFINITIONS CORE_ENABLE_MAGICENUM)
-
 # =============================================================================
 # Third-party
 # dependencies owned by Core
@@ -351,29 +339,6 @@ endforeach()
 
 list(APPEND CORE_DEPENDENCY_INCLUDE_DIRS "${_tpdir}/fmt/include")
 list(APPEND CORE_DEPENDENCY_INCLUDE_DIRS "${_tpdir}/cpuinfo/include")
-
-# magic_enum — zero-overhead compile-time enum reflection (header-only).
-if(CORE_ENABLE_MAGICENUM)
-  set(MAGIC_ENUM_OPT_BUILD_EXAMPLES OFF CACHE BOOL "Disable magic_enum examples" FORCE)
-  set(MAGIC_ENUM_OPT_BUILD_TESTS OFF CACHE BOOL "Disable magic_enum tests" FORCE)
-
-  add_third_party_library(
-    magic_enum
-    CONDITION
-    CORE_ENABLE_MAGICENUM
-    LIBRARY_TYPE
-    HEADER_ONLY
-    SOURCE_DIR
-    "${_tpdir}/magic_enum"
-    XSIGMA_TARGETS
-    "MagicEnum::magic_enum=magic_enum"
-    INCLUDE_DIR
-    "${_tpdir}/magic_enum/include"
-    AUTO_ADD_TO_DEPENDENCIES
-    OFF
-  )
-  list(APPEND CORE_DEPENDENCY_INCLUDE_DIRS "${_tpdir}/magic_enum/include")
-endif()
 
 # =============================================================================
 set(xsigma_headers "")
@@ -481,9 +446,6 @@ endif()
 if(TARGET Cpuinfo::cpuinfo)
   target_link_libraries(Core PUBLIC Cpuinfo::cpuinfo)
 endif()
-if(CORE_ENABLE_MAGICENUM AND TARGET MagicEnum::magic_enum)
-  target_link_libraries(Core PUBLIC MagicEnum::magic_enum)
-endif()
 
 if(CORE_ENABLE_CLANGTIDY)
   include(clang_tidy)
@@ -546,7 +508,6 @@ message("  Vectorization type   : ${VECTORIZATION_CPU_BACKEND}")
 message("  Mkl                  : ${CORE_ENABLE_MKL}")
 message("  Rocm                 : ${CORE_ENABLE_ROCM}")
 message("  Experimental         : ${CORE_ENABLE_EXPERIMENTAL}")
-message("  Magic enum           : ${CORE_ENABLE_MAGICENUM}")
 message("  Enzyme               : ${CORE_ENABLE_ENZYME}")
 message("  Compression          : ${CORE_ENABLE_COMPRESSION}")
 message("  Cxx standard         : ${CORE_CXX_STANDARD}")

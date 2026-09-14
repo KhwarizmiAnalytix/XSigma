@@ -5,9 +5,9 @@ The vendored repo ships its own BUILD.bazel files that refer to in-repo
 This rule copies the tree, drops nested BUILD files, and writes
 //ThirdParty:profiler.BUILD at the root so @xsigma//bazel flags apply.
 
-Kineto and ITT are private to Profiler: their BUILD overlays are written
-under third_party/{kineto,ittapi}/ inside the staged @profiler repo so
-XSigma never registers @kineto / @ittapi WORKSPACE dependencies.
+Kineto/ITT sources stay under Profiler/third_party and are compiled from
+profiler.BUILD — XSigma does not ship kineto.BUILD / ittapi.BUILD overlays
+or register @kineto / @ittapi WORKSPACE dependencies.
 """
 
 def _local_profiler_repository_impl(repository_ctx):
@@ -16,10 +16,9 @@ def _local_profiler_repository_impl(repository_ctx):
         fail("Profiler checkout missing at %s (git submodule update --init ThirdParty/Profiler)" % src)
 
     kineto_src = repository_ctx.path(str(src) + "/third_party/kineto/libkineto")
-    itt_src = repository_ctx.path(str(src) + "/third_party/ittapi")
-    if not kineto_src.exists or not itt_src.exists:
+    if not kineto_src.exists:
         fail(
-            "Profiler nested third_party (kineto/ittapi) missing. Initialize:\n" +
+            "Profiler nested third_party/kineto missing. Initialize:\n" +
             "  git submodule update --init --recursive ThirdParty/Profiler"
         )
 
@@ -41,8 +40,8 @@ def _local_profiler_repository_impl(repository_ctx):
             "--exclude", "third_party/ittapi/python",
             "--exclude", "third_party/kineto/tb_plugin",
             "--exclude", "third_party/kineto/benchmarks",
-            # libkineto's nested third_party (dynolog, …) is unused by our
-            # kineto.BUILD overlay and ships invalid/non-Bazel BUILD files.
+            # libkineto's nested third_party (dynolog, …) is unused and ships
+            # invalid/non-Bazel BUILD files.
             "--exclude", "third_party/kineto/libkineto/third_party",
             str(src) + "/",
             "./",
@@ -93,8 +92,8 @@ for name in os.listdir(src):
             repository_ctx.delete(nested)
 
     # Drop vendored nested BUILD files under third_party (kineto dynolog, etc.)
-    # so @profiler//... does not analyze unrelated packages. We re-add only the
-    # private kineto/ittapi overlays below.
+    # so @profiler//... does not analyze unrelated packages. Kineto is compiled
+    # from profiler.BUILD at the repo root.
     strip_script = """
 import os
 import sys
@@ -107,17 +106,6 @@ for dirpath, dirnames, filenames in os.walk(os.path.join(root, "third_party")):
     strip = repository_ctx.execute([python, "-c", strip_script, "."])
     if strip.return_code != 0:
         fail("Failed to strip nested BUILD files: %s%s" % (strip.stdout, strip.stderr))
-
-    # Private backend BUILD overlays (content lives under //ThirdParty as
-    # templates; not registered as top-level WORKSPACE repos).
-    repository_ctx.file(
-        "third_party/kineto/BUILD.bazel",
-        repository_ctx.read(repository_ctx.attr.kineto_build_file),
-    )
-    repository_ctx.file(
-        "third_party/ittapi/BUILD.bazel",
-        repository_ctx.read(repository_ctx.attr.ittapi_build_file),
-    )
 
     repository_ctx.file(
         "WORKSPACE",
@@ -133,8 +121,6 @@ local_profiler_repository = repository_rule(
     attrs = {
         "path": attr.string(mandatory = True),
         "build_file": attr.label(mandatory = True, allow_single_file = True),
-        "kineto_build_file": attr.label(mandatory = True, allow_single_file = True),
-        "ittapi_build_file": attr.label(mandatory = True, allow_single_file = True),
     },
     local = True,
 )

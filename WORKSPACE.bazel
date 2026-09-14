@@ -8,7 +8,6 @@
 workspace(name = "xsigma")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
 # =============================================================================
 # Bazel Skylib - Utility functions for Bazel
@@ -46,7 +45,7 @@ openmp_configure(name = "parallel_openmp")
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# fmt — vendored ThirdParty/fmt (must match CMake / spdlog; same tree as Library/Logging)
+# fmt — vendored ThirdParty/fmt (shared with Logging / spdlog)
 # -----------------------------------------------------------------------------
 new_local_repository(
     name = "fmt",
@@ -69,15 +68,6 @@ new_local_repository(
 )
 
 # -----------------------------------------------------------------------------
-# magic_enum - Static reflection for enums (vendored ThirdParty/magic_enum)
-# -----------------------------------------------------------------------------
-new_local_repository(
-    name = "magic_enum",
-    path = "ThirdParty/magic_enum",
-    build_file = "//ThirdParty:magic_enum.BUILD",
-)
-
-# -----------------------------------------------------------------------------
 # mimalloc - Microsoft's high-performance memory allocator (vendored, v2.x)
 # -----------------------------------------------------------------------------
 new_local_repository(
@@ -94,39 +84,9 @@ new_local_repository(
 # version over the network. This is the same source CMake builds from
 # (ThirdParty/googletest via add_subdirectory), so both build systems compile
 # the exact same googletest commit -- no more version drift between them.
-# glog's own Bazel build references @googletest, which bzlmod already
-# provides via the `googletest` bazel_dep in MODULE.bazel; no WORKSPACE alias
-# is needed for that name.
 local_repository(
     name = "com_google_googletest",
     path = "ThirdParty/googletest",
-)
-
-# -----------------------------------------------------------------------------
-# Google Logging (glog) — Logging backend (nested under ThirdParty/Logging)
-# -----------------------------------------------------------------------------
-local_repository(
-    name = "glog",
-    path = "ThirdParty/Logging/ThirdParty/glog",
-)
-
-# -----------------------------------------------------------------------------
-# Loguru — Logging backend (nested under ThirdParty/Logging)
-# -----------------------------------------------------------------------------
-# Overlay BUILD so we do not edit the vendored loguru tree.
-new_local_repository(
-    name = "loguru",
-    path = "ThirdParty/Logging/ThirdParty/loguru",
-    build_file = "//ThirdParty:loguru.BUILD",
-)
-
-# -----------------------------------------------------------------------------
-# spdlog — Logging backend (nested under ThirdParty/Logging)
-# -----------------------------------------------------------------------------
-new_local_repository(
-    name = "spdlog",
-    path = "ThirdParty/Logging/ThirdParty/spdlog",
-    build_file = "//ThirdParty:spdlog.BUILD",
 )
 
 # -----------------------------------------------------------------------------
@@ -142,16 +102,14 @@ local_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Profiler. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
-# Kineto/ITT live under Profiler/third_party and are staged privately into
-# @profiler — XSigma must not register @kineto / @ittapi.
+# Kineto/ITT live under Profiler/third_party and are compiled from
+# profiler.BUILD — XSigma does not register @kineto / @ittapi.
 load("//bazel:profiler_repository.bzl", "local_profiler_repository")
 
 local_profiler_repository(
     name = "profiler",
     path = "ThirdParty/Profiler",
     build_file = "//ThirdParty:profiler.BUILD",
-    kineto_build_file = "//ThirdParty:kineto.BUILD",
-    ittapi_build_file = "//ThirdParty:ittapi.BUILD",
 )
 
 # -----------------------------------------------------------------------------
@@ -159,13 +117,14 @@ local_profiler_repository(
 # -----------------------------------------------------------------------------
 # Git submodule ThirdParty/Logging. Overlay BUILD so we do not edit the
 # vendored tree; host //bazel flags are referenced as @xsigma//bazel:*.
-# Logging's backends (loguru / glog / spdlog) come from its nested
-# ThirdParty/ tree. fmt / magic_enum stay as XSigma root repos so Core
-# can share them.
-new_local_repository(
+# Nested backends (loguru / glog / spdlog / magic_enum) are compiled from
+# logging.BUILD. fmt stays as an XSigma root repo so Core can share it.
+load("//bazel:logging_repository.bzl", "local_logging_repository")
+
+local_logging_repository(
     name = "logging",
-    build_file = "//ThirdParty:logging.BUILD",
     path = "ThirdParty/Logging",
+    build_file = "//ThirdParty:logging.BUILD",
 )
 
 # -----------------------------------------------------------------------------

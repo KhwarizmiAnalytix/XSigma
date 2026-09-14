@@ -18,7 +18,7 @@ Dependency policy is owned by the consuming library, not by a generic
 |---|---|
 | External package preference | `XSIGMA_ENABLE_EXTERNAL=ON|OFF` |
 | Logging backend | `LOGGING_BACKEND=SPDLOG|LOGURU|GLOG|NATIVE` |
-| Enum reflection | `CORE_ENABLE_MAGICENUM=ON|OFF` |
+| Enum reflection | `LOGGING_ENABLE_MAGICENUM=ON|OFF` |
 | CPU allocator | `MEMORY_ENABLE_MIMALLOC=ON|OFF` |
 | TBB Memory allocator | `MEMORY_ENABLE_TBB=ON|OFF` |
 | OpenMP execution | `PARALLEL_BACKEND=openmp` |
@@ -50,7 +50,7 @@ substitution exists.
 # Lightweight logging and no magic_enum.
 cmake -S . -B build-minimal -G Ninja \
   -DLOGGING_BACKEND=NATIVE \
-  -DCORE_ENABLE_MAGICENUM=OFF
+  -DLOGGING_ENABLE_MAGICENUM=OFF
 
 # TBB parallel execution and Memory allocator.
 cmake -S . -B build-tbb -G Ninja \

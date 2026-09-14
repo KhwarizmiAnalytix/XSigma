@@ -70,7 +70,7 @@ include(CTest)
 
 # Our Library/*/Testing suites call add_test() regardless of BUILD_TESTING.
 # Keep CTest enabled, then turn BUILD_TESTING off so vendored ThirdParty/
-# CMakeLists (fmt, glog, kineto, cpuinfo, mimalloc, googletest, …) do not
+# CMakeLists (fmt, kineto, cpuinfo, mimalloc, googletest, …) do not
 # register or build their own tests. Do not edit anything under ThirdParty/.
 enable_testing()
 set(BUILD_TESTING OFF CACHE BOOL "Disable testing for third-party libraries" FORCE)
@@ -90,16 +90,6 @@ set(CPUINFO_BUILD_BENCHMARKS OFF CACHE BOOL "Disable cpuinfo benchmarks" FORCE)
 set(MI_BUILD_TESTS OFF CACHE BOOL "Disable mimalloc tests" FORCE)
 set(KINETO_BUILD_TESTS OFF CACHE BOOL "Disable Kineto tests" FORCE)
 set(SLEEF_BUILD_TESTS OFF CACHE BOOL "Disable SLEEF tests" FORCE)
-set(LOGURU_BUILD_TESTS OFF CACHE BOOL "Disable loguru tests" FORCE)
-set(LOGURU_BUILD_EXAMPLES OFF CACHE BOOL "Disable loguru examples" FORCE)
-set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "Disable spdlog tests" FORCE)
-set(SPDLOG_BUILD_TESTS_HO OFF CACHE BOOL "Disable spdlog header-only tests" FORCE)
-set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "Disable spdlog examples" FORCE)
-set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "Disable spdlog benchmarks" FORCE)
-set(WITH_GTEST OFF CACHE BOOL "Disable glog gtest" FORCE)
-set(WITH_GMOCK OFF CACHE BOOL "Disable glog gmock" FORCE)
-set(MAGIC_ENUM_OPT_BUILD_TESTS OFF CACHE BOOL "Disable magic_enum tests" FORCE)
-set(MAGIC_ENUM_OPT_BUILD_EXAMPLES OFF CACHE BOOL "Disable magic_enum examples" FORCE)
 
 # Always use bundled googletest — external shared gtest (e.g. from conda) causes rpath failures at
 # runtime because its dylib install path is not in our test executables' rpath.

@@ -73,10 +73,7 @@ cc_library(
         "@logging//:Logging",
         "//Library/Memory:memory_lib",
         "@cpuinfo//:cpuinfo",
-    ] + select({
-        "//bazel:disable_magic_enum": [],
-        "//conditions:default": ["@magic_enum//:magic_enum"],
-    }),
+    ],
     alwayslink = False,
     visibility = [
         "//Library/Core:__pkg__",

@@ -20,8 +20,8 @@ add_third_party_library(fmt)
 
 ### With Condition
 ```cmake
-add_third_party_library(loguru
-    CONDITION XSIGMA_USE_LOGURU
+add_third_party_library(mimalloc
+    CONDITION MEMORY_ENABLE_MIMALLOC
     LIBRARY_TYPE STATIC
 )
 ```
