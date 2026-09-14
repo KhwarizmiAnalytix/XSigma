@@ -4,12 +4,7 @@ load("//bazel:xsigma.bzl", "xsigma_copts", "xsigma_defines", "xsigma_linkopts")
 PROFILER_CXX_STD = "c++20"
 
 def profiler_copts():
-    # session.h names a getter memory_tracker() next to class memory_tracker.
-    # GCC 13+ rejects that as -Wchanges-meaning; Clang ignores the unknown -Wno.
-    return xsigma_copts(cxx_std = PROFILER_CXX_STD) + select({
-        "@platforms//os:windows": [],
-        "//conditions:default": ["-Wno-changes-meaning"],
-    })
+    return xsigma_copts(cxx_std = PROFILER_CXX_STD)
 
 def profiler_defines():
     """Returns compile definitions for the ThirdParty Profiler package.
