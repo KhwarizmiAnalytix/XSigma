@@ -79,9 +79,9 @@ mine/yours to silently fix as a drive-by — confirm they're still the same
   from a widely-used script — a real but separate refactor.
 - The `BAZEL_LINTER` "Advice" failure
   (`bazel query 'kind(http_archive, //external:*)'` exits 7) is a bug in
-  `Tools/linter/adapters/bazel_linter.py` itself — it queries a
-  WORKSPACE-era construct this repo no longer has after migrating to
-  Bzlmod. Not fixable by changing repo content.
+  `lint-tool`'s `bazel_linter` adapter — it queries a WORKSPACE-era
+  construct this repo no longer has after migrating to Bzlmod. Not
+  fixable by changing repo content.
 
 Two CMake linters in this repo's `.lintrunner.toml` (`cmakelint` via the
 `CMAKE` code, and `cmake-format` via `CMAKEFORMAT`) can disagree on

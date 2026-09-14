@@ -1,26 +1,23 @@
 # XSigma Linter
 
 ## Overview
-The `Tools/linter` package hosts XSigma's lint and formatting toolchain. It
-collects thin adapter scripts that wrap external tools, along with shared
-Python helpers that let every adapter participate in the repository's
-`lintrunner` workflow. The suite keeps code style consistent, enforces project
-policy (for example, GitHub workflow safeguards), and runs static analysis that
-would otherwise require bespoke shell scripting.
+Linting is the `lint-tool` PyPI package
+(https://github.com/KhwarizmiAnalytix/lint-tool). XSigma owns **policy**
+(`.lintrunner.toml`, `.clang-format`, `pyproject.toml`, spell
+suppressions); the package owns adapter implementations. Install with
+`pip install lint-tool`, then run `lintrunner` from the repository root.
 
 ## Folder Structure
 | Path | Description |
 | --- | --- |
-| `Tools/linter/__init__.py` | Marks the package as importable so adapters can share helpers. |
+| `lint-tool` (PyPI) | Adapter scripts (`python3 -m lint_tool.adapters.<name>`). |
 | `Docs/readme/linter.md` | High-level documentation (this file). |
 | `Scripts/suppressions/spell_suppressions.txt` | Shared codespell ignore-words list; keep it sorted and deduplicated. |
-| `Tools/linter/adapters/` | Individual adapter entrypoints plus the shared `_linter` framework. |
-| `Tools/linter/adapters/_linter/` | Tokeniser, parser, and CLI scaffolding for Python-focused adapters. |
-| `Tools/linter/adapters/README.md` | Adapter authoring checklist (protocol, dry-run behaviour, etc.). |
+| `.lintrunner.toml` | Host menu: which linters run, include/exclude globs. |
 
-The adapter directory contains one script per lint code (for example
-`clangformat_linter.py`, `mypy_linter.py`) plus project-specific data such as
-`docstring_linter-grandfather.json` and `s3_init_config.json`.
+Host-owned data such as `[tool.lint-tool] import-allowlist` lives in
+`pyproject.toml`. Binary hashes for optional `s3_init` downloads ship
+inside `lint-tool`.
 
 ## Functionality
 - **Formatting and style**: `pyfmt`, `ruff`, `clangformat`, `cmake_format`, and `codespell` keep
@@ -33,8 +30,8 @@ The adapter directory contains one script per lint code (for example
   configuration.
 - **Repository policy**: `docstring_linter` and `import_linter` encode project
   conventions for Scripts.
-- **Infrastructure helpers**: `pip_init.py`, `s3_init.py`, and `update_s3.py`
-  provision third-party binaries.
+- **Infrastructure helpers**: `lint_tool.adapters.pip_init`,
+  `s3_init`, and `update_s3` provision third-party binaries.
 
 All adapters emit the JSON protocol expected by `lintrunner`, so they can run
 either individually or behind the aggregated developer workflow.
@@ -71,41 +68,43 @@ positional file paths at the end.
 
 | Lint code | Script | Purpose | Key options |
 | --- | --- | --- | --- |
-| ACTIONLINT | `adapters/actionlint_linter.py` | Wraps `actionlint` for GitHub workflow validation. | `--binary PATH` (required); `filenames...` |
-| BAZEL_LINTER | `adapters/bazel_linter.py` | Flags unstable `http_archive` checksums (parses WORKSPACE/MODULE.bazel/`*.bzl` directly; no bazel binary needed). | `filenames...` |
-| CLANGFORMAT | `adapters/clangformat_linter.py` | Runs `clang-format` and captures diffs. | `--binary PATH` (required); `--retries N`; `--timeout SEC`; `--verbose`; `filenames...` |
-| CLANGTIDY | `adapters/clangtidy_linter.py` | Executes `clang-tidy` (resolved via PATH/`shutil.which`, matching the local toolchain) using a build directory. | `--binary NAME_OR_PATH` (required, e.g. `clang-tidy`); `--build-dir DIR` (required); `--verbose`; `filenames...` |
-| CMAKE | `adapters/cmake_linter.py` | Applies `cmakelint` with repo defaults. | `--config PATH` (required); `filenames...` |
-| CMAKEFORMAT | `adapters/cmake_format_linter.py` | Formats CMake files with `cmake-format`. | `--config PATH` (required); `--retries N`; `--timeout SEC`; `--verbose`; `filenames...` |
-| CMAKE_MINIMUM_REQUIRED | `adapters/cmake_minimum_required_linter.py` | Ensures CMake and dependency minimum versions match project policy. | `--verbose`; `filenames...` |
-| CODESPELL | `adapters/codespell_linter.py` | Runs `codespell` with the shared dictionary. | `--verbose`; `filenames...` |
-| DOCSTRING | `adapters/docstring_linter.py` | Requires docstrings on large classes/functions. | Shared `FileLinter` flags; plus `--grandfather PATH`; `--grandfather-tolerance PERCENT`; `--lint-init`; `--lint-local`; `--lint-protected`; `--max-class N`; `--max-def N`; `--min-docstring N`; `--no-grandfather`; `--report`; `--write-grandfather`. |
-| EXEC | `adapters/exec_linter.py` | Checks that source files are non-executable. | `--verbose`; `filenames...` |
-| FLAKE8 | `adapters/flake8_linter.py` | Wraps `flake8` and plugin set. | `--flake8-plugins-path DIR`; `--severity CODE:LEVEL` (repeatable); `--retries N`; `--verbose`; `filenames...` |
-| GHA | `adapters/gha_linter.py` | Verifies `secrets: inherit` in workflow jobs. | `filenames...` |
-| GREP | `adapters/grep_linter.py` | Generic pattern matcher with optional sed fixes. | `--pattern REGEX` (required); `--allowlist-pattern REGEX`; `--linter-name CODE`; `--match-first-only`; `--error-name TEXT`; `--error-description TEXT`; `--replace-pattern SED_EXPR`; `--verbose`; `filenames...` |
-| IMPORT | `adapters/import_linter.py` | Blocks disallowed third-party imports. | `filepaths...` (positional only) |
-| LINTRUNNER_VERSION | `adapters/lintrunner_version_linter.py` | Confirms the local `lintrunner` is up to date. | No CLI options; run the script directly. |
-| MYPY | `adapters/mypy_linter.py` | Wraps `dmypy`/`mypy` type checking. | `--retries N`; `--config PATH` (required); `--code CODE`; `--verbose`; `filenames...` |
-| NEWLINE | `adapters/newlines_linter.py` | Enforces POSIX newlines and bans CRLF. | `--verbose`; `filenames...` |
-| PIP INIT | `adapters/pip_init.py` | Installs pinned Python packages for linting. | `packages...` (required); `--verbose`; `--dry-run 1` |
-| PYFMT | `adapters/pyfmt_linter.py` | Formats Python with `isort`, `usort`, and `ruff format`. | `--verbose`; `filenames...` |
-| PYPROJECT | `adapters/pyproject_linter.py` | Checks `pyproject.toml` metadata consistency. | `--verbose`; `filenames...` |
-| PYREFLY | `adapters/pyrefly_linter.py` | Runs the `pyrefly` analyser. | `--code CODE`; `--verbose`; `--config PATH` (required) |
-| RUFF | `adapters/ruff_linter.py` | Wraps `ruff check` with optional autofix follow-up. | `--config PATH`; `--explain`; `--show-disable`; `--timeout SEC`; `--severity CODE:LEVEL` (repeatable); `--no-fix`; plus default `--retries`, `--verbose`, and `filenames...` from `add_default_options`. |
-| S3 INIT | `adapters/s3_init.py` | Downloads prebuilt binaries referenced by adapters. | `--config-json PATH` (required); `--linter NAME` (required); `--output-dir DIR`; `--output-name NAME`; `--dry-run {0,1}` |
-| SHELLCHECK | `adapters/shellcheck_linter.py` | Calls `shellcheck` with JSON output. | `filenames...` |
-| UPDATE_S3 | `adapters/update_s3.py` | Uploads refreshed binaries and updates hashes. | `--config-json PATH` (required); `--linter NAME` (required); `--platform NAME`; `--file PATH` (required); `--dry-run` |
+| ACTIONLINT | `lint_tool.adapters.actionlint_linter` | Wraps `actionlint` for GitHub workflow validation. | `--binary PATH` (required); `filenames...` |
+| BAZEL_LINTER | `lint_tool.adapters.bazel_linter` | Flags unstable `http_archive` checksums (parses WORKSPACE/MODULE.bazel/`*.bzl` directly; no bazel binary needed). | `filenames...` |
+| CLANGFORMAT | `lint_tool.adapters.clangformat_linter` | Runs `clang-format` and captures diffs. | `--binary PATH` (required); `--retries N`; `--timeout SEC`; `--verbose`; `filenames...` |
+| CLANGTIDY | `lint_tool.adapters.clangtidy_linter` | Executes `clang-tidy` (resolved via PATH/`shutil.which`, matching the local toolchain) using a build directory. | `--binary NAME_OR_PATH` (required, e.g. `clang-tidy`); `--build-dir DIR` (optional; otherwise auto-discovers `compile_commands.json`); `--verbose`; `filenames...` |
+| CMAKE | `lint_tool.adapters.cmake_linter` | Applies `cmakelint` with repo defaults. | `--config PATH` (required); `filenames...` |
+| CMAKEFORMAT | `lint_tool.adapters.cmake_format_linter` | Formats CMake files with `cmake-format`. | `--config PATH` (required); `--retries N`; `--timeout SEC`; `--verbose`; `filenames...` |
+| CMAKE_MINIMUM_REQUIRED | `lint_tool.adapters.cmake_minimum_required_linter` | Ensures CMake and dependency minimum versions match project policy. | `--verbose`; `filenames...` |
+| CODESPELL | `lint_tool.adapters.codespell_linter` | Runs `codespell` with the shared dictionary. | `--verbose`; `filenames...` |
+| DOCSTRING | `lint_tool.adapters.docstring_linter` | Requires docstrings on large classes/functions. | Shared `FileLinter` flags; plus `--grandfather PATH`; `--grandfather-tolerance PERCENT`; `--lint-init`; `--lint-local`; `--lint-protected`; `--max-class N`; `--max-def N`; `--min-docstring N`; `--no-grandfather`; `--report`; `--write-grandfather`. |
+| EXEC | `lint_tool.adapters.exec_linter` | Checks that source files are non-executable. | `--verbose`; `filenames...` |
+| FLAKE8 | `lint_tool.adapters.flake8_linter` | Wraps `flake8` and plugin set. | `--flake8-plugins-path DIR`; `--severity CODE:LEVEL` (repeatable); `--retries N`; `--verbose`; `filenames...` |
+| GHA | `lint_tool.adapters.gha_linter` | Verifies `secrets: inherit` in workflow jobs. | `filenames...` |
+| GREP | `lint_tool.adapters.grep_linter` | Generic pattern matcher with optional sed fixes. | `--pattern REGEX` (required); `--allowlist-pattern REGEX`; `--linter-name CODE`; `--match-first-only`; `--error-name TEXT`; `--error-description TEXT`; `--replace-pattern SED_EXPR`; `--verbose`; `filenames...` |
+| IMPORT | `lint_tool.adapters.import_linter` | Blocks disallowed third-party imports. | `filepaths...` (positional only) |
+| LINTRUNNER_VERSION | `lint_tool.adapters.lintrunner_version_linter` | Confirms the local `lintrunner` is up to date. | No CLI options; `python3 -m lint_tool.adapters.lintrunner_version_linter`. |
+| MYPY | `lint_tool.adapters.mypy_linter` | Wraps `dmypy`/`mypy` type checking. | `--retries N`; `--config PATH` (required); `--code CODE`; `--verbose`; `filenames...` |
+| NEWLINE | `lint_tool.adapters.newlines_linter` | Enforces POSIX newlines and bans CRLF. | `--verbose`; `filenames...` |
+| PIP INIT | `lint_tool.adapters.pip_init` | Installs pinned Python packages for linting. | `packages...` (required); `--verbose`; `--dry-run 1` |
+| PYFMT | `lint_tool.adapters.pyfmt_linter` | Formats Python with `isort`, `usort`, and `ruff format`. | `--verbose`; `filenames...` |
+| PYPROJECT | `lint_tool.adapters.pyproject_linter` | Checks `pyproject.toml` metadata consistency. | `--verbose`; `filenames...` |
+| PYREFLY | `lint_tool.adapters.pyrefly_linter` | Runs the `pyrefly` analyser. | `--code CODE`; `--verbose`; `--config PATH` (required) |
+| RUFF | `lint_tool.adapters.ruff_linter` | Wraps `ruff check` with optional autofix follow-up. | `--config PATH`; `--explain`; `--show-disable`; `--timeout SEC`; `--severity CODE:LEVEL` (repeatable); `--no-fix`; plus default `--retries`, `--verbose`, and `filenames...` from `add_default_options`. |
+| S3 INIT | `lint_tool.adapters.s3_init` | Downloads prebuilt binaries referenced by adapters. | `--config-json PATH` (optional; packaged default); `--linter NAME` (required); `--output-dir DIR`; `--output-name NAME`; `--dry-run {0,1}` |
+| SHELLCHECK | `lint_tool.adapters.shellcheck_linter` | Calls `shellcheck` with JSON output. | `filenames...` |
+| UPDATE_S3 | `lint_tool.adapters.update_s3` | Uploads refreshed binaries and updates hashes. | `--config-json PATH` (optional; packaged default); `--linter NAME` (required); `--platform NAME`; `--file PATH` (required); `--dry-run` |
 
 ## Requirements
 - **Python runtime**: adapters target the repository's supported Python version
   (tooling is validated with Python 3.12). Activate the same interpreter locally.
-- **Python packages**: `ruamel.yaml`, `typing_extensions`, `libcst`, `isort`,
-  `usort`, `ruff`, `cmakelang`, `codespell_lib`, `packaging`, `boto3`, and other packages
-  pinned by `pip_init.py`.
+- **Python packages**: `lint-tool` (the adapters), plus `ruamel.yaml`,
+  `typing_extensions`, `libcst`, `isort`, `usort`, `ruff`, `cmakelang`,
+  `codespell_lib`, `packaging`, `boto3`, and other packages pinned by
+  `lint_tool.adapters.pip_init`.
 - **Native tooling**: `clang-format`, `clang-tidy`, `cmakelint`, `cmake-format`, `shellcheck`,
   `actionlint`, `grep`, `sed`, and any binaries referenced in
-  `s3_init_config.json`. `lintrunner init` installs the correct versions.
+  `lint-tool`'s packaged `s3_init_config.json`. `lintrunner init` installs the
+  correct versions.
 - **Repository build prerequisites**: the clang-tidy adapter expects a CMake
   build directory with `compile_commands.json` (produced by `setup.py config`).
 
@@ -141,9 +140,9 @@ vcpkg install cmake:x64-windows clang-tools:x64-windows
 
 ### Step-by-Step Installation
 
-1. **Install lintrunner** (if not already installed):
+1. **Install lintrunner and lint-tool** (if not already installed):
    ```bash
-   pip install lintrunner==0.12.7
+   pip install lintrunner==0.12.7 lint-tool
    ```
 
 2. **Initialize lintrunner** (installs all dependencies):
@@ -151,7 +150,7 @@ vcpkg install cmake:x64-windows clang-tools:x64-windows
    lintrunner init
    ```
    This command will:
-   - Install all Python packages specified in `pip_init.py`
+   - Install all Python packages specified by `lint_tool.adapters.pip_init`
    - Download prebuilt binaries for `clang-format`, `clang-tidy`, etc.
    - Set up the `.lintbin` directory with linter binaries
 
@@ -167,7 +166,7 @@ If you prefer to install components individually:
 
 ```bash
 # Install Python dependencies
-python Tools/linter/adapters/pip_init.py \
+python3 -m lint_tool.adapters.pip_init \
   flake8==7.3.0 \
   ruff==0.13.1 \
   cmakelint==1.4.1 \
@@ -175,8 +174,7 @@ python Tools/linter/adapters/pip_init.py \
   codespell[toml]==2.4.1
 
 # Fetch prebuilt binaries
-python Tools/linter/adapters/s3_init.py \
-  --config-json Tools/linter/adapters/s3_init_config.json \
+python3 -m lint_tool.adapters.s3_init \
   --linter clang-format \
   --output-dir .lintbin \
   --output-name clang-format
@@ -250,25 +248,25 @@ lintrunner --help
 ### Individual Adapter Usage
 ```bash
 # Run flake8 directly
-python Tools/linter/adapters/flake8_linter.py Library/**/*.py
+python3 -m lint_tool.adapters.flake8_linter Library/**/*.py
 
 # Run clang-format directly
-python Tools/linter/adapters/clangformat_linter.py \
+python3 -m lint_tool.adapters.clangformat_linter \
   --binary=.lintbin/clang-format \
   Library/**/*.h Library/**/*.cpp
 
 # Run cmake linter directly
-python Tools/linter/adapters/cmake_linter.py \
+python3 -m lint_tool.adapters.cmake_linter \
   --config=.cmakelintrc \
   CMakeLists.txt
 
 # Run cmake-format directly
-python Tools/linter/adapters/cmake_format_linter.py \
+python3 -m lint_tool.adapters.cmake_format_linter \
   --config=.cmake-format.yaml \
   CMakeLists.txt Cmake/**/*.cmake
 
 # Run codespell directly
-python Tools/linter/adapters/codespell_linter.py \
+python3 -m lint_tool.adapters.codespell_linter \
   Library/**/*.py Library/**/*.h
 ```
 
@@ -290,22 +288,21 @@ git diff --name-only | xargs lintrunner
   lint errors remain.
 - Wrapper adapters typically return `0` on success, `1` when lint findings are
   emitted, and another non-zero code if the underlying command fails (for
-  example, a timeout in `clangformat_linter.py` or a missing binary in
-  `shellcheck_linter.py`).
-- Utility scripts (`pip_init.py`, `s3_init.py`, `update_s3.py`) exit non-zero if
+  example, a timeout in `clangformat_linter` or a missing binary in
+  `shellcheck_linter`).
+- Utility modules (`pip_init`, `s3_init`, `update_s3`) exit non-zero if
   provisioning fails.
 
 ## Troubleshooting
 
 ### Common Issues and Solutions
 
-#### 1. "lintrunner: command not found"
-**Problem**: lintrunner is not installed or not in PATH.
+#### 1. "lintrunner: command not found" or `No module named lint_tool`
+**Problem**: lintrunner or the `lint-tool` adapters are not installed.
 
 **Solution**:
 ```bash
-# Install lintrunner
-pip install lintrunner==0.12.7
+pip install lintrunner==0.12.7 lint-tool
 
 # Verify installation
 lintrunner -V
@@ -320,8 +317,7 @@ lintrunner -V
 lintrunner init
 
 # Or manually fetch specific binary
-python Tools/linter/adapters/s3_init.py \
-  --config-json Tools/linter/adapters/s3_init_config.json \
+python3 -m lint_tool.adapters.s3_init \
   --linter clang-format \
   --output-dir .lintbin
 ```
@@ -332,7 +328,7 @@ python Tools/linter/adapters/s3_init.py \
 **Solution**:
 ```bash
 # Reinstall Python dependencies
-python Tools/linter/adapters/pip_init.py \
+python3 -m lint_tool.adapters.pip_init \
   flake8==7.3.0 \
   ruff==0.13.1 \
   cmakelint==1.4.1
@@ -452,8 +448,8 @@ lintrunner --take FLAKE8 --take RUFF
 
 - **Check linter documentation**: Each adapter has built-in help
   ```bash
-  python Tools/linter/adapters/flake8_linter.py --help
-  python Tools/linter/adapters/clangformat_linter.py --help
+  python3 -m lint_tool.adapters.flake8_linter --help
+  python3 -m lint_tool.adapters.clangformat_linter --help
   ```
 
 - **Review configuration**: Check `.lintrunner.toml`, `.flake8`, and `.cmakelintrc`
@@ -524,6 +520,7 @@ lintrunner --take FLAKE8 --take RUFF --take CLANGFORMAT
 # Example GitHub Actions workflow
 - name: Run linters
   run: |
+    pip install lint-tool lintrunner==0.12.7
     lintrunner init
     lintrunner --take PYFMT --take RUFF --take MYPY --take CLANGFORMAT
 ```
@@ -532,14 +529,12 @@ lintrunner --take FLAKE8 --take RUFF --take CLANGFORMAT
 When updating linter binaries:
 ```bash
 # Update and upload new binaries
-python Tools/linter/adapters/update_s3.py \
-  --config-json Tools/linter/adapters/s3_init_config.json \
+python3 -m lint_tool.adapters.update_s3 \
   --linter clang-format \
   --platform Linux-x86_64 \
   --file dist/clang-format
 
 # Commit updated configuration
-git add Tools/linter/adapters/s3_init_config.json
 git commit -m "Update clang-format binary"
 ```
 
@@ -583,7 +578,7 @@ Shared ignore-words list for `codespell` (CMake `spell` token, lintrunner `CODES
 ### Configuration
 - **Configuration file**: `.cmake-format.yaml` (located in project root)
 - **Lintrunner code**: `CMAKEFORMAT`
-- **Adapter**: `Tools/linter/adapters/cmake_format_linter.py`
+- **Adapter**: `lint_tool.adapters.cmake_format_linter`
 
 ### Key Settings
 The `.cmake-format.yaml` configuration includes:
@@ -717,7 +712,9 @@ For detailed information, see:
 
 ## Centralizing Lint Configuration
 
-All lint configuration is centralized under `Tools/linter` to ensure:
+Lint **policy** lives in this repository (`.lintrunner.toml`, format
+configs). Adapter **implementations** live in `lint-tool` so other
+KhwarizmiAnalytix repos can share them.
 - **Consistency**: Same rules apply locally and in CI/CD
 - **Maintainability**: Single source of truth for all linting rules
 - **Extensibility**: New adapters can reuse existing protocol with minimal boilerplate

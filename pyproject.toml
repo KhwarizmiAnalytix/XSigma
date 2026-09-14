@@ -48,6 +48,7 @@ dev = [
     "typing-extensions>=4.13.2",
     "wheel",
     "coverage-tool",
+    "lint-tool==2026.9.14",
 ]
 
 
@@ -105,6 +106,7 @@ dev = [
     "build",
     "wheel",
     "coverage-tool",
+    "lint-tool==2026.9.14",
 ]
 optree = ["optree>=0.13.0"]
 opt-einsum = ["opt-einsum>=3.3"]
@@ -293,10 +295,31 @@ keep-runtime-typing = true
     "PYI021", # docstring-in-stub
     "PYI053", # string-or-bytes-too-long
 ]
-"Tools/linter/adapters/**" = [
-    "LOG015"
-]
 
 [tool.codespell]
 ignore-words = "Scripts/suppressions/spell_suppressions.txt"
 skip = ".git,.augment,.github,.vscode,build,Build,Cmake,ThirdParty,third_party,3rdparty,*ThirdParty*,*third_party*,*3rdparty*"
+
+[tool.lint-tool]
+# Host-owned IMPORT_LINTER allowlist. Stdlib names are always allowed.
+import-allowlist = [
+    "sympy",
+    "einops",
+    "libfb",
+    "xsigma",
+    "tvm",
+    "_pytest",
+    "tabulate",
+    "optree",
+    "typing_extensions",
+    "triton",
+    "functorch",
+    "torchrec",
+    "numpy",
+    "torch_xla",
+    "colorama",
+    "psutil",
+    "helpers",
+    "run_coverage",
+    "coverage_tool",
+]

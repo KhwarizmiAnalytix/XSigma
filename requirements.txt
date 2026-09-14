@@ -3,3 +3,4 @@ psutil
 cmake-format
 numpy
 coverage-tool
+lint-tool==2026.9.14

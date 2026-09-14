@@ -276,8 +276,8 @@ XSigma uses `clang-format` for automatic code formatting. Configuration is in `.
 Before committing, format your code using the linter:
 
 ```bash
-cd Tools/linter
-python -m lintrunner --fix
+pip install lint-tool
+lintrunner -a
 ```
 
 ### Example Formatting

@@ -370,11 +370,11 @@ See [README.md](README.md#prerequisites) for detailed platform-specific requirem
 5. **Run linters and formatters**:
    ```bash
    # Format code
-   cd Tools/linter
-   python -m lintrunner --fix
+   pip install lint-tool
+   lintrunner -a
 
    # Check for issues
-   python -m lintrunner
+   lintrunner
    ```
 
 6. **Commit your changes** with clear, descriptive messages:
@@ -423,8 +423,8 @@ XSigma follows strict coding standards to ensure code quality, consistency, and 
 
 **Format your code before committing**:
 ```bash
-cd Tools/linter
-python -m lintrunner --fix
+pip install lint-tool
+lintrunner -a
 ```
 
 ### Static Analysis
@@ -576,7 +576,7 @@ Ensure your pull request meets the following criteria:
 - [ ] **Code Quality**:
   - [ ] Follows [coding standards](#coding-standards)
   - [ ] Passes all static analysis checks (`clang-tidy`, `cppcheck`, `IWYU`)
-  - [ ] Formatted with `clang-format` (run `lintrunner --fix`)
+  - [ ] Formatted with `clang-format` (run `lintrunner -a`)
   - [ ] No compiler warnings
 
 - [ ] **Testing**:

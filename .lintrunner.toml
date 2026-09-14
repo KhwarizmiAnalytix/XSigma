@@ -47,14 +47,16 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/editorconfig_checker_linter.py',
+    '-m',
+    'lint_tool.adapters.editorconfig_checker_linter',
     '--config=.editorconfig-checker.json',
     '--',
     '@{{PATHSFILE}}',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'editorconfig-checker==3.8.0',
 ]
@@ -76,13 +78,15 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/flake8_linter.py',
+    '-m',
+    'lint_tool.adapters.flake8_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'flake8==7.3.0',
     'flake8-bugbear==24.12.12',
@@ -123,8 +127,8 @@ exclude_patterns = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/s3_init.py',
-    '--config-json=Tools/linter/adapters/s3_init_config.json',
+    '-m',
+    'lint_tool.adapters.s3_init',
     '--linter=clang-format',
     '--dry-run={{DRYRUN}}',
     '--output-dir=.lintbin',
@@ -132,7 +136,8 @@ init_command = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/clangformat_linter.py',
+    '-m',
+    'lint_tool.adapters.clangformat_linter',
     '--binary=.lintbin/clang-format',
     '--',
     '@{{PATHSFILE}}'
@@ -163,14 +168,16 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/mypy_linter.py',
+    '-m',
+    'lint_tool.adapters.mypy_linter',
     '--config=mypy.ini',
     '--',
     '@{{PATHSFILE}}'
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'numpy==1.26.4 ; python_version >= "3.10" and python_version <= "3.11"',
     'numpy==2.1.0 ; python_version >= "3.12"',
@@ -216,7 +223,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/mypy_linter.py',
+    '-m',
+    'lint_tool.adapters.mypy_linter',
     '--config=mypy-strict.ini',
     '--code=MYPYSTRICT',
     '--',
@@ -241,12 +249,14 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/pyrefly_linter.py',
+    '-m',
+    'lint_tool.adapters.pyrefly_linter',
     '--config=pyrefly.toml',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'numpy==2.1.0 ; python_version >= "3.12"',
     'expecttest==0.3.0',
@@ -303,11 +313,12 @@ exclude_patterns = [
 # stable directory to hardcode, and doing so (previously --build_dir=
 # ./build_ninja) silently pinned every run to whatever stale/narrow-scope
 # build happened to already be sitting in that exact directory name. Leaving
-# it unset makes clangtidy_linter.py auto-detect the most recently modified
-# build_ninja* directory with a compile_commands.json instead.
+# it unset makes clangtidy_linter.py auto-detect the newest top-level
+# build directory with a compile_commands.json (build_ninja*, build, …).
 command = [
     'python3',
-    'Tools/linter/adapters/clangtidy_linter.py',
+    '-m',
+    'lint_tool.adapters.clangtidy_linter',
     '--binary=clang-tidy',
     '--',
     '@{{PATHSFILE}}'
@@ -327,7 +338,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=# type:\s*ignore([^\[]|$)',
     '--linter-name=TYPEIGNORE',
     '--error-name=unqualified type: ignore',
@@ -344,7 +356,8 @@ code = 'TYPENOSKIP'
 include_patterns = ['mypy.ini']
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=follow_imports\s*=\s*skip',
     '--linter-name=TYPENOSKIP',
     '--error-name=use of follow_imports = skip',
@@ -373,7 +386,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=# noqa([^:]|$)',
     '--linter-name=NOQA',
     '--error-name=unqualified noqa',
@@ -390,13 +404,15 @@ code = 'GHA'
 include_patterns=['.github/workflows/**/*.yml']
 command = [
     'python3',
-    'Tools/linter/adapters/gha_linter.py',
+    '-m',
+    'lint_tool.adapters.gha_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'ruamel.yaml==0.18.10',
 ]
@@ -423,7 +439,8 @@ exclude_patterns=[
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/newlines_linter.py',
+    '-m',
+    'lint_tool.adapters.newlines_linter',
     '--',
     '@{{PATHSFILE}}',
 ]
@@ -445,7 +462,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=[[:blank:]]$',
     '--linter-name=SPACES',
     '--error-name=trailing spaces',
@@ -477,7 +495,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     # @lint-ignore TXT2
     '--pattern=	',
     '--linter-name=TABS',
@@ -507,7 +526,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     """--pattern=\
     (pip|pip3|python -m pip|python3 -m pip|python3 -mpip|python -mpip) \
     install ([a-zA-Z0-9][A-Za-z0-9\\._\\-]+)([^/=<>~!]+)[A-Za-z0-9\\._\\-\\*\\+\\!]*$\
@@ -542,7 +562,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/exec_linter.py',
+    '-m',
+    'lint_tool.adapters.exec_linter',
     '--',
     '@{{PATHSFILE}}',
 ]
@@ -563,7 +584,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=logging\.(debug|info|warn|warning|error|critical|log|exception)\(',
     '--replace-pattern=s/logging\.(debug|info|warn|warning|error|critical|log|exception)\(/log.\1(/',
     '--linter-name=ROOT_LOGGING',
@@ -594,14 +616,16 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/cmake_linter.py',
+    '-m',
+    'lint_tool.adapters.cmake_linter',
     '--config=.cmakelintrc',
     '--',
     '@{{PATHSFILE}}',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'cmakelint==1.4.1',
 ]
@@ -624,14 +648,16 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/cmake_format_linter.py',
+    '-m',
+    'lint_tool.adapters.cmake_format_linter',
     '--config=.cmake-format.yaml',
     '--',
     '@{{PATHSFILE}}',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'cmakelang==0.6.13',
 ]
@@ -656,13 +682,15 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/shellcheck_linter.py',
+    '-m',
+    'lint_tool.adapters.shellcheck_linter',
     '--',
     '@{{PATHSFILE}}',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'shellcheck-py==0.7.2.1',
 ]
@@ -684,15 +712,16 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/actionlint_linter.py',
+    '-m',
+    'lint_tool.adapters.actionlint_linter',
     '--binary=.lintbin/actionlint',
     '--',
     '@{{PATHSFILE}}',
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/s3_init.py',
-    '--config-json=Tools/linter/adapters/s3_init_config.json',
+    '-m',
+    'lint_tool.adapters.s3_init',
     '--linter=actionlint',
     '--dry-run={{DRYRUN}}',
     '--output-dir=.lintbin',
@@ -703,7 +732,8 @@ init_command = [
 code = 'CODESPELL'
 command = [
     'python3',
-    'Tools/linter/adapters/codespell_linter.py',
+    '-m',
+    'lint_tool.adapters.codespell_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
@@ -726,7 +756,8 @@ exclude_patterns = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'codespell[toml]==2.4.1',
 ]
@@ -741,7 +772,8 @@ include_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/pyfmt_linter.py',
+    '-m',
+    'lint_tool.adapters.pyfmt_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
@@ -756,7 +788,8 @@ exclude_patterns = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'usort==1.0.8.post1',
     'isort==6.0.1',
@@ -768,7 +801,8 @@ is_formatter = true
 code = 'PYPROJECT'
 command = [
     'python3',
-    'Tools/linter/adapters/pyproject_linter.py',
+    '-m',
+    'lint_tool.adapters.pyproject_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
@@ -786,7 +820,8 @@ exclude_patterns = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'packaging==25.0',
     'tomli==2.2.1 ; python_version < "3.11"',
@@ -796,7 +831,8 @@ init_command = [
 code = 'CMAKE_MINIMUM_REQUIRED'
 command = [
     'python3',
-    'Tools/linter/adapters/cmake_minimum_required_linter.py',
+    '-m',
+    'lint_tool.adapters.cmake_minimum_required_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
@@ -820,7 +856,8 @@ exclude_patterns = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'packaging==25.0',
     'tomli==2.2.1 ; python_version < "3.11"',
@@ -841,7 +878,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/grep_linter.py',
+    '-m',
+    'lint_tool.adapters.grep_linter',
     '--pattern=Confidential and proprietary',
     '--linter-name=COPYRIGHT',
     '--error-name=Confidential Code',
@@ -868,7 +906,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/bazel_linter.py',
+    '-m',
+    'lint_tool.adapters.bazel_linter',
     '--',
     '@{{PATHSFILE}}'
 ]
@@ -887,7 +926,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/lintrunner_version_linter.py'
+    '-m',
+    'lint_tool.adapters.lintrunner_version_linter'
 ]
 
 [[linter]]
@@ -909,7 +949,8 @@ exclude_patterns = [
 ]
 command = [
     'python3',
-    'Tools/linter/adapters/ruff_linter.py',
+    '-m',
+    'lint_tool.adapters.ruff_linter',
     '--config=pyproject.toml',
     '--show-disable',
     '--',
@@ -917,7 +958,8 @@ command = [
 ]
 init_command = [
     'python3',
-    'Tools/linter/adapters/pip_init.py',
+    '-m',
+    'lint_tool.adapters.pip_init',
     '--dry-run={{DRYRUN}}',
     'ruff==0.13.1',  # sync with PYFMT
 ]
@@ -927,7 +969,8 @@ is_formatter = true
 code = 'DOCSTRING_LINTER'
 command = [
     'python3',
-    'Tools/linter/adapters/docstring_linter.py',
+    '-m',
+    'lint_tool.adapters.docstring_linter',
     '--lintrunner',
     '--',
     '@{{PATHSFILE}}'
@@ -945,7 +988,8 @@ is_formatter = false
 code = 'IMPORT_LINTER'
 command = [
     'python3',
-    'Tools/linter/adapters/import_linter.py',
+    '-m',
+    'lint_tool.adapters.import_linter',
     '--',
     '@{{PATHSFILE}}'
 ]

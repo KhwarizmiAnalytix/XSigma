@@ -226,6 +226,9 @@ library the file lives in, never another library's:
 - Follow the Google Python Style Guide; target Python 3.9+.
 - Modules: lowercase-with-underscores filenames, one module per file,
   `pathlib` for filesystem paths (not raw string concatenation).
+- Lintrunner adapters are the `lint-tool` PyPI package
+  (`pip install lint-tool`), not an in-tree `Tools/linter` tree. Host
+  policy stays in `.lintrunner.toml`.
 - Format with `ruff-format` + `usort` (the `PYFMT`/`RUFF` linters in
   `.lintrunner.toml`), lint with `ruff`/`flake8`/`mypy` per the root
   `pyproject.toml` / `.pylintrc` — these already exist and are wired into
