@@ -34,14 +34,6 @@ from helpers import (
 )
 from helpers.cpu_isa import runtime_test_skip_reason
 
-
-# Import coverage runner
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "Tools", "coverage", "src")
-)
-from coverage_tool import get_coverage
-
-
 DEBUG_FLAG = False
 
 
@@ -1676,6 +1668,16 @@ class XSigmaConfiguration:
         print_status(
             "Starting code coverage collection and report generation...", "INFO"
         )
+
+        try:
+            from coverage_tool import get_coverage
+        except ImportError:
+            print_status(
+                "coverage-tool is not installed. Install with: "
+                "pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git",
+                "ERROR",
+            )
+            return 1
 
         coverage_result = get_coverage(
             compiler="auto",

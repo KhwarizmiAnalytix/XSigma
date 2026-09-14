@@ -1,9 +1,7 @@
-# =============================================================================
-# Coverage Tool Configuration
-# =============================================================================
-# Place this file next to run_coverage.py, or at the project root.
-# All values shown here are the built-in defaults — only set what you need
-# to override.
+# Host config for coverage-tool (https://github.com/KhwarizmiAnalytix/coverage-tool).
+# pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git
+# coverage-tool --build=<build-dir>
+
 
 [coverage]
 # Force a specific compiler instead of auto-detecting.

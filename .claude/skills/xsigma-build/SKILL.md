@@ -71,8 +71,10 @@ python3 setup.py config.build.test.ninja.clang.coverage
 # To re-analyze an existing coverage build with more detail:
 python3 setup.py analyze.v
 ```
-Report parsing lives in `Tools/coverage/run_coverage.py`; CI does not
-currently hard-gate on a specific coverage percentage.
+Report parsing is the `coverage-tool` PyPI package
+(https://github.com/KhwarizmiAnalytix/coverage-tool); CI does not
+currently hard-gate on a specific coverage percentage. Install with
+`pip install git+https://github.com/KhwarizmiAnalytix/coverage-tool.git`.
 
 ## Static analysis (clang-tidy)
 

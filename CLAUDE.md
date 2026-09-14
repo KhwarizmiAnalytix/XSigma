@@ -196,10 +196,11 @@ library the file lives in, never another library's:
   tree). Benchmarks follow the same pattern under `Benchmark<Name>.cpp`.
 - Cover happy path, boundary/edge cases, error/failure return paths, and
   null/empty/invalid inputs — each test case should check one behavior.
-- Coverage is tracked via `setup.py config.build.test.coverage` (see
-  `Tools/coverage/`); treat high coverage as the project norm on touched
-  code, but note CI does not currently hard-gate on a specific percentage
-  — don't assert "98% is required" as a build-breaking fact.
+- Coverage is tracked via `setup.py config.build.test.coverage` (requires
+  `pip install coverage-tool` from KhwarizmiAnalytix/coverage-tool); treat
+  high coverage as the project norm on touched code, but note CI does not
+  currently hard-gate on a specific percentage — don't assert "98% is
+  required" as a build-breaking fact.
 
 ## Docs and markdown files
 

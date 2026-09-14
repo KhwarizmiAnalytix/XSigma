@@ -21,7 +21,7 @@ project-excludes = [
 ]
 
 # Import roots mirroring how the scripts actually run: setup.py and the
-# helpers package resolve from Scripts/, the coverage runner from
-# Tools/coverage (both are sys.path-inserted at runtime).
-search-path = ["Scripts", "Tools/coverage", "."]
+# helpers package resolve from Scripts/. coverage-tool is a pip package
+# (KhwarizmiAnalytix/coverage-tool), not an in-tree path.
+search-path = ["Scripts", "."]
 use-ignore-files = true

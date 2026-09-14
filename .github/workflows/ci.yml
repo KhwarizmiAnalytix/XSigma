@@ -1690,15 +1690,10 @@ jobs:
         clang --version
         llvm-cov --version
 
-    - name: Install coverage tool package
+    - name: Install coverage tool
       shell: bash
       run: |
-        pip install -e "Tools/coverage[test]"
-
-    - name: Run coverage tool test suite
-      shell: bash
-      run: |
-        python -m pytest Tools/coverage/tests/ -v
+        pip install "git+https://github.com/KhwarizmiAnalytix/coverage-tool.git"
 
     - name: Run coverage build
       shell: bash
